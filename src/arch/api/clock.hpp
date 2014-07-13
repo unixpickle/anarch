@@ -2,7 +2,7 @@
 #define __ANARCH_API_CLOCK_HPP__
 
 #include <ansa/rational>
-#include <cstdint>
+#include <anarch/stdint>
 
 namespace anarch {
 

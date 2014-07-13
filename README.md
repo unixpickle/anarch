@@ -29,3 +29,15 @@ Additionally, it will provide these tools to wrap the APIs above:
  * A very limited implementation of &lt;iostream&gt;
 
 Architecture-specific APIs will have to be initialized by the operating system's entry point. This means that you may use a custom bootloader, etc. and still use architecture-specific APIs. However, an architecture may provide helper classes/methods for tasks such as parsing multiboot tables.
+
+# TODO
+
+Oh my god, there's so much to do I can barely express it in words. Right now, here's what I'm working on:
+
+ * Create a good abstraction for memory regions for x86-64
+ * Implement an "optional" tool for parsing multiboot region map
+ * Pull in the existing Alux source piece by piece
+   * Memory mapper and physical memory allocator
+   * ACPI subsystem
+   * Interrupt subsystem
+ * Implement EasyMap and other utilities
