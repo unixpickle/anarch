@@ -26,6 +26,6 @@ Additionally, it will provide these tools to wrap the APIs above:
  * A set of classes that lock and unlock locks on construction and destruction
  * A class that enters and leaves a critical section on construction and destruction
  * An implementation of the `assert()` function using the panic API
- * An very limited implementation of &lt;iostream&gt;
+ * A very limited implementation of &lt;iostream&gt;
 
 Architecture-specific APIs will have to be initialized by the operating system's entry point. This means that you may use a custom bootloader, etc. and still use architecture-specific APIs. However, an architecture may provide helper classes/methods for tasks such as parsing multiboot tables.
