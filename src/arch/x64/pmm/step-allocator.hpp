@@ -1,24 +1,26 @@
-#ifndef __X64_STEP_ALLOCATOR_HPP__
-#define __X64_STEP_ALLOCATOR_HPP__
+#ifndef __ANARCH_X64_STEP_ALLOCATOR_HPP__
+#define __ANARCH_X64_STEP_ALLOCATOR_HPP__
 
-#include <arch/x64/pmm/page-allocator.hpp>
-#include <cstddef>
+#include "page-allocator.hpp"
 
-namespace OS {
+namespace anarch {
 
 namespace x64 {
 
 class StepAllocator : public PageAllocator {
-private:
-  PhysAddr lastAddr;
-  
 public:
   StepAllocator(PhysAddr start);
   
+  // PageAllocator
   virtual PhysAddr AllocPage();
-  virtual PhysAddr AllocSize(size_t size);
   virtual void FreePage(PhysAddr p);
+  
+  // specialized methods
+  virtual PhysAddr AllocSize(PhysSize size);
   PhysAddr GetLastAddress();
+
+private:
+  PhysAddr lastAddr;
 };
 
 }

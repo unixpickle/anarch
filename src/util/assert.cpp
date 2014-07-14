@@ -1,4 +1,4 @@
-#include <anarch/panic>
+#include <anarch/api/panic>
 
 extern "C" {
 

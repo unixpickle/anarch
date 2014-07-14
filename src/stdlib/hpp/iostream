@@ -1,0 +1,14 @@
+#ifndef __ANARCH_STDLIB_IOSTREAM_HPP__
+#define __ANARCH_STDLIB_IOSTREAM_HPP__
+
+#include <anarch/stream>
+
+namespace std {
+
+using anarch::cout;
+using anarch::cerr;
+using anarch::endl;
+
+}
+
+#endif

@@ -1,38 +1,37 @@
-#ifndef __X64_ALLOCATOR_HPP__
-#define __X64_ALLOCATOR_HPP__
+#ifndef __ANARCH_X64_ALLOCATOR_HPP__
+#define __ANARCH_X64_ALLOCATOR_HPP__
 
-#include <arch/x64/pmm/step-allocator.hpp>
-#include <arch/general/physical-allocator.hpp>
-#include <panic>
-#include <macros>
+#include "page-allocator.hpp"
+#include <anarch/api/allocator>
+#include <anarch/lock>
 #include <analloc2>
 
-namespace OS {
+namespace anarch {
 
 namespace x64 {
 
-class Allocator : public PhysicalAllocator, public PageAllocator {
+class Allocator : public PageAllocator, public anarch::Allocator {
 public:
   static const int MaxAllocators = 0x10;
   
   static void InitGlobal();
   static Allocator & GetGlobal();
   
-  virtual PhysAddr AllocLower(size_t size, size_t align);
+  virtual bool AllocLower(PhysAddr &, PhysSize size, PhysSize align);
   
-  // OS::PhysicalAllocator
-  virtual PhysAddr Alloc(size_t size, size_t align);
+  // anarch::PhysicalAllocator
+  virtual bool Alloc(PhysAddr &, PhysSize size, PhysSize align);
   virtual void Free(PhysAddr address);
-  virtual size_t Used();
-  virtual size_t Available();
-  virtual size_t Total();
+  virtual PhysSize Used();
+  virtual PhysSize Available();
+  virtual PhysSize Total();
   
-  // OS::x64::PageAllocator
+  // anarch::x64::PageAllocator
   virtual PhysAddr AllocPage();
   virtual void FreePage(PhysAddr p);
   
 protected:
-  virtual DepList GetDependencies();
+  virtual ansa::DepList GetDependencies();
   virtual void Initialize();
   
 private:
@@ -40,12 +39,12 @@ private:
   ANAlloc::FixedCluster<MaxAllocators> upper;
   bool hasUpper = false;
   
-  uint64_t upperLock OS_ALIGNED(8) = 0;
-  uint64_t lowerLock OS_ALIGNED(8) = 0;
+  NoncriticalLock upperLock;
+  NoncriticalLock lowerLock;
   
-  size_t totalSpace = 0;
+  PhysSize totalSpace = 0;
   
-  static VirtAddr AllocateRaw(size_t size);
+  static VirtAddr AllocateRaw(PhysSize size);
   void InitializeCluster(ANAlloc::MutableCluster & cluster,
                          const ANAlloc::RegionList & regs);  
 };

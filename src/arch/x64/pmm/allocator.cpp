@@ -1,17 +1,13 @@
-#include <arch/x64/pmm/allocator.hpp>
-#include <arch/x64/pmm/region-list.hpp>
-#include <arch/x64/vmm/global-map.hpp>
-#include <arch/x64/vmm/scratch.hpp>
-#include <iostream>
-#include <panic>
-#include <lock>
-#include <new>
+#include "allocator.hpp"
+#include "region-list.hpp"
+#include "../vmm/global-map.hpp"
+#include "../vmm/scratch.hpp"
+#include <anarch/critical>
+#include <anarch/stream>
+#include <anarch/lock>
+#include <anarch/new>
 
-namespace OS {
-
-PhysicalAllocator & PhysicalAllocator::GetGlobal() {
-  return x64::Allocator::GetGlobal();
-}
+namespace anarch {
 
 namespace x64 {
 
@@ -25,71 +21,79 @@ Allocator & Allocator::GetGlobal() {
   return allocator;
 }
 
-PhysAddr Allocator::AllocLower(size_t size, size_t align) {
-  ScopeLock scope(&lowerLock);
-  ANAlloc::UInt addr;
-  bool res = lower.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
-  if (!res) return 0;
-  return (PhysAddr)addr;
+bool Allocator::AllocLower(PhysAddr & addr, PhysSize size, PhysSize align) {
+  AssertNoncritical();
+  ScopedLock scope(lowerLock);
+  
+  return lower.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
 }
 
-PhysAddr Allocator::Alloc(size_t size, size_t align) {
-  if (!hasUpper) {
-    return AllocLower(size, align);
-  }
-  {
-    ScopeLock scope(&upperLock);
-    ANAlloc::UInt addr;
-    bool res = upper.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
-    if (res) return (PhysAddr)addr;
-  }
+bool Allocator::Alloc(PhysAddr & addr, PhysSize size, PhysSize align) {
+  AssertNoncritical();
+  
+  if (!hasUpper) return AllocLower(size, align);
+  
+  upperLock.Seize();
+  bool res = upper.Align((ANAlloc::UInt)size, (ANAlloc::UInt)align, addr);
+  upperLock.Release();
+  if (res) return true;
+  
   return AllocLower(size, align);
 }
 
 void Allocator::Free(PhysAddr address) {
+  AssertNoncritical();
   if (address < 0x100000000L) {
-    ScopeLock scope(&lowerLock);
+    ScopedLock scope(lowerLock);
     lower.Free((ANAlloc::UInt)address);
   } else {
-    ScopeLock scope(&upperLock);
+    ScopedLock scope(upperLock);
     upper.Free((ANAlloc::UInt)address);
   }
 }
 
-size_t Allocator::Used() {
+PhysSize Allocator::Used() {
+  AssertNoncritical();
   return totalSpace - Available();
 }
 
-size_t Allocator::Available() {
-  size_t available = 0;
-  {
-    ScopeLock scope(&lowerLock);
-    available += (size_t)lower.GetFreeSize();
+PhysSize Allocator::Available() {
+  AssertNoncritical();
+  
+  PhysSize available = 0;
+  
+  lowerLock.Seize();  
+  available += (PhysSize)lower.GetFreeSize();
+  lowerLock.Release();
+  
+  if (hasUpper) {
+    ScopedLock scope(upperLock);
+    available += (PhysSize)upper.GetFreeSize();
   }
-  {
-    ScopeLock scope(&upperLock);
-    available += (size_t)upper.GetFreeSize();
-  }
+  
   return available;
 }
 
-size_t Allocator::Total() {
+PhysSize Allocator::Total() {
+  AssertNoncritical();
   return totalSpace;
 }
 
 PhysAddr Allocator::AllocPage() {
+  AssertNoncritical();
   return Alloc(0x1000, 0x1000);
 }
 
 void Allocator::FreePage(PhysAddr p) {
+  AssertNoncritical();
   Free(p);
 }
 
 // PROTECTED //
 
-DepList Allocator::GetDependencies() {
-  return DepList(&GlobalMap::GetGlobal(), &Scratch::GetGlobal(),
-                 &RegionList::GetGlobal(), &OutStreamModule::GetGlobal());
+ansa::DepList Allocator::GetDependencies() {
+  return ansa::DepList(&GlobalMap::GetGlobal(), &Scratch::GetGlobal(),
+                       &RegionList::GetGlobal(), &StreamModule::GetGlobal());
 }
 
 void Allocator::Initialize() {
@@ -122,14 +126,14 @@ void Allocator::Initialize() {
 
 // PRIVATE //
 
-VirtAddr Allocator::AllocateRaw(size_t size) {
+VirtAddr Allocator::AllocateRaw(PhysSize size) {
   PageAllocator & theAllocator = *GlobalMap::GetGlobal().allocator;
   StepAllocator & alloc = static_cast<StepAllocator &>(theAllocator);
   
   GlobalMap & map = GlobalMap::GetGlobal();
   
-  size_t pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
-  size_t pageCount = size / pageSize + (size % pageSize ? 1 : 0);
+  PhysSize pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
+  PhysSize pageCount = size / pageSize + (size % pageSize ? 1 : 0);
   VirtAddr reserved = map.Reserve(GlobalMap::Size(pageSize, pageCount));
   VirtAddr dest = reserved;
   
@@ -153,7 +157,7 @@ void Allocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
   // create the allocators and their trees
   ANAlloc::ClusterBuilder<ANAlloc::BBTree> builder(descs, cluster, 12);
   ANAlloc::UInt space = builder.RequiredSpace();
-  VirtAddr newAddress = AllocateRaw((size_t)space);
+  VirtAddr newAddress = AllocateRaw((PhysSize)space);
   builder.CreateAllocators((uint8_t *)newAddress);
 }
 
