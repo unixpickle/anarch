@@ -11,7 +11,7 @@ public:
    * Allocate aligned physical memory.
    * @noncritical
    */
-  virtual PhysAddr Alloc(PhysSize size, PhysSize align) = 0;
+  virtual bool Alloc(PhysAddr & result, PhysSize size, PhysSize align) = 0;
   
   /**
    * Free physical memory.

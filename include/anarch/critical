@@ -1,2 +1,1 @@
-#include "../../src/arch/api/critical.hpp"
-// TODO: here, I will include some AssertCritical() type things
+#include "../../src/util/critical.hpp"

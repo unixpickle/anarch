@@ -1,6 +1,7 @@
 #ifndef __ANARCH_API_DOMAIN_LIST_HPP__
 #define __ANARCH_API_DOMAIN_LIST_HPP__
 
+#include "domain.hpp"
 #include <ansa/module>
 
 namespace anarch {
