@@ -7,7 +7,7 @@
 using namespace anarch;
 
 int main() {
-  ScopedPass pass("cout/cerr/StreamModule");
+  ScopedPass pass("[cout/cerr/StreamModule]");
   
   StreamModule::GetGlobal().Load();
   cout << "abcd" << endl;
