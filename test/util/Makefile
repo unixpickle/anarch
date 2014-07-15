@@ -1,9 +1,14 @@
 CPPFLAGS=-Wall -Wextra -std=c++11
+TEST_INCLUDES=-I../../include -Idependencies/ansa/include
+TEST_SOURCES=../../src/util/*.cpp dummy-api/*.cpp build/ansa/*.o
 
-all: build/assert
+all: build/assert build/stream
 
 build/assert: dependencies build/ansa
-	$(CXX) $(CPPFLAGS) -I../../include -Idependencies/ansa/include test-assert.cpp ../../src/util/*.cpp dummy-api/*.cpp build/ansa/*.o -o build/assert
+	$(CXX) $(CPPFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) test-assert.cpp -o build/assert
+
+build/stream: dependencies build/ansa
+	$(CXX) $(CPPFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) test-stream.cpp -o build/stream
 
 build/ansa: dependencies build
 	mkdir build/ansa

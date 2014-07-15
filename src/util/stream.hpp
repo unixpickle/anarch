@@ -7,8 +7,8 @@ namespace anarch {
 
 class StreamModule : public ansa::Module {
 public:
-  void InitGlobal();
-  StreamModule & GetGlobal();
+  static void InitGlobal();
+  static StreamModule & GetGlobal();
   
 protected:
   ansa::DepList GetDependencies();
