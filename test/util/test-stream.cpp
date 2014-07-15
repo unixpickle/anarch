@@ -2,6 +2,7 @@
 #include <ansa/cstring>
 #include "dummy-api/console.hpp"
 #include "../scoped-pass.hpp"
+#include "../assert.hpp"
 
 using namespace anarch;
 
@@ -14,8 +15,8 @@ int main() {
   cout << (unsigned int)32 << endl;
   
   dummy::LogConsole & console = dummy::LogConsole::GetGlobal();
-  assert(console.GetBacklogSize() == 15);
-  assert(ansa::Memcmp(console.GetBacklog(), "abcd\nefgh\n0x20\n", 15) == 0);
+  Assert(console.GetBacklogSize() == 15);
+  Assert(ansa::Memcmp(console.GetBacklog(), "abcd\nefgh\n0x20\n", 15) == 0);
   
   return 0;
 }
