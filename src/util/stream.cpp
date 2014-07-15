@@ -27,13 +27,13 @@ void StreamModule::Initialize() {
 }
 
 void ConsoleOutStream::Puts(const char * str) {
-  console.SetColor(Console::ColorLightGray, true);
-  console.PrintString(str);
+  Console::GetGlobal().SetColor(Console::ColorLightGray, true);
+  Console::GetGlobal().PrintString(str);
 }
 
 void ConsoleErrorStream::Puts(const char * str) {
-  console.SetColor(Console::ColorRed, true);
-  console.PrintString(str);
+  Console::GetGlobal().SetColor(Console::ColorRed, true);
+  Console::GetGlobal().PrintString(str);
 }
 
 OutStream & operator<<(OutStream & stream, unsigned char num) {
@@ -69,12 +69,13 @@ OutStream & operator<<(OutStream & stream, unsigned long long number) {
     buf[len - i - 1] = buf[i];
     buf[i] = a;
   }
-  stream.Puts(_buf);
+  stream.Puts((const char *)_buf);
   return stream;
 }
 
 OutStream & operator<<(OutStream & stream, const char * str) {
   stream.Puts(str);
+  return stream;
 }
 
 }

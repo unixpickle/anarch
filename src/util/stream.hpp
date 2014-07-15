@@ -37,9 +37,9 @@ OutStream & operator<<(OutStream &, unsigned long);
 OutStream & operator<<(OutStream &, unsigned long long);
 OutStream & operator<<(OutStream &, const char *);
 
-ConsoleOutStream cout;
-ConsoleErrorStream cerr;
-const char * endl;
+extern ConsoleOutStream cout;
+extern ConsoleErrorStream cerr;
+extern const char * endl;
 
 }
 
