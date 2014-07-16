@@ -22,7 +22,8 @@ int PageTable::CalcDepth(PhysSize size) {
   return -1;
 }
 
-uint64_t PageTable::CalcMask(PhysSize, bool kernel, MemoryMap::Attributes) {
+uint64_t PageTable::CalcMask(PhysSize, bool kernel,
+                             const MemoryMap::Attributes &) {
   return 1 | (pageSize == 0x1000 ? 0 : 0x80) | (kernel ? 0x100 : 0x4)
     | (attributes.executable ? 0 : (uint64_t)1 << 63)
     | (attirbutes.writable ? 2 : 0);
@@ -180,6 +181,21 @@ bool PageTable::Unset(VirtAddr addr) {
   }
 
   return true;
+}
+
+void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
+                        uint64_t parentMask) {
+  int depth = CalcDepth(size.pageSize);
+  VirtAddr curVirt = virt;
+  PhysAddr curPhys = phys;
+
+  for (size_t i = 0; i < size.pageCount; i++) {
+    if (!Set(curVirt, curPhys, parentMask, depth)) {
+      Panic("PageTable::SetList() - Set() failed");
+    }
+    curPhys += size.pageSize;
+    curVirt += size.pageSize;
+  }
 }
 
 }

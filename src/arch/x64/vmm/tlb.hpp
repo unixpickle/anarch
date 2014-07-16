@@ -1,4 +1,4 @@
-#include <anarch/types>
+#include <anarch/api/memory-map>
 #include <ansa/module>
 
 namespace anarch {
@@ -12,7 +12,12 @@ public:
   static void InitGlobal();
   static TLB & GetGlobal();
   
+  /**
+   * @critical
+   */
   virtual void WillSetAddressSpace(MemoryMap & map);
+  
+  virtual void DistributeInvlpg(VirtAddr start, PhysSize size);
   
 protected:
   ansa::DepList GetDependencies();

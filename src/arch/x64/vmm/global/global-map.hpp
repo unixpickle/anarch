@@ -1,10 +1,11 @@
 #ifndef __ANARCH_X64_GLOBAL_MAP_HPP__
 #define __ANARCH_X64_GLOBAL_MAP_HPP__
 
-#include "scratch.hpp"
-#include "page-table.hpp"
+#include "../scratch.hpp"
+#include "../page-table.hpp"
 #include <anarch/api/global-map>
 #include <anarch/api/allocator>
+#include <anarch/lock>
 
 namespace anarch {
 
@@ -15,9 +16,10 @@ public:
   static void InitGlobal();
   static GlobalMap & GetGlobal();
   
-  virtual Allocator & GetPageAllocator();
   virtual Scratch & GetScratch();
   virtual PageTable & GetPageTable();
+  virtual FreeFinder & GetFreeFinder();
+  virtual Allocator & GetPageAllocator();
   virtual PhysAddr GetPDPT();
   
   // anarch::MemoryMap
@@ -34,10 +36,13 @@ protected:
   virtual void Initialize();
   
 private:
-  Allocator * pageAllocator;
   Scratch * scratch;
   PageTable * pageTable;
+  FreeFinder * freeFinder;
+  Allocator * pageAllocator;
   PhysAddr pdpt;
+  
+  NoncriticalLock lock;
 };
 
 }

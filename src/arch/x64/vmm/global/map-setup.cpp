@@ -11,7 +11,8 @@ MapSetup::MapSetup()
   : kernelEnd(ansa::Align(GetBootInfo()->GetKernelEnd(), 0x1000)),
     scratchEnd(kernelEnd + 0x1000 * Scratch::PTCount),
     reservedEnd(scratchEnd + ansa::Align(sizeof(Scratch)
-      + sizeof(BuddyAllocator) + sizeof(PageTable), 0x1000)),
+      + sizeof(BuddyAllocator) + sizeof(PageTable)
+      + sizeof(FreeFinder), 0x1000)),
     stepAllocator(reservedEnd) {
 }
 
@@ -48,6 +49,10 @@ void MapSetup::GeneratePageTable() {
   new(GetPageTable()) PageTable(stepAllocator, *GetScratch(), pml4);
 }
 
+void MapSetup::GenerateFreeFinder() {
+  new(GetFreeFinder()) FreeFinder(*GetPageTable());
+}
+
 void MapSetup::GenerateBuddyAllocator() {
   const RegionList & regions = GetBootInfo()->GetRegions();
   new(GetBuddyAllocator()) BuddyAllocator(regions, stepAllocator);
@@ -64,10 +69,15 @@ PageTable * MapSetup::GetPageTable() {
   return (PageTable *)(scratchEnd + sizeof(Scratch));
 }
 
+FreeFinder * MapSetup::GetFreeFinder() {
+  static_assert(sizeof(PageTable) % 8 == 0, "bad FreeFinder alignment");
+  return (FreeFinder *)(scratchEnd + sizeof(Scratch) + sizeof(PageTable));
+}
+
 BuddyAllocator * MapSetup::GetBuddyAllocator() {
-  static_assert(sizeof(Scratch) % 8 == 0, "bad PageTable alignment");
-  static_assert(sizeof(PageTable) % 8 == 0, "bad BuddyAllocator alignment");
-  return (BuddyAllocator *)(scratchEnd + sizeof(Scratch) + sizeof(PageTable));
+  static_assert(sizeof(FreeFinder) % 8 == 0, "bad BuddyAllocator alignment");
+  return (BuddyAllocator *)(scratchEnd + sizeof(Scratch) + sizeof(PageTable)
+    + sizeof(FreeFinder));
 }
 
 PhysAddr MapSetup::GetPDPT() {

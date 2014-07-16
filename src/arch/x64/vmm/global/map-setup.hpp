@@ -1,9 +1,10 @@
 #ifndef __ANARCH_X64_MAP_SETUP_HPP__
 #define __ANARCH_X64_MAP_SETUP_HPP__
 
-#include "../pmm/buddy-allocator.hpp"
-#include "scratch.hpp"
-#include "page-table.hpp"
+#include "free-finder.hpp"
+#include "../scratch.hpp"
+#include "../page-table.hpp"
+#include "../../pmm/buddy-allocator.hpp"
 
 namespace anarch {
 
@@ -19,10 +20,12 @@ public:
   void GenerateMap();
   void GenerateScratch();
   void GeneratePageTable();
+  void GenerateFreeFinder();
   void GenerateBuddyAllocator();
   
   Scratch * GetScratch();
   PageTable * GetPageTable();
+  FreeFinder * GetFreeFinder();
   BuddyAllocator * GetBuddyAllocator();
   
   PhysAddr GetPDPT();

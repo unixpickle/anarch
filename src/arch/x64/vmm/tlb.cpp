@@ -1,4 +1,5 @@
 #include "tlb.hpp"
+#include <anarch/critical>
 #include <anarch/new>
 
 namespace anarch {
@@ -13,6 +14,7 @@ TLB globalTLB;
 
 void TLB::Invlpg(VirtAddr addr) {
   // this shall be easy
+  AssertCritical();
   __asm__ __volatile__("invlpg (%0)" : "r" (addr));
 }
 
@@ -26,6 +28,7 @@ TLB & TLB::GetGlobal() {
 
 void TLB::WillSetAddressSpace(MemoryMap &) {
   // TODO: something here
+  AssertCritical();
 }
   
 ansa::DepList TLB::GetDependencies() {

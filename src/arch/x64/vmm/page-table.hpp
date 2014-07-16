@@ -14,7 +14,8 @@ namespace x64 {
 class PageTable {
 public:
   static int CalcDepth(PhysSize size);
-  static uint64_t CalcMask(PhysSize, bool kernel, MemoryMap::Attributes);
+  static uint64_t CalcMask(PhysSize, bool kernel,
+                           const MemoryMap::Attributes &);
   
   PageTable(Allocator &, Scratch &, PhysAddr pml4);
   PageTable(Allocator &, Scratch &);
@@ -53,6 +54,12 @@ public:
    * @ambicritical -> @critical -> @ambicritical
    */
   bool Unset(VirtAddr addr);
+  
+  /**
+   * Set a bunch of entries at once.
+   */
+  void SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
+               uint64_t parentMask);
   
 private:
   Allocator * allocator;

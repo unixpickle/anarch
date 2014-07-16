@@ -1,5 +1,4 @@
 #include "scoped-scratch.hpp"
-#include "global-map.hpp"
 #include "tlb.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
