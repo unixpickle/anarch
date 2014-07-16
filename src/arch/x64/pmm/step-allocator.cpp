@@ -1,6 +1,6 @@
 #include "step-allocator.hpp"
-#include "region-list.hpp"
-#include <anarch/api/panic>
+#include <anarch/x64/init>
+#include <anarch/panic>
 
 namespace anarch {
 
@@ -9,43 +9,60 @@ namespace x64 {
 StepAllocator::StepAllocator(PhysAddr start) : lastAddr(start) {
 }
 
-PhysAddr StepAllocator::AllocPage() {
-  return AllocSize(0x1000);
+PhysAddr StepAllocator::GetLastAddress() {
+  return lastAddr;
 }
 
-void StepAllocator::FreePage(PhysAddr) {
-  Panic("StepAllocator::FreePage() - nothing to do");
-}
-
-PhysAddr StepAllocator::AllocSize(PhysSize pageSize) {
-  RegionList & regions = RegionList::GetGlobal();
+bool StepAllocator::Alloc(PhysAddr & addr, PhysSize size, PhysSize align) {
+  const RegionList & regions = GetBootInfo()->GetRegions();
+  
   const ANAlloc::Region * reg = regions.FindRegion(lastAddr);
   if (!reg) {
     if (!(reg = regions.FindRegion(lastAddr - 1))) {
-      Panic("StepAllocator::AllocSize() - lastAddr out of bounds");
+      return false;
     }
   }
+
+  if (lastAddr % align) {
+    lastAddr += align - (lastAddr % align);
+  }
   
-  if (lastAddr % pageSize) lastAddr += pageSize - (lastAddr % pageSize);
-  if (lastAddr > reg->GetEnd()) lastAddr = reg->GetEnd() - 1;
-  
-  while (lastAddr + pageSize > reg->GetEnd()) {
+  if (lastAddr > (PhysAddr)reg->GetEnd()) {
+    lastAddr = (PhysAddr)reg->GetEnd() - 1;
+  }
+
+  while (lastAddr + size > (PhysAddr)reg->GetEnd()) {
     reg = regions.NextRegion(reg);
-    if (!reg) {
-      Panic("StepAllocator::AllocSize() - out of memory");
+    if (!reg) return false;
+    
+    lastAddr = (PhysAddr)reg->GetStart();
+    if (lastAddr % align) {
+      lastAddr += align - (lastAddr % align);
     }
-    lastAddr = reg->GetStart();
-    if (lastAddr % pageSize) lastAddr += pageSize - (lastAddr % pageSize);
-    if (lastAddr > reg->GetEnd()) lastAddr = reg->GetEnd() - 1;
+    if (lastAddr > (PhysAddr)reg->GetEnd()) {
+      lastAddr = (PhysAddr)reg->GetEnd() - 1;
+    }
   }
-  
-  PhysAddr res = lastAddr;
-  lastAddr += pageSize;
-  return res;
+
+  addr = lastAddr;
+  lastAddr += size;
+  return true;
 }
 
-PhysAddr StepAllocator::GetLastAddress() {
-  return lastAddr;
+void StepAllocator::Free(PhysAddr) {
+  Panic("StepAllocator::Free() - unsupported");
+}
+
+PhysSize StepAllocator::Used() {
+  Panic("StepAllocator::Used() - unsupported");
+}
+
+PhysSize StepAllocator::Available() {
+  Panic("StepAllocator::Available() - unsupported");
+}
+
+PhysSize StepAllocator::Total() {
+  Panic("StepAllocator::Total() - unsupported");
 }
 
 }

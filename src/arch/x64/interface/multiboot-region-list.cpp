@@ -1,74 +1,21 @@
-#include "region-list.hpp"
-#include "../bootloader/multiboot.hpp"
-#include <ansa/iostream>
-#include <ansa/assert>
-#include <ansa/panic>
-#include <ansa/new>
+#include "multiboot-region-list.hpp"
+#include "multiboot.hpp"
+#include <anarch/panic>
 
-namespace OS {
+namespace anarch {
 
 namespace x64 {
 
-static RegionList globalRegions;
-static MultibootBootInfo * multibootPtr;
-
-void RegionList::InitGlobal(void * mbootPtr) {
-  new(&globalRegions) RegionList();
-  multibootPtr = (MultibootBootInfo *)mbootPtr;
-}
-
-RegionList & RegionList::GetGlobal() {
-  return globalRegions;
-}
-
-const ANAlloc::RegionList & RegionList::GetLowerRegions() {
-  return lowerRegions;
-}
-
-const ANAlloc::RegionList & RegionList::GetUpperRegions() {
-  return upperRegions;
-}
-
-const ANAlloc::Region * RegionList::FindRegion(PhysAddr addr) {
-  for (int i = 0; i < lowerRegions.GetCount(); i++) {
-    if (lowerRegions[i].Contains((ANAlloc::UInt)addr)) {
-      return &lowerRegions[i];
-    }
-  }
-  for (int i = 0; i < upperRegions.GetCount(); i++) {
-    if (upperRegions[i].Contains((ANAlloc::UInt)addr)) {
-      return &upperRegions[i];
-    }
-  }
-  return NULL;
-}
-
-const ANAlloc::Region * RegionList::NextRegion(const ANAlloc::Region * reg) {
-  for (int i = 0; i < lowerRegions.GetCount(); i++) {
-    if (lowerRegions[i].GetStart() > reg->GetStart()) {
-      return &lowerRegions[i];
-    }
-  }
-  for (int i = 0; i < upperRegions.GetCount(); i++) {
-    if (upperRegions[i].GetStart() > reg->GetStart()) {
-      return &upperRegions[i];
-    }
-  }
-  return NULL;
-}
-
-// PROTECTED //
-
-void RegionList::Initialize() {
-  cout << "Initializing region list..." << endl;
+MultibootRegionList::MultibootRegionList(void * mbootPtr) {
+  MultibootBootInfo * multibootPtr = (MultibootBootInfo *)mbootPtr;
   
-  // loop through and generate the regions
   uint32_t mmapLen = multibootPtr->mmap_length;
   uint32_t mmapAddr = multibootPtr->mmap_addr;
   if (mmapAddr + mmapLen > 0x100000) {
     Panic("GRUB memory map is placed beyond 1MB -- might be destroyed!");
   }
   
+  // generate ANAlloc::Region objects in a loop
   uintptr_t longAddr = (uintptr_t)mmapAddr;
   MultibootMmapInfo * info = NULL;
   MultibootMmapInfo * next = (MultibootMmapInfo *)longAddr;
@@ -109,15 +56,11 @@ void RegionList::Initialize() {
     }
   }
   if (!lowerRegions.GetCount()) {
-    Panic("RegionList::Initialize() - no lower regions found");
+    Panic("MultibootRegionList::Initialize() - no lower regions found");
   }
 }
 
-ansa::DepList RegionList::GetDependencies() {
-  return ansa::DepList(&OutStreamModule::GetGlobal());
-}
-
-void RegionList::AddRegion(const ANAlloc::Region & region) {
+void MultibootRegionList::AddRegion(const ANAlloc::Region & region) {
   ANAlloc::FixedRegionList<MaximumCount> * list = NULL;
   
   if (region.GetStart() < 0x100000000L) {
@@ -134,7 +77,7 @@ void RegionList::AddRegion(const ANAlloc::Region & region) {
     }
   }
   if (!list->Insert(region, insertIndex)) {
-    Panic("RegionList::AddRegion() - region overflow");
+    Panic("MultibootRegionList::AddRegion() - region overflow");
   }
 }
 
