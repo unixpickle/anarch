@@ -30,6 +30,10 @@ void TLB::WillSetAddressSpace(MemoryMap &) {
   // TODO: something here
   AssertCritical();
 }
+
+void TLB::DistributeInvlpg(VirtAddr start, PhysSize size) {
+  // TODO: here, we will send this around and stuff
+}
   
 ansa::DepList TLB::GetDependencies() {
   // TODO: something here
