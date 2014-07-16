@@ -1,9 +1,12 @@
 #include "global-map.hpp"
+#include "map-setup.hpp"
+#include "scratch.hpp"
 #include "../pmm/step-allocator.hpp"
 #include "../pmm/buddy-allocator.hpp"
 #include <anarch/x64/init>
 #include <anarch/assert>
 #include <anarch/new>
+#include <ansa/math>
 
 namespace anarch {
 
@@ -69,13 +72,26 @@ Allocator & GlobalMap::GetPageAllocator() {
   return *pageAllocator;
 }
 
+Scratch & GlobalMap::GetScratch() {
+  return *scratch;
+}
+
+PageTable & GlobalMap::GetPageTable() {
+  return *pageTable;
+}
+
+PhysAddr GlobalMap::GetPDPT() {
+  return pdpt;
+}
+
 void GlobalMap::Set() {
   // TODO: this
+  TLB::GetGlobal().WillSetAddressSpace(this);
+  __asm__("mov %0, %cr3" : "r" (GetPageTable().GetPML4()));
 }
 
 bool GlobalMap::Map(VirtAddr &, PhysAddr, Size, const Attributes &) {
   // TODO: this
-  return false;
 }
 
 void GlobalMap::MapAt(VirtAddr, PhysAddr, Size, const Attributes &) {
@@ -99,20 +115,18 @@ ansa::DepList GlobalMap::GetDependencies() {
 }
 
 void GlobalMap::Initialize() {
-  // create the temporary step allocator
-  PhysAddr lastAddr = GetBootInfo()->GetKernelEnd();
-  StepAllocator tempAllocator(lastAddr);
-  pageAllocator = &tempAllocator;
+  MapSetup setup;
   
-  // TODO: here, setup the actual map
+  setup.GenerateMap();
+  setup.GenerateScratch();
+  scratch = setup.GetScratch();
+  setup.GeneratePageTable();
+  pageTable = setup.GetPageTable();
   
-  // create the permanent buddy allocator
-  void * ptr = (void *)tempAllocator.AllocAndMap(sizeof(BuddyAllocator));
-  const RegionList & regions = GetBootInfo()->GetRegions();
-  BuddyAllocator * buddy = new(ptr) BuddyAllocator(regions);
-  buddy->Reserve(tempAllocator.GetLastAddress());
+  Set();
   
-  pageAllocator = buddy;
+  setup.GenerateBuddyAllocator();
+  pageAllocator = setup.GetBuddyAllocator();
 }
 
 }

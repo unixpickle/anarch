@@ -6,7 +6,8 @@ namespace anarch {
 
 namespace x64 {
 
-BuddyAllocator::BuddyAllocator(const RegionList & regions) {
+BuddyAllocator::BuddyAllocator(const RegionList & regions,
+                               Allocator & tempAllocator) {
   // initialize the buddy allocator piece by piece like a boss
   for (int i = 0; i < regions.GetLowerRegions().GetCount(); i++) {
     totalSpace += (size_t)regions.GetLowerRegions()[i].GetSize();
@@ -16,11 +17,11 @@ BuddyAllocator::BuddyAllocator(const RegionList & regions) {
   }
 
   if (regions.GetLowerRegions().GetCount()) {
-    InitializeCluster(lower, regions.GetLowerRegions());
+    InitializeCluster(lower, regions.GetLowerRegions(), tempAllocator);
     hasLower = true;
   }
   if (regions.GetUpperRegions().GetCount()) {
-    InitializeCluster(upper, regions.GetUpperRegions());
+    InitializeCluster(upper, regions.GetUpperRegions(), tempAllocator);
     hasUpper = true;
   }
 }
@@ -97,38 +98,9 @@ PhysSize BuddyAllocator::Total() {
   return totalSpace;
 }
 
-VirtAddr BuddyAllocator::AllocFromGlobalMap(PhysSize size) {
-  // perform a quick and dirty memory allocation
-  GlobalMap & map = GlobalMap::GetGlobal();
-  Allocator & alloc = map.GetPageAllocator();
-  
-  PhysSize pageSize = size >= 0x200000 ? 0x200000 : 0x1000;
-  PhysSize pageCount = size / pageSize + (size % pageSize ? 1 : 0);
-  VirtAddr reserved = map.Reserve(GlobalMap::Size(pageSize, pageCount));
-  VirtAddr dest = reserved;
-
-  GlobalMap::Size mapSize(pageSize, 1);
-  GlobalMap::Attributes mapAttributes;
-  if (GlobalMap::SupportsNX()) {
-    attributes.executable = false;
-  }
-  
-  // allocate a page at a time and map each one sequentially
-  while (pageCount--) {
-    PhysAddr phys;
-    if (!alloc.Alloc(phys, pageSize, pageSize)) {
-      Panic("BuddyAllocator::AllocFromGlobalMap() - allocation failed");
-    }
-    map.MapAt(dest, phys, mapSize, mapAttributes);
-    dest += pageSize;
-  }
-
-  return reserved;
-
-}
-
 void BuddyAllocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
-                                       const ANAlloc::RegionList & regs) {
+                                       const ANAlloc::RegionList & regs,
+                                       Allocator & tempAllocator) {
   ANAlloc::FixedDescList<MaxAllocators> descs;
 
   // create the descriptions
@@ -139,8 +111,7 @@ void BuddyAllocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
   ANAlloc::ClusterBuilder<ANAlloc::BBTree> builder(descs, cluster, 12);
   ANAlloc::UInt space = builder.RequiredSpace();
   
-  Allocator & alloc = GlobalMap::GetGlobal().GetPageAllocator();
-  VirtAddr newAddress = alloc.AllocAndMap((PhysSize)space);
+  VirtAddr newAddress = tempAllocator.AllocAndMap((PhysSize)space);
   builder.CreateAllocators((uint8_t *)newAddress);
 }
 

@@ -15,7 +15,7 @@ namespace x64 {
  */
 class BuddyAllocator : public Allocator {
 public:
-  BuddyAllocator(const RegionList & regions);
+  BuddyAllocator(const RegionList & regions, Allocator & tempAllocator);
   
   virtual void Reserve(PhysAddr lastAddr);
   
@@ -41,9 +41,9 @@ private:
   
   PhysSize totalSpace = 0;
   
-  static VirtAddr AllocFromGlobalMap(PhysSize size);
   static void InitializeCluster(ANAlloc::MutableCluster & cluster,
-                                const ANAlloc::RegionList & regs);
+                                const ANAlloc::RegionList & regs,
+                                Allocator & tempAllocator);
 };
 
 }
