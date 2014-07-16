@@ -16,8 +16,8 @@ build/critical: ../dependencies build/ansa build/assert.o
 
 build/ansa: ../dependencies build
 	mkdir build/ansa
-	cd build/ansa; $(CXX) $(CPPFLAGS) -I../../../dependencies/ansa/include -c ../../../dependencies/ansa/src/*.cpp; cd -
-	cd build/ansa; $(CC) -I../../../dependencies/ansa/include -c ../../../dependencies/ansa/dependencies/anlock/src/*.c; cd -
+	../build-objects $(CXX) $(CPPFLAGS) -I../dependencies/ansa/include -c ../dependencies/ansa/src/*.cpp -o build/ansa
+	../build-objects $(CC) -I../dependencies/ansa/include -c ../dependencies/ansa/dependencies/anlock/src/*.c -o build/ansa
 
 build/assert.o:
 	g++ -c ../assert.cpp -o build/assert.o
