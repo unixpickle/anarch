@@ -36,6 +36,13 @@ public:
    * @noncritical
    */
   virtual PhysSize Total() = 0;
+  
+  /**
+   * Allocate physical memory and map it into contiguous virtual memory. This
+   * makes no guarantees about which page size it will use. If the allocation
+   * fails, this function will Panic() the kernel.
+   */
+  virtual VirtAddr AllocAndMap(PhysSize size);
 };
 
 }

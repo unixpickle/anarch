@@ -138,7 +138,9 @@ void BuddyAllocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
   // create the allocators and their trees
   ANAlloc::ClusterBuilder<ANAlloc::BBTree> builder(descs, cluster, 12);
   ANAlloc::UInt space = builder.RequiredSpace();
-  VirtAddr newAddress = AllocateFromGlobalMap((PhysSize)space);
+  
+  Allocator & alloc = GlobalMap::GetGlobal().GetPageAllocator();
+  VirtAddr newAddress = alloc.AllocAndMap((PhysSize)space);
   builder.CreateAllocators((uint8_t *)newAddress);
 }
 
