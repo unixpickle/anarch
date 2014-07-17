@@ -3,6 +3,7 @@
 
 #include <anarch/api/memory-map>
 #include <anarch/api/allocator>
+#include "scratch.hpp"
 
 namespace anarch {
 
@@ -29,7 +30,7 @@ public:
   /**
    * @return The depth of the entry found (0-3 inclusive) or -1 if not mapped.
    * This may return depth 3 with entry=0.
-   * @ambicritical -> @critical -> @ambicritical
+   * @noncritical -> @critical -> @noncritical
    */
   int Walk(VirtAddr addr, uint64_t & entry, size_t * size);
   
@@ -42,7 +43,7 @@ public:
    * @return true on success; false will only be returned in the case where a
    * large page has been mapped and you try to Set() a smaller piece of that
    * large page at a deeper point.
-   * @ambicritical -> @critical -> @ambicritical
+   * @noncritical -> @critical -> @noncritical
    */
   bool Set(VirtAddr addr, uint64_t entry, uint64_t parentMask, int depth);
   
@@ -51,20 +52,32 @@ public:
    * @return The only time Unset() can fail is if you try to unmap a piece of
    * a larger page (i.e. you try to allocate a 2MB region but passed an address
    * that is not 2MB aligned).
-   * @ambicritical -> @critical -> @ambicritical
+   * @noncritical -> @critical -> @noncritical
    */
   bool Unset(VirtAddr addr);
   
   /**
    * Set a bunch of entries at once.
+   * @noncritical
    */
   void SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
                uint64_t parentMask);
+  
+  /**
+   * Free all of the page table structures including the PML4.
+   * @noncritical
+   */
+  void FreeTable(int pdptStart);
   
 private:
   Allocator * allocator;
   Scratch & scratch;
   PhysAddr pml4 = 0;
+  
+  /**
+   * @critical
+   */
+  void FreeTableRecursive(PhysAddr table, int depth, int start);
 };
 
 }

@@ -1,11 +1,16 @@
 #include "allocator.hpp"
 #include "global-map.hpp"
+#include <anarch/api/panic>
 
 namespace anarch {
 
 VirtAddr Allocator::AllocAndMap(PhysSize size) {
   GlobalMap & map = GlobalMap::GetGlobal();
-  Allocator & alloc = map.GetPageAllocator();
+  
+  if (!GlobalMap::SupportsMapAt() || !GlobalMap::SupportsReserve()) {
+    // TODO: here, allocate a contiguous buffer and then map it.
+    Panic("Allocator::AllocAndMap() currently unsupported");
+  }
   
   // TODO: here, attempt to allocate the memory with bigger page sizes if the
   // requested amount of memory *is* a bigger page size
@@ -25,7 +30,7 @@ VirtAddr Allocator::AllocAndMap(PhysSize size) {
   VirtAddr dest = reserved;
   while (pageCount--) {
     PhysAddr phys;
-    if (!alloc.Alloc(phys, pageSize, pageAlign)) {
+    if (!Alloc(phys, pageSize, pageAlign)) {
       Panic("BuddyAllocator::AllocFromGlobalMap() - allocation failed");
     }
     map.MapAt(dest, phys, mapSize, mapAttributes);

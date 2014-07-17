@@ -1,27 +1,32 @@
 #ifndef __TEST_SCOPED_PASS_HPP__
 #define __TEST_SCOPED_PASS_HPP__
 
-#include <iostream>
+extern "C" {
+extern int printf(const char * format, ...);
+extern void fflush(void *);
+}
 
 class ScopedPass {
 public:
-  template <class... Y>
+  template <typename... Y>
   inline ScopedPass(Y... args) {
-    std::cout << "testing ";
+    printf("testing");
+    fflush(NULL);
     Initializer(args...);
   }
   
   inline ~ScopedPass() {
-    std::cout << "passed!" << std::endl;
+    printf("passed!\n");
   }
   
   inline void Initializer() {
-    std::cout << " ... " << std::flush;
+    printf(" ... ");
+    fflush(NULL);
   }
   
-  template <class X, class... Y>
+  template <typename X, typename... Y>
   inline void Initializer(X arg1, Y... args) {
-    std::cout << arg1;
+    printf(" %s", arg1);
     Initializer(args...);
   }
 };

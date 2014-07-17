@@ -22,11 +22,11 @@ int PageTable::CalcDepth(PhysSize size) {
   return -1;
 }
 
-uint64_t PageTable::CalcMask(PhysSize, bool kernel,
-                             const MemoryMap::Attributes &) {
+uint64_t PageTable::CalcMask(PhysSize pageSize, bool kernel,
+                             const MemoryMap::Attributes & attributes) {
   return 1 | (pageSize == 0x1000 ? 0 : 0x80) | (kernel ? 0x100 : 0x4)
     | (attributes.executable ? 0 : (uint64_t)1 << 63)
-    | (attirbutes.writable ? 2 : 0);
+    | (attributes.writable ? 2 : 0);
 }
 
 PageTable::PageTable(Allocator & a, Scratch & s, PhysAddr p)
@@ -53,6 +53,7 @@ Allocator & PageTable::GetAllocator() {
 }
 
 int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
+  AssertNoncritical();
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
     (int)((addr >> 30) & 0x1ff),
@@ -80,7 +81,8 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
 }
 
 bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
-                    int depth) {
+                    int theDepth) {
+  AssertNoncritical();
   assert(theDepth >= 0 && theDepth < 4);
   assert(!(addr & (0x1000L << (27 - 9 * theDepth)) - 1));
   int indexes[4] = {
@@ -99,7 +101,7 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
       // we will have to clear the scratch's CPU cache
       SetCritical(false);
       PhysAddr fresh;
-      if (!allocator->Alloc(fresh, 0x1000, 0x1000)) {
+      if (!GetAllocator().Alloc(fresh, 0x1000, 0x1000)) {
         Panic("PageTable::Set() - allocation failed");
       }
       nextPage = (uint64_t)fresh;
@@ -128,6 +130,7 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
 }
 
 bool PageTable::Unset(VirtAddr addr) {
+  AssertNoncritical();
   assert(!(addr & 0xfff));
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
@@ -142,7 +145,7 @@ bool PageTable::Unset(VirtAddr addr) {
   TypedScratch<uint64_t> table(scratch, pml4);
   int maxDepth = 3;
   for (int depth = 0; depth < 3; depth++) {
-    uint64_t nextPage = scratch[indexes[depth]];
+    uint64_t nextPage = table[indexes[depth]];
     if (nextPage & 0x80) {
       maxDepth = depth;
       break;
@@ -172,7 +175,7 @@ bool PageTable::Unset(VirtAddr addr) {
     if (!allGone) break;
   
     SetCritical(false);
-    allocator->Free(tableAddresses[i]);
+    GetAllocator().Free(tableAddresses[i]);
     SetCritical(true);
     // no need to run table.InvalidateCache() because we are reassigning it
     
@@ -185,6 +188,7 @@ bool PageTable::Unset(VirtAddr addr) {
 
 void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
                         uint64_t parentMask) {
+  AssertNoncritical();
   int depth = CalcDepth(size.pageSize);
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
@@ -196,6 +200,41 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
     curPhys += size.pageSize;
     curVirt += size.pageSize;
   }
+}
+
+void PageTable::FreeTable(int start) {
+  AssertNoncritical();
+  ScopedCritical critical;
+  FreeTableRecursive(pml4, 0, start);
+}
+
+// PRIVATE //
+
+void PageTable::FreeTableRecursive(PhysAddr tbl, int depth, int start) {
+  AssertCritical();
+
+  if (depth == 3) {
+    SetCritical(false);
+    GetAllocator().Free(tbl);
+    SetCritical(true);
+    return;
+  }
+
+  {
+    TypedScratch<uint64_t> table(scratch, tbl);
+    for (int i = start; i < 0x200; i++) {
+      uint64_t entry = table[i];
+      if ((entry & 1) && !(entry & 0x80)) {
+        PhysAddr addr = entry & 0x7FFFFFFFFFFFF000L;
+        FreeTableRecursive(addr, depth + 1, 0);
+        table.InvalidateCache();
+      }
+    }
+  }
+
+  SetCritical(false);
+  GetAllocator().Free(tbl);
+  SetCritical(true);
 }
 
 }

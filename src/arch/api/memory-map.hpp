@@ -1,6 +1,8 @@
 #ifndef __ANARCH_API_MEMORY_MAP_HPP__
 #define __ANARCH_API_MEMORY_MAP_HPP__
 
+#include <anarch/types>
+
 namespace anarch {
 
 class MemoryMap {

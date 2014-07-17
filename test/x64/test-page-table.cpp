@@ -1,6 +1,9 @@
-#include <iostream>
+#include "../../src/arch/x64/vmm/page-table.hpp"
+#include "../scoped-pass.hpp"
+
+void TestBasicSet();
 
 int main() {
-  std::cout << "TODO: make tests!\a" << std::endl;
+  // TODO: put some tests here!
   return 0;
 }

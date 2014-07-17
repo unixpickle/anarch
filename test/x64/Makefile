@@ -1,26 +1,27 @@
 ARCH_FLAG=-D__ANARCH_TARGET_X64__
 
-CXXFLAGS=-Wall -Wextra -std=c++11 $(ARCH_FLAG)
-CCFLAGS=-Wall -Wextra $(ARCH_FLAG)
+CXXFLAGS=-Wall -Wextra -std=c++11 -nostdinc $(ARCH_FLAG)
+CCFLAGS=-Wall -Wextra -nostdinc $(ARCH_FLAG)
 
-CXX_STANDALONE=-nostdlib -nostdinc -I../../src/stdlib/h -I../../src/stdlib/hpp
-CC_STANDALONE=-nostdlib -nostdinc -I../../src/stdlib/h
-
-TEST_INCLUDES=-I../../include -I../dependencies/ansa/include
-TEST_SOURCES=build/util/*.o build/dummy/*.o build/ansa/*.o build/assert.o
+TEST_INCLUDES=-I../../include -I../dependencies/ansa/include -I../../src/stdlib/h -I../../src/stdlib/hpp
+TEST_SOURCES=build/util/*.o build/dummy-api/*.o build/ansa/*.o build/assert.o
 
 all: build/page-table
 
-build/page-table: build/dummy build/ansa build/util build/assert.o
-	$(CXX) $(CPPFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) test-page-table.cpp -o build/page-table
+build/page-table: build/dummy-api build/identity-memory build/ansa build/util build/assert.o
+	$(CXX) $(CXXFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) build/identity-memory/*.o ../../src/arch/api/allocator.cpp ../../src/arch/x64/vmm/page-table.cpp test-page-table.cpp -o build/page-table
 
 build/util: build
 	mkdir build/util
 	../build-objects $(CXX) $(CXXFLAGS) $(CXX_STANDALONE) $(TEST_INCLUDES) -c ../../src/util/*.cpp -o build/util
 
-build/dummy: build
-	mkdir build/dummy
-	../build-objects $(CXX) $(CXXFLAGS) $(CXX_STANDALONE) $(TEST_INCLUDES) -c dummy-api/*.cpp -o build/dummy
+build/identity-memory: build
+	mkdir build/identity-memory
+	../build-objects $(CXX) $(CXXFLAGS) $(CXX_STANDALONE) $(TEST_INCLUDES) -c identity-memory/*.cpp -o build/identity-memory
+
+build/dummy-api: build
+	mkdir build/dummy-api
+	../build-objects $(CXX) $(CXXFLAGS) $(CXX_STANDALONE) $(TEST_INCLUDES) -c dummy-api/*.cpp -o build/dummy-api
 
 build/ansa: ../dependencies build
 	mkdir build/ansa
