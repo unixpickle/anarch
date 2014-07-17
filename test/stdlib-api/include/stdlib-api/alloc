@@ -1,0 +1,12 @@
+#ifndef __STDLIB_API_ALLOC_HPP__
+#define __STDLIB_API_ALLOC_HPP__
+
+extern "C" {
+
+void * AlignMemory(unsigned long size, unsigned long align);
+void * AllocMemory(unsigned long size);
+void FreeMemory(void * mem);
+
+}
+
+#endif

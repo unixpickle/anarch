@@ -3,7 +3,7 @@
 
 extern "C" {
 
-int __Assert(const char * msg) {
+int __stdlib_api_assert(const char * msg) {
   std::cerr << msg << std::endl;
   exit(1);
 }

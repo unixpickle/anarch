@@ -1,0 +1,10 @@
+#ifndef __STDLIB_API_PRINT_HPP__
+#define __STDLIB_API_PRINT_HPP__
+
+extern "C" {
+
+void PrintString(const char * str);
+
+}
+
+#endif

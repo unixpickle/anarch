@@ -1,32 +1,28 @@
-#ifndef __TEST_SCOPED_PASS_HPP__
-#define __TEST_SCOPED_PASS_HPP__
+#ifndef __STDLIB_API_SCOPED_PASS_HPP__
+#define __STDLIB_API_SCOPED_PASS_HPP__
 
-extern "C" {
-extern int printf(const char * format, ...);
-extern int fflush(void *);
-}
+#include "print.hpp"
 
 class ScopedPass {
 public:
   template <typename... Y>
   inline ScopedPass(Y... args) {
-    printf("testing");
-    fflush(NULL);
+    PrintString("testing");
     Initializer(args...);
   }
   
   inline ~ScopedPass() {
-    printf("passed!\n");
+    PrintString("passed!\n");
   }
   
   inline void Initializer() {
-    printf(" ... ");
-    fflush(NULL);
+    PrintString(" ... ");
   }
   
   template <typename X, typename... Y>
   inline void Initializer(X arg1, Y... args) {
-    printf(" %s", arg1);
+    PrintString(" ");
+    PrintString(arg);
     Initializer(args...);
   }
 };
