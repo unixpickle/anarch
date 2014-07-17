@@ -1,7 +1,7 @@
 #ifndef __STDLIB_API_SCOPED_PASS_HPP__
 #define __STDLIB_API_SCOPED_PASS_HPP__
 
-#include "print.hpp"
+#include "print"
 
 class ScopedPass {
 public:
@@ -22,7 +22,7 @@ public:
   template <typename X, typename... Y>
   inline void Initializer(X arg1, Y... args) {
     PrintString(" ");
-    PrintString(arg);
+    PrintString(arg1);
     Initializer(args...);
   }
 };

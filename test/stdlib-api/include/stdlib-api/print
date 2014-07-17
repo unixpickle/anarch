@@ -4,6 +4,7 @@
 extern "C" {
 
 void PrintString(const char * str);
+void PrintError(const char * str);
 
 }
 

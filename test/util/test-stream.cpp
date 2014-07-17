@@ -1,8 +1,8 @@
+#include <stdlib-api/scoped-pass>
+#include <stdlib-api/assert>
 #include <anarch/stream>
 #include <ansa/cstring>
 #include "dummy-api/console.hpp"
-#include "../scoped-pass.hpp"
-#include "../assert.hpp"
 
 using namespace anarch;
 

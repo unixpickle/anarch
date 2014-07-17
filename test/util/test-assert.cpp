@@ -1,7 +1,7 @@
 #include <anarch/assert>
 #include <anarch/stddef>
-#include <iostream>
-#include "../scoped-pass.hpp"
+#include <stdlib-api/scoped-pass>
+#include <stdlib-api/assert>
 
 int main() {
   ScopedPass pass("assert()");
@@ -10,13 +10,11 @@ int main() {
     assert(3 == 3);
     try {
       assert(false);
-      std::cerr << "assert(false) should Panic!" << std::endl;
-      exit(1);
+      Die("assert(false) should Panic!");
     } catch (const char * x) {
     }
   } catch (const char * msg) {
-    std::cerr << "Unexpected Panic: " << msg << std::endl;
-    exit(1);
+    Die(msg);
   }
   return 0;
 }

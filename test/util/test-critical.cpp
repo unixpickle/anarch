@@ -1,8 +1,9 @@
-#include "../scoped-pass.hpp"
-#include "../assert.hpp"
+#include <stdlib-api/assert>
+#include <stdlib-api/scoped-pass>
+#include <stdlib-api/print>
+
 #include "dummy-api/critical.hpp"
 #include <anarch/critical>
-#include <cstdlib>
 
 using namespace anarch;
 using dummy::SetIgnoreCriticality;
@@ -42,8 +43,8 @@ void TestAssertCriticality() {
     AssertCritical();
     AssertNoncritical();
   } catch (const char * exc) {
-    std::cerr << "unexpected panic: " << exc << std::endl;
-    exit(1);
+    PrintError("unexpected panic: ");
+    Die(exc);
   }
   
   SetIgnoreCriticality(false);
@@ -51,13 +52,12 @@ void TestAssertCriticality() {
   try {
     AssertCritical();
   } catch (const char * exc) {
-    std::cerr << "unexpected panic: " << exc << std::endl;
-    exit(1);
+    PrintError("unexpected panic: ");
+    Die(exc);
   }
   try {
     AssertNoncritical();
-    std::cerr << "expected panic after AssertNoncritical()" << std::endl;
-    exit(1);
+    Die("expected panic after AssertNoncritical()");
   } catch (const char * exc) {
   }
   
@@ -65,13 +65,12 @@ void TestAssertCriticality() {
   try {
     AssertNoncritical();
   } catch (const char * exc) {
-    std::cerr << "unexpected panic: " << exc << std::endl;
-    exit(1);
+    PrintError("unexpected panic: ");
+    Die(exc);
   }
   try {
     AssertCritical();
-    std::cerr << "expected panic after AssertCritical()" << std::endl;
-    exit(1);
+    Die("expected panic after AssertCritical()");
   } catch (const char * exc) {
   }
 }

@@ -8,4 +8,9 @@ void PrintString(const char * str) {
   fflush(stdout);
 }
 
+void PrintError(const char * str) {
+  fprintf(stderr, "%s", str);
+  fflush(stdout);
+}
+
 }
