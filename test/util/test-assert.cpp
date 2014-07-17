@@ -1,5 +1,6 @@
 #include <anarch/assert>
 #include <anarch/stddef>
+#include <iostream>
 #include "../scoped-pass.hpp"
 
 int main() {

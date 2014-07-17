@@ -3,7 +3,7 @@
 
 extern "C" {
 extern int printf(const char * format, ...);
-extern void fflush(void *);
+extern int fflush(void *);
 }
 
 class ScopedPass {
