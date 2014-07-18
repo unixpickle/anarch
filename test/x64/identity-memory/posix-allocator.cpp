@@ -16,11 +16,13 @@ bool PosixAllocator::Alloc(PhysAddr & result, PhysSize size, PhysSize align) {
     return false;
   }
   result = (PhysAddr)ptr;
+  ++allocationCount;
   return true;
 }
 
 void PosixAllocator::Free(PhysAddr address) {
   free((void *)address);
+  --allocationCount;
 }
 
 PhysSize PosixAllocator::Used() {
@@ -33,6 +35,10 @@ PhysSize PosixAllocator::Available() {
 
 PhysSize PosixAllocator::Total() {
   return 0x100000000L;
+}
+
+long PosixAllocator::GetAllocationCount() {
+  return allocationCount;
 }
 
 }

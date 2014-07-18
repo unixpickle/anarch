@@ -10,6 +10,11 @@ void PrintString(const char * str) {
 
 void PrintError(const char * str) {
   fprintf(stderr, "%s", str);
+  fflush(stderr);
+}
+
+void PrintNumber(unsigned long long number) {
+  printf("0x%llx", number);
   fflush(stdout);
 }
 

@@ -32,7 +32,7 @@ public:
    * This may return depth 3 with entry=0.
    * @noncritical -> @critical -> @noncritical
    */
-  int Walk(VirtAddr addr, uint64_t & entry, size_t * size);
+  int Walk(VirtAddr addr, uint64_t & entry, PhysSize * size);
   
   /**
    * Set a raw entry in the page table.

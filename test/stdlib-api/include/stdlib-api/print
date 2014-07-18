@@ -5,6 +5,7 @@ extern "C" {
 
 void PrintString(const char * str);
 void PrintError(const char * str);
+void PrintNumber(unsigned long long number);
 
 }
 

@@ -1,10 +1,72 @@
 #include "../../src/arch/x64/vmm/page-table.hpp"
-#include <stdlib-api/print>
+#include "../../src/arch/x64/vmm/scratch.hpp"
+#include "identity-memory/identity-scoped-scratch.hpp"
+#include "identity-memory/posix-allocator.hpp"
+#include <stdlib-api/scoped-pass>
+#include <stdlib-api/assert>
+#include <ansa/cstring>
 
-void TestBasicSet();
+using namespace anarch::x64;
+
+void TestSetFirstPage();
 
 int main() {
-  PrintString("TODO: write tests!\n");
-  // TODO: put some tests here!
+  try {
+    TestSetFirstPage();
+  } catch (const char * exc) {
+    PrintError("received panic: ");
+    Die(exc);
+  }
   return 0;
+}
+
+void TestSetFirstPage() {
+  ScopedPass pass("PageTable::[Set/Walk/FreeTable]() [first page]");
+  
+  anarch::dummy::PosixAllocator allocator;
+  Scratch scratch(NULL); // identity scratch
+  
+  PhysAddr thePML4;
+  if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
+    Die("Failed to allocate PML4");
+  }
+  ansa::Bzero((void *)thePML4, 0x1000);
+  PageTable table(allocator, scratch, thePML4);
+  
+  assert(allocator.GetAllocationCount() == 1);
+  
+  uint64_t entry;
+  PhysSize entrySize = 0;
+  Assert(table.Walk(0, entry, &entrySize) == -1);
+  Assert(entrySize == 1UL << 39);
+  Assert(allocator.GetAllocationCount() == 1);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.Set(0, 0x1003, 3, 3);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  Assert(allocator.GetAllocationCount() == 4);
+  
+  // ensure that the page is properly set and that Walk() returns the right
+  // information
+  Assert(table.Walk(0, entry, &entrySize) == 3);
+  Assert(entry == 0x1003);
+  Assert(entrySize == 0x1000);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+
+  Assert(table.Walk(100, entry, &entrySize) == 3);
+  Assert(entry == 0x1003);
+  Assert(entrySize == 0x1000);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+
+  Assert(table.Walk(0x1000, entry, &entrySize) == 3);
+  Assert(entrySize == 0x1000);
+  Assert(entry == 0);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  Assert(table.Walk(0x200000, entry, &entrySize) == -1);
+  Assert(entrySize == 0x200000);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.FreeTable(0);
+  assert(allocator.GetAllocationCount() == 0);
 }

@@ -52,7 +52,7 @@ Allocator & PageTable::GetAllocator() {
   return *allocator;
 }
 
-int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
+int PageTable::Walk(VirtAddr addr, uint64_t & entry, PhysSize * size) {
   AssertNoncritical();
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
@@ -193,7 +193,7 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
 
-  for (size_t i = 0; i < size.pageCount; i++) {
+  for (PhysSize i = 0; i < size.pageCount; i++) {
     if (!Set(curVirt, curPhys, parentMask, depth)) {
       Panic("PageTable::SetList() - Set() failed");
     }

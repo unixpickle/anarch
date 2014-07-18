@@ -1,4 +1,5 @@
 #include <anarch/api/allocator>
+#include <ansa/atomic>
 
 namespace anarch {
 
@@ -11,6 +12,11 @@ public:
   virtual PhysSize Used();
   virtual PhysSize Available();
   virtual PhysSize Total();
+  
+  long GetAllocationCount();
+  
+private:
+  ansa::Atomic<long> allocationCount;
 };
 
 }
