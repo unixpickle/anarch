@@ -10,7 +10,7 @@ namespace x64 {
 
 class BootInfo {
 public:
-  BootInfo(const RegionList & regs, PhysAddr kernelEnd)
+  BootInfo(const RegionList & regs, PhysAddr end)
     : regions(regs), kernelEnd(end) {}
   
   const RegionList & GetRegions() const {

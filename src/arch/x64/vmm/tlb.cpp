@@ -15,7 +15,7 @@ TLB globalTLB;
 void TLB::Invlpg(VirtAddr addr) {
   // this shall be easy
   AssertCritical();
-  __asm__ __volatile__("invlpg (%0)" : "r" (addr));
+  __asm__ __volatile__("invlpg (%0)" : : "r" (addr));
 }
 
 void TLB::InitGlobal() {
@@ -33,6 +33,8 @@ void TLB::WillSetAddressSpace(MemoryMap &) {
 
 void TLB::DistributeInvlpg(VirtAddr start, PhysSize size) {
   // TODO: here, we will send this around and stuff
+  (void)start;
+  (void)size;
 }
   
 ansa::DepList TLB::GetDependencies() {

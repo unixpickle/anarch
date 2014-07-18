@@ -1,3 +1,4 @@
+#include "free-finder.hpp"
 #include "../scratch.hpp"
 
 namespace anarch {
@@ -20,11 +21,12 @@ bool FreeFinder::Alloc(VirtAddr & addr, PhysSize size, PhysSize align) {
     freeStart += align - freeStart % align;
   }
   
-  VirtAddr result = result;
+  addr = freeStart;
+  
   freeSize -= size;
   freeStart += size;
   
-  return result;
+  return true;
 }
 
 void FreeFinder::Free(VirtAddr addr, PhysSize size) {
@@ -38,7 +40,7 @@ void FreeFinder::Free(VirtAddr addr, PhysSize size) {
   }
 }
 
-void Reserve(VirtAddr addr, PhysSize size) {
+void FreeFinder::Reserve(VirtAddr addr, PhysSize size) {
   if (addr > freeStart + freeSize || addr + size <= freeStart) {
     return;
   }
@@ -68,12 +70,12 @@ void FreeFinder::UpdateFreeRegion() {
   VirtAddr addr = 0;
   while (addr < Scratch::StartAddr) {
     VirtAddr nextStart = addr;
-    size_t nextSize = 0;
+    PhysSize nextSize = 0;
   
     while (1) {
-      size_t pageSize;
+      PhysSize pageSize;
       uint64_t entry = 0;
-      int result = table.Walk(nextStart + nextSize, entry, &pageSize);
+      int result = pageTable.Walk(nextStart + nextSize, entry, &pageSize);
       addr += pageSize;
       if (result >= 0 && entry) break;
       nextSize += pageSize;
@@ -93,7 +95,6 @@ void FreeFinder::UpdateFreeRegion() {
 bool FreeFinder::CanAllocate(PhysSize size, PhysSize align) {
   if (!size) return true;
   
-  PhysSize available = freeSize;
   PhysSize slice = 0;
   if (freeStart % align) {
     slice = align - (freeStart % align);

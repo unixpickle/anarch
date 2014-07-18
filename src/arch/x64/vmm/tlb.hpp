@@ -1,3 +1,6 @@
+#ifndef __ANARCH_X64_TLB_HPP__
+#define __ANARCH_X64_TLB_HPP__
+
 #include <anarch/api/memory-map>
 #include <ansa/module>
 
@@ -27,3 +30,5 @@ protected:
 }
 
 }
+
+#endif

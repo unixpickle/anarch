@@ -1,6 +1,6 @@
 #include "multiboot-region-list.hpp"
 #include "multiboot.hpp"
-#include <anarch/panic>
+#include <anarch/api/panic>
 
 namespace anarch {
 

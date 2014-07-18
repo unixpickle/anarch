@@ -5,6 +5,7 @@
 #include "../scratch.hpp"
 #include "../page-table.hpp"
 #include "../../pmm/buddy-allocator.hpp"
+#include "../../pmm/step-allocator.hpp"
 
 namespace anarch {
 

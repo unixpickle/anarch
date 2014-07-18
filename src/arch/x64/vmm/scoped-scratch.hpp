@@ -1,3 +1,6 @@
+#ifndef __ANARCH_X64_SCOPED_SCRATCH_X64_HPP__
+#define __ANARCH_X64_SCOPED_SCRATCH_X64_HPP__
+
 #include "scratch.hpp"
 
 namespace anarch {
@@ -47,3 +50,5 @@ public:
 }
 
 }
+
+#endif

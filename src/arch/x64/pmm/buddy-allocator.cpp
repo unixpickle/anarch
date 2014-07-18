@@ -1,5 +1,4 @@
 #include "buddy-allocator.hpp"
-#include "../vmm/global-map.hpp"
 #include <anarch/critical>
 
 namespace anarch {
@@ -26,7 +25,7 @@ BuddyAllocator::BuddyAllocator(const RegionList & regions,
   }
 }
 
-virtual void Reserve(PhysAddr lastAddr) {
+void BuddyAllocator::Reserve(PhysAddr lastAddr) {
   if (hasLower) {
     lower.Reserve(0, (ANAlloc::UInt)lastAddr);
   }

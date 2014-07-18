@@ -2,15 +2,16 @@
 #include <anarch/x64/init>
 #include <anarch/api/panic>
 #include <ansa/cstring>
+#include <ansa/math>
 
 namespace anarch {
 
 namespace x64 {
 
 MapSetup::MapSetup()
-  : kernelEnd(ansa::Align(GetBootInfo()->GetKernelEnd(), 0x1000)),
+  : kernelEnd(ansa::Align<PhysSize>(GetBootInfo()->GetKernelEnd(), 0x1000)),
     scratchEnd(kernelEnd + 0x1000 * Scratch::PTCount),
-    reservedEnd(scratchEnd + ansa::Align(sizeof(Scratch)
+    reservedEnd(scratchEnd + ansa::Align<PhysSize>(sizeof(Scratch)
       + sizeof(BuddyAllocator) + sizeof(PageTable)
       + sizeof(FreeFinder), 0x1000)),
     stepAllocator(reservedEnd) {
@@ -24,8 +25,8 @@ void MapSetup::GenerateMap() {
     Panic("MapSetup::Run() - failed to allocate PDPT");
   }
   
-  Bzero((void *)pml4, 0x1000);
-  Bzero((void *)pdpt, 0x1000);
+  ansa::Bzero((void *)pml4, 0x1000);
+  ansa::Bzero((void *)pdpt, 0x1000);
   
   uint64_t * pml4Buf = (uint64_t *)pml4;
   pml4Buf[0] = pdpt | 3;
@@ -89,13 +90,13 @@ PhysAddr MapSetup::GetPDPT() {
 void MapSetup::MapNext(PhysSize & linearSize) {
   if (pdtOffset == 0x200) {
     pdtOffset = 0;
-    if (!allocator.Alloc(currentPDT, 0x1000, 0x1000)) {
+    if (!stepAllocator.Alloc(currentPDT, 0x1000, 0x1000)) {
       Panic("MapSetup::MapNext() - failed to allocate PDT");
     }
-    Bzero((void *)currentPDT, 0x1000);
+    ansa::Bzero((void *)currentPDT, 0x1000);
     ((uint64_t *)pdpt)[++pdptOffset] = currentPDT | 3;
   }
-  ((uint64_t *)currentPDT)[pdtOffset++] = firstUnmappedVirtual | 0x183;
+  ((uint64_t *)currentPDT)[pdtOffset++] = firstUnmapped | 0x183;
   if (linearSize <= 0x200000) linearSize = 0;
   else linearSize -= 0x200000;
 }

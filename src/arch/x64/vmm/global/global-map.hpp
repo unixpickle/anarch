@@ -3,6 +3,7 @@
 
 #include "../scratch.hpp"
 #include "../page-table.hpp"
+#include "free-finder.hpp"
 #include <anarch/api/global-map>
 #include <anarch/api/allocator>
 #include <anarch/lock>

@@ -1,6 +1,6 @@
 #include "step-allocator.hpp"
 #include <anarch/x64/init>
-#include <anarch/panic>
+#include <anarch/api/panic>
 
 namespace anarch {
 

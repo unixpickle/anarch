@@ -1,9 +1,12 @@
 #include "global-map.hpp"
 #include "map-setup.hpp"
 #include "../scoped-scratch.hpp"
+#include "../tlb.hpp"
 #include "../../pmm/step-allocator.hpp"
 #include "../../pmm/buddy-allocator.hpp"
 #include <anarch/x64/init>
+#include <anarch/api/panic>
+#include <anarch/critical>
 #include <anarch/assert>
 #include <anarch/new>
 #include <ansa/math>
@@ -90,8 +93,8 @@ PhysAddr GlobalMap::GetPDPT() {
 
 void GlobalMap::Set() {
   AssertCritical();
-  TLB::GetGlobal().WillSetAddressSpace(this);
-  __asm__("mov %0, %cr3" : "r" (GetPageTable().GetPML4()));
+  TLB::GetGlobal().WillSetAddressSpace(*this);
+  __asm__("mov %0, %%cr3" : : "r" (GetPageTable().GetPML4()));
 }
 
 bool GlobalMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
@@ -99,12 +102,14 @@ bool GlobalMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
   AssertNoncritical();
   ScopedLock scope(lock);
   
-  if (!GetFreeFinder().Alloc(addr, size.Total(), size.pageCount)) {
+  if (!GetFreeFinder().Alloc(addr, size.Bytes(), size.pageCount)) {
     return false;
   }
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, true, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 3);
+  
+  return true;
 }
 
 void GlobalMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
@@ -116,7 +121,7 @@ void GlobalMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 3);
 
   // we may have overwritten something
-  TLB::GetGlobal().DistributeInvlpg(addr, size.Total());
+  TLB::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
 void GlobalMap::Unmap(VirtAddr addr, Size size) {
@@ -131,31 +136,32 @@ void GlobalMap::Unmap(VirtAddr addr, Size size) {
     next += size.pageSize;
   }
   
-  GetFreeFinder().Free(addr, size.Total());
+  GetFreeFinder().Free(addr, size.Bytes());
   
   // we should invalidate the old memory before releasing the lock since new
   // mappings might not invalidate it.
-  TLB::GetGlobal().DistributeInvlpg(virt, size.Total());
+  TLB::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
 bool GlobalMap::Reserve(VirtAddr & addr, Size size) {
   AssertNoncritical();
   ScopedLock scope(lock);
   
-  VirtAddr region;
-  if (!GetFreeFinder().Alloc(size.Total(), size.pageSize)) {
+  if (!GetFreeFinder().Alloc(addr, size.Bytes(), size.pageSize)) {
     return false;
   }
   
   uint64_t entry = size.pageSize | (size.pageSize == 0x1000 ? 0 : 0x80);
-  GetPageTable().SetList(region, entry, size, 3);
+  GetPageTable().SetList(addr, entry, size, 3);
+  
+  return true;
 }
 
 void GlobalMap::ReserveAt(VirtAddr addr, Size size) {
   AssertNoncritical();
   ScopedLock scope(lock);
   
-  GetFreeFinder().Reserve(addr, size.Total());
+  GetFreeFinder().Reserve(addr, size.Bytes());
   
   uint64_t entry = size.pageSize | (size.pageSize == 0x1000 ? 0 : 0x80);
   GetPageTable().SetList(addr, entry, size, 3);
@@ -173,7 +179,7 @@ void GlobalMap::Initialize() {
   scratch = setup.GetScratch();
   setup.GeneratePageTable();
   pageTable = setup.GetPageTable();
-  setup.GeterateFreeFinder();
+  setup.GenerateFreeFinder();
   freeFinder = setup.GetFreeFinder();
   
   Set();

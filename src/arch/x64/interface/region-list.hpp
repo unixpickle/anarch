@@ -2,6 +2,7 @@
 #define __ANARCH_X64_REGION_LIST_HPP__
 
 #include <analloc2>
+#include <anarch/types>
 
 namespace anarch {
 

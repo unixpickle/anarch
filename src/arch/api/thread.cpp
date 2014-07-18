@@ -2,11 +2,11 @@
 
 namespace anarch {
 
-static void * Thread::GetUserInfo() {
+void * Thread::GetUserInfo() {
   return Thread::GetCurrent().userInfo;
 }
 
-static void Thread::SetUserInfo(void * info) {
+void Thread::SetUserInfo(void * info) {
   Thread::GetCurrent().userInfo = info;
 }
 

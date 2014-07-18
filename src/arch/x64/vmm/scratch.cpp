@@ -1,12 +1,14 @@
 #include "scratch.hpp"
-#include <anarch/scratch>
+#include "tlb.hpp"
+#include <anarch/api/panic>
+#include <anarch/critical>
 #include <ansa/cstring>
 
 namespace anarch {
 
 namespace x64 {
 
-Scratch(uint64_t * ptStart) : pageTables(ptStart), bitmap(false) {
+Scratch::Scratch(uint64_t * ptStart) : pageTables(ptStart), bitmap(false) {
 }
 
 void Scratch::CreateMappings(uint64_t * pdpt, Allocator & allocator) {
@@ -14,13 +16,12 @@ void Scratch::CreateMappings(uint64_t * pdpt, Allocator & allocator) {
   if (!allocator.Alloc(scratchPDT, 0x1000, 0x1000)) {
     Panic("Scratch::CreateMappings() - failed to allocate PDT");
   }
-  Bzero((void *)scratchPDT, 0x1000);
+  ansa::Bzero((void *)scratchPDT, 0x1000);
 
   // put the scratch PDT into the kernel PDPT
   pdpt[0x1ff] = scratchPDT | 3;
 
   // setup the page tables and put them in the scratch PDT
-  uint64_t scratchStart = ScratchPTStart();
   for (int i = 0; i < PTCount; i++) {
     PhysAddr scratchPT = (PhysAddr)(&pageTables[0x200 * i]);
     ((uint64_t *)scratchPDT)[i] = scratchPT | 3;

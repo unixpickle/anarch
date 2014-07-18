@@ -1,5 +1,6 @@
 #include "init.hpp"
 #include <anarch/assert>
+#include <anarch/stddef>
 
 namespace anarch {
 
@@ -7,7 +8,7 @@ namespace x64 {
 
 namespace {
 
-const BootInfo * bootInfo;
+const BootInfo * bootInfo = NULL;
 
 }
 
@@ -18,7 +19,7 @@ void InitializeSingletons() {
 }
 
 void SetBootInfo(const BootInfo * info) {
-  assert(info);
+  assert(info != NULL);
   assert(!bootInfo);
   bootInfo = info;
 }

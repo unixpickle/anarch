@@ -1,3 +1,6 @@
+#ifndef __ANARCH_X64_STEP_ALLOCATOR_HPP__
+#define __ANARCH_X64_STEP_ALLOCATOR_HPP__
+
 #include <anarch/api/allocator>
 
 namespace anarch {
@@ -29,3 +32,5 @@ private:
 }
 
 }
+
+#endif

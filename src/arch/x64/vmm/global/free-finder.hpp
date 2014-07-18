@@ -1,3 +1,6 @@
+#ifndef __ANARCH_X64_FREE_FINDER_HPP__
+#define __ANARCH_X64_FREE_FINDER_HPP__
+
 #include "../page-table.hpp"
 
 namespace anarch {
@@ -26,3 +29,5 @@ protected:
 }
 
 }
+
+#endif
