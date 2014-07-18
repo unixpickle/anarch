@@ -3,7 +3,7 @@
 #include "identity-memory/identity-scoped-scratch.hpp"
 #include "identity-memory/posix-allocator.hpp"
 #include <stdlib-api/scoped-pass>
-#include <stdlib-api/Assert>
+#include <stdlib-api/assert>
 #include <ansa/cstring>
 
 using namespace anarch::x64;

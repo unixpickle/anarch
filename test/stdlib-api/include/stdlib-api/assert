@@ -3,7 +3,7 @@
 
 #define STDLIB_API_ASSERT_STRX(x) #x
 #define STDLIB_API_ASSERT_STR(x) STDLIB_API_ASSERT_STRX(x)
-#define Assert(x) (void)((x) ?: (Die("Assertion failure: " #x " at " __FILE__ ":" STDLIB_API_ASSERT_STR(__LINE__))));
+#define Assert(x) (void)((x) || (Die("Assertion failure: " #x " at " __FILE__ ":" STDLIB_API_ASSERT_STR(__LINE__))));
 
 extern "C" {
 

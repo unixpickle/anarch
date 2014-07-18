@@ -84,7 +84,7 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
                     int theDepth) {
   AssertNoncritical();
   assert(theDepth >= 0 && theDepth < 4);
-  assert(!(addr & (0x1000L << (27 - 9 * theDepth)) - 1));
+  assert(!(addr % (0x1000L << (27 - 9 * theDepth))));
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
     (int)((addr >> 30) & 0x1ff),
@@ -156,7 +156,7 @@ bool PageTable::Unset(VirtAddr addr) {
     table.Reassign(tableAddresses[depth + 1]);
   }
 
-  if (addr & (0x1000L << (27 - 9 * maxDepth)) - 1) {
+  if (addr % (0x1000L << (27 - 9 * maxDepth))) {
     // the address is not properly aligned to the page we found
     return false;
   }
