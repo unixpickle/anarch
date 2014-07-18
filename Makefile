@@ -1,10 +1,8 @@
 TARGET_ARCH ?= x64
 PROJECT_ROOT=$(shell pwd)
-OBJDIR=$(PROJECT_ROOT)/build/objects
 
 export TARGET_ARCH
 export PROJECT_ROOT
-export OBJDIR
 
 CC ?= gcc
 CXX ?= g++
