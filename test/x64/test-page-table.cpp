@@ -3,16 +3,20 @@
 #include "identity-memory/identity-scoped-scratch.hpp"
 #include "identity-memory/posix-allocator.hpp"
 #include <stdlib-api/scoped-pass>
-#include <stdlib-api/assert>
+#include <stdlib-api/Assert>
 #include <ansa/cstring>
 
 using namespace anarch::x64;
 
 void TestSetFirstPage();
+void TestSetFragmented();
+void TestUnset();
 
 int main() {
   try {
     TestSetFirstPage();
+    TestSetFragmented();
+    TestUnset();
   } catch (const char * exc) {
     PrintError("received panic: ");
     Die(exc);
@@ -33,7 +37,7 @@ void TestSetFirstPage() {
   ansa::Bzero((void *)thePML4, 0x1000);
   PageTable table(allocator, scratch, thePML4);
   
-  assert(allocator.GetAllocationCount() == 1);
+  Assert(allocator.GetAllocationCount() == 1);
   
   uint64_t entry;
   PhysSize entrySize = 0;
@@ -68,5 +72,88 @@ void TestSetFirstPage() {
   Assert(GetIdentityScopedScratchUsage() == 0);
   
   table.FreeTable(0);
-  assert(allocator.GetAllocationCount() == 0);
+  Assert(allocator.GetAllocationCount() == 0);
+}
+
+void TestSetFragmented() {
+  ScopedPass pass("PageTable::[Set/Walk/FreeTable]() [fragmented]");
+  
+  anarch::dummy::PosixAllocator allocator;
+  Scratch scratch(NULL); // identity scratch
+  
+  PhysAddr thePML4;
+  if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
+    Die("Failed to allocate PML4");
+  }
+  ansa::Bzero((void *)thePML4, 0x1000);
+  PageTable table(allocator, scratch, thePML4);
+  
+  Assert(allocator.GetAllocationCount() == 1);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.Set(0, 0x133800083, 3, 2);
+  
+  Assert(allocator.GetAllocationCount() == 3);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.Set(0x400000, 0x1003, 3, 3);
+  
+  Assert(allocator.GetAllocationCount() == 4);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  uint64_t entry;
+  PhysSize entrySize;
+  Assert(table.Walk(0, entry, &entrySize) == 2);
+  Assert(entry == 0x133800083);
+  Assert(entrySize == 0x200000);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  entrySize = 0;
+  Assert(table.Walk(0x200000, entry, &entrySize) == -1);
+  Assert(entrySize == 0x200000);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  Assert(table.Walk(0x400000, entry, &entrySize) == 3);
+  Assert(entrySize == 0x1000);
+  Assert(entry == 0x1003);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.FreeTable(0);
+  Assert(allocator.GetAllocationCount() == 0);
+}
+
+void TestUnset() {
+  ScopedPass pass("PageTable::Unset()");
+  
+  anarch::dummy::PosixAllocator allocator;
+  Scratch scratch(NULL); // identity scratch
+  
+  PhysAddr thePML4;
+  if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
+    Die("Failed to allocate PML4");
+  }
+  ansa::Bzero((void *)thePML4, 0x1000);
+  PageTable table(allocator, scratch, thePML4);
+  
+  Assert(allocator.GetAllocationCount() == 1);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.Set(0, 0x133800083, 3, 2);
+  
+  Assert(allocator.GetAllocationCount() == 3);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  table.Set(0x400000, 0x1003, 3, 3);
+  
+  Assert(allocator.GetAllocationCount() == 4);
+  Assert(GetIdentityScopedScratchUsage() == 0);
+  
+  Assert(table.Unset(0x400000));
+  Assert(allocator.GetAllocationCount() == 3);
+  
+  Assert(table.Unset(0));
+  Assert(allocator.GetAllocationCount() == 1);
+  
+  table.FreeTable(0);
+  Assert(allocator.GetAllocationCount() == 0);
 }
