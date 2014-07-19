@@ -1,5 +1,5 @@
 TARGET_ARCH ?= x64
-PROJECT_ROOT=$(shell pwd)
+override PROJECT_ROOT=$(shell pwd)
 
 export TARGET_ARCH
 export PROJECT_ROOT

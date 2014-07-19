@@ -10,7 +10,8 @@ namespace x64 {
 
 class TLB : public ansa::Module {
 public:
-  static void Invlpg(VirtAddr addr);
+  static void Invlpg(VirtAddr addr); // @critical
+  static void Invlpgs(VirtAddr, PhysSize); // @critical
   
   static void InitGlobal();
   static TLB & GetGlobal();
@@ -20,6 +21,9 @@ public:
    */
   virtual void WillSetAddressSpace(MemoryMap & map);
   
+  /**
+   * @noncritical
+   */
   virtual void DistributeInvlpg(VirtAddr start, PhysSize size);
   
 protected:
