@@ -32,12 +32,13 @@ Architecture-specific APIs will have to be initialized by the operating system's
 
 # TODO
 
-Oh my god, there's so much to do I can barely express it in words. Right now, here's what I'm working on:
+Right now, I am working on getting memory management up and running under Alux on real x86-64 hardware (and, of course, a VM).
 
- * Create a good abstraction for memory regions for x86-64
- * Implement an "optional" tool for parsing multiboot region map
+ * Implement Panic() x86-64 API
+ * Implement critical x86-64 API
+ * Implement console x86-64 API
+ * Test what we have so far on real hardware!
  * Pull in the existing Alux source piece by piece
-   * Memory mapper and physical memory allocator
    * ACPI subsystem
    * Interrupt subsystem
  * Implement EasyMap and other utilities

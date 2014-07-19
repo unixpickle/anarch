@@ -1,4 +1,8 @@
 #include "init.hpp"
+#include "../vmm/tlb.hpp"
+#include "../vmm/global/global-map.hpp"
+#include "../console/text-console.hpp"
+#include "../panic/panic.hpp"
 #include <anarch/assert>
 #include <anarch/stddef>
 
@@ -13,9 +17,11 @@ const BootInfo * bootInfo = NULL;
 }
 
 void InitializeSingletons() {
-  // TODO: here, there are going to be lots of architecture-specific singletons
-  // to initialize
   bootInfo = NULL;
+  GlobalMap::InitGlobal();
+  TLB::InitGlobal();
+  TextConsole::InitGlobal();
+  PanicModule::InitGlobal();
 }
 
 void SetBootInfo(const BootInfo * info) {
