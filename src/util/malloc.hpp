@@ -20,6 +20,7 @@ public:
   
   virtual bool Alloc(void *& addr, size_t size); // @noncritical
   virtual void Free(void * addr); // @noncritical
+  virtual bool Owns(void * ptr); // @noncritical
   
 protected:
   size_t poolSize;

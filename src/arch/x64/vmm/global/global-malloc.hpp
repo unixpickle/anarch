@@ -10,7 +10,7 @@ public:
   static void InitGlobal();
   static GlobalMalloc & GetGlobal();
   
-  VirtualAllocator & GetVirtualAllocator();
+  VirtualAllocator & GetAllocator();
   
 protected:
   virtual ansa::DepList GetDependencies();

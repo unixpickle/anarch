@@ -4,6 +4,7 @@
 #include "thread.hpp"
 #include "allocator.hpp"
 #include "virtual-allocator.hpp"
+#include <anarch/stddef>
 
 namespace anarch {
 
@@ -21,13 +22,16 @@ public:
    * same "distance" away, the order is irrelevant.
    * @ambicritical
    */
-  virtual Domain & GetSibling(int idx);
+  virtual Domain & GetSibling(int idx) = 0;
   
-  virtual int GetThreadCount(); // @ambicritical
-  virtual Thread & GetThread(int idx); // @ambicritical
+  virtual int GetThreadCount() = 0; // @ambicritical
+  virtual Thread & GetThread(int idx) = 0; // @ambicritical
   
-  virtual Allocator & GetAllocator(); // @ambicritical
-  virtual VirtualAllocator & GetVirtualAllocator(); // @ambicritical
+  virtual Allocator & GetAllocator() = 0; // @ambicritical
+  virtual VirtualAllocator & GetVirtualAllocator() = 0; // @ambicritical
+  
+  virtual bool Alloc(void *&, size_t);
+  virtual void Free(void *);
 };
 
 

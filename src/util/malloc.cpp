@@ -45,6 +45,22 @@ void Malloc::Free(void * addr) {
   Panic("Malloc::Free() - unowned memory region");
 }
 
+bool Malloc::Owns(void * ptr) {
+  AssertNoncritical();
+  firstLock.Seize();
+  Segment * segment = firstSegment;
+  firstLock.Release();
+  
+  while (segment) {
+    ScopedLock scope(segment->lock);
+    if (segment->allocator->OwnsPointer(ptr)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 // PRIVATE //
 
 bool Malloc::AllocNoNewSegment(void *& addr, size_t size) {

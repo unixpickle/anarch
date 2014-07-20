@@ -20,7 +20,7 @@ GlobalMalloc & GlobalMalloc::GetGlobal() {
   return gMalloc;
 }
 
-VirtualAllocator & GlobalMalloc::GetVirtualAllocator() {
+VirtualAllocator & GlobalMalloc::GetAllocator() {
   return *(Malloc *)mallocBuf;
 }
 
