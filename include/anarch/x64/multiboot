@@ -1,1 +1,1 @@
-#include "../../../src/arch/x64/interface/multiboot.hpp"
+#include "../../../src/arch/x64/public/multiboot.hpp"
