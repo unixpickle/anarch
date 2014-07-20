@@ -3,6 +3,7 @@
 
 #include "thread.hpp"
 #include "allocator.hpp"
+#include "virtual-allocator.hpp"
 
 namespace anarch {
 
@@ -26,6 +27,7 @@ public:
   virtual Thread & GetThread(int idx); // @ambicritical
   
   virtual Allocator & GetAllocator(); // @ambicritical
+  virtual VirtualAllocator & GetVirtualAllocator(); // @ambicritical
 };
 
 
