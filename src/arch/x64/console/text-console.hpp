@@ -30,7 +30,7 @@ protected:
 private:
   uint8_t color = 0xa;
   int x = 0, y = 0;
-  uint64_t * buffer = (uint64_t *)0xb8000;
+  uint16_t * buffer = (uint16_t *)0xb8000;
   CriticalLock lock;
   
   virtual void MoveCursor();
