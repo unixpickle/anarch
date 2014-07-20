@@ -97,6 +97,7 @@ void MapSetup::MapNext(PhysSize & linearSize) {
     ((uint64_t *)pdpt)[++pdptOffset] = currentPDT | 3;
   }
   ((uint64_t *)currentPDT)[pdtOffset++] = firstUnmapped | 0x183;
+  firstUnmapped += 0x200000; // forgetting this line ruined my evening
   if (linearSize <= 0x200000) linearSize = 0;
   else linearSize -= 0x200000;
 }
