@@ -43,6 +43,12 @@ public:
    * fails, this function will Panic() the kernel.
    */
   virtual VirtAddr AllocAndMap(PhysSize size);
+  
+  /**
+   * Do the inverse of AllocAndMap(). This method looks up each page, unmaps
+   * it, frees it, and moves on to the next one.
+   */
+  virtual void FreeAndUnmap(VirtAddr addr, PhysSize size);
 };
 
 }

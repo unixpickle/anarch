@@ -1,0 +1,1 @@
+#define ANARCH_OBJECT_ALIGN 0x8

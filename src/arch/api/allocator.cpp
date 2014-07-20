@@ -1,6 +1,7 @@
 #include "allocator.hpp"
 #include "global-map.hpp"
 #include <anarch/api/panic>
+#include <anarch/stddef>
 
 namespace anarch {
 
@@ -31,13 +32,41 @@ VirtAddr Allocator::AllocAndMap(PhysSize size) {
   while (pageCount--) {
     PhysAddr phys;
     if (!Alloc(phys, pageSize, pageAlign)) {
-      Panic("BuddyAllocator::AllocFromGlobalMap() - allocation failed");
+      Panic("Allocator::AllocAndMap() - allocation failed");
     }
     map.MapAt(dest, phys, mapSize, mapAttributes);
-    dest += pageSize;
+    dest += (VirtAddr)pageSize;
   }
 
   return reserved;
+}
+
+void Allocator::FreeAndUnmap(VirtAddr addr, PhysSize size) {
+  GlobalMap & map = GlobalMap::GetGlobal();
+  
+  if (!GlobalMap::SupportsReadAddress()) {
+    Panic("Allocator::FreeAndUnmap() - GlobalMap::Read() [address] required");
+  }
+  
+  if (!GlobalMap::SupportsReadSize()) {
+    Panic("Allocator::FreeAndUnmap() - GlobalMap::Read() [size] required");
+  }
+  
+  VirtAddr source = addr;
+  PhysSize remaining = size;
+  
+  while (remaining) {
+    PhysSize pageSize;
+    PhysAddr pageAddr;
+    if (!map.Read(&pageAddr, NULL, &pageSize, source)) {
+      Panic("Allocator::FreeAndUnmap() - map.Read() failed");
+    }
+    map.Unmap(source, GlobalMap::Size(pageSize, 1));
+    Free(source);
+    
+    remaining -= pageSize;
+    source += (VirtAddr)pageSize;
+  }
 }
 
 }

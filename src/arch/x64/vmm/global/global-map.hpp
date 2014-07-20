@@ -25,6 +25,7 @@ public:
   
   // anarch::MemoryMap
   virtual void Set();
+  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr);
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &);
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &);
   virtual void Unmap(VirtAddr, Size);

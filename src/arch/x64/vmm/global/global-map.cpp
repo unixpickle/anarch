@@ -32,6 +32,18 @@ PhysSize GlobalMap::GetPageSizeAlign(int idx) {
   return GetPageSize(idx);
 }
 
+bool GlobalMap::SupportsReadAddress() {
+  return true;
+}
+
+bool GlobalMap::SupportsReadAttributes() {
+  return true;
+}
+
+bool GlobalMap::SupportsReadSize() {
+  return true;
+}
+
 bool GlobalMap::SupportsReserveAt() {
   return true;
 }
@@ -96,6 +108,37 @@ void GlobalMap::Set() {
   AssertCritical();
   TLB::GetGlobal().WillSetAddressSpace(*this);
   __asm__("mov %0, %%cr3" : : "r" (GetPageTable().GetPML4()));
+}
+
+bool GlobalMap::Read(PhysAddr * physOut, Attributes * attrOut,
+                     PhysSize * sizeOut, VirtAddr addr) {
+  AssertNoncritical();
+  ScopedLock scope(lock);
+  
+  uint64_t entry;
+  int depth = GetPageTable().Walk(addr, entry, sizeOut);
+  if (depth < 0) return false;
+  if (!entry) return false;
+  
+  assert(depth >= 2);
+  
+  if (physOut) {
+    if (depth == 3) {
+      *physOut = entry & 0x7ffffffffffff000UL;
+    } else {
+      *physOut = entry & 0x7fffffffffe00000UL;
+    }
+  }
+  
+  if (attrOut) {
+    attrOut->executable = (entry & (1UL << 63)) != 0;
+    attrOut->writable = (entry & 2) != 0;
+  
+    // TODO: set cachable flag properly here
+    attrOut->cachable = true;
+  }
+  
+  return true;
 }
 
 bool GlobalMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
