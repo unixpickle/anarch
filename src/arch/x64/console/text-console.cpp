@@ -6,6 +6,10 @@
 
 namespace anarch {
 
+Console & Console::GetGlobal() {
+  return x64::TextConsole::GetGlobal();
+}
+
 namespace x64 {
 
 namespace {
