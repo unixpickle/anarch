@@ -7,6 +7,7 @@
 #include <anarch/x64/init>
 #include <anarch/api/panic>
 #include <anarch/critical>
+#include <anarch/stream>
 #include <anarch/assert>
 #include <anarch/new>
 #include <ansa/math>
@@ -168,21 +169,31 @@ void GlobalMap::ReserveAt(VirtAddr addr, Size size) {
 }
 
 ansa::DepList GlobalMap::GetDependencies() {
-  return ansa::DepList();
+  return ansa::DepList(&StreamModule::GetGlobal());
 }
 
 void GlobalMap::Initialize() {
+  cout << "Initializing x64::GlobalMap" << endl;
+  
   MapSetup setup;
   
   setup.GenerateMap();
   setup.GenerateScratch();
   scratch = setup.GetScratch();
+  
+  cout << " - generating global PageTable" << endl;
+  
   setup.GeneratePageTable();
   pageTable = setup.GetPageTable();
+  
+  cout << " - generating FreeFinder" << endl;
+  
   setup.GenerateFreeFinder();
   freeFinder = setup.GetFreeFinder();
   
   Set();
+  
+  cout << " - generating BuddyAllocator" << endl;
   
   setup.GenerateBuddyAllocator();
   pageAllocator = setup.GetBuddyAllocator();
