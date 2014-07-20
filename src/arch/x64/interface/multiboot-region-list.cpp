@@ -60,6 +60,14 @@ MultibootRegionList::MultibootRegionList(void * mbootPtr) {
   }
 }
 
+const ANAlloc::RegionList & MultibootRegionList::GetLowerRegions() const {
+  return lowerRegions;
+}
+
+const ANAlloc::RegionList & MultibootRegionList::GetUpperRegions() const {
+  return upperRegions;
+}
+
 void MultibootRegionList::AddRegion(const ANAlloc::Region & region) {
   ANAlloc::FixedRegionList<MaximumCount> * list = NULL;
   
