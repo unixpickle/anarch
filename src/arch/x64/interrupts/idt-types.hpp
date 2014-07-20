@@ -29,8 +29,7 @@ struct IdtHandler {
 
 static_assert(sizeof(IdtHandler) == 0x20, "IdtHandler size == 0x20");
 
-class IdtEntry {
-public:
+struct IdtEntry {
   uint16_t lowOffset = 0;
   uint16_t codeSegment = 8;
   uint8_t ist : 3;
@@ -51,8 +50,7 @@ public:
 
 static_assert(sizeof(IdtEntry) == 0x10, "IdtEntry size == 0x10");
 
-class IdtPointer {
-public:
+struct IdtPointer {
   uint16_t limit;
   uint64_t virtualAddress;
 } ANSA_PACKED;
