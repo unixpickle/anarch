@@ -12,6 +12,7 @@ includes = [
 sourceDirs = [
   'src/arch/api'
   'src/util'
+  'src/memory'
   'dependencies/ansa/src'
   'dependencies/ansa/dependencies/anlock/src'
   'dependencies/analloc2/src'
