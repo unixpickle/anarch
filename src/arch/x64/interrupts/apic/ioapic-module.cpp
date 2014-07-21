@@ -44,6 +44,7 @@ void IOApicModule::Initialize() {
   
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
   baseIOApic = allocator.New<IOApic>(table, info);
+  assert(baseIOApic != NULL);
   
   cout << "Initialized I/O APIC; version=" << baseIOApic->GetVersion() << endl;
 }

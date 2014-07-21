@@ -45,6 +45,7 @@ void AcpiModule::Initialize() {
   int apicIndex = GetRoot().FindTable("APIC");
   if (apicIndex >= 0) {
     apicTable = allocator.New<ApicTable>(GetRoot().GetTable(apicIndex));
+    assert(apicTable != NULL);
   }
 }
 
