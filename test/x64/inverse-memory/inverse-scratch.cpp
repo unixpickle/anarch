@@ -1,6 +1,7 @@
 #ifndef __ANARCH_TEST_IDENTITY_SCRATCH_HPP__
 #define __ANARCH_TEST_IDENTITY_SCRATCH_HPP__
 
+#include "inverter.hpp"
 #include "../../../src/arch/x64/vmm/scratch.hpp"
 #include <anarch/api/panic>
 
@@ -15,7 +16,7 @@ void Scratch::CreateMappings(uint64_t *, Allocator &) {
 }
 
 bool Scratch::Alloc(VirtAddr & addr, PhysAddr page) {
-  addr = page;
+  addr = InvertPhys(page);
   return true;
 }
 

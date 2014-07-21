@@ -1,4 +1,5 @@
-#include "identity-scoped-scratch.hpp"
+#include "inverse-scoped-scratch.hpp"
+#include "inverter.hpp"
 #include <ansa/atomic>
 #include "../../../src/arch/x64/vmm/scoped-scratch.hpp"
 
@@ -13,7 +14,7 @@ long GetIdentityScopedScratchUsage() {
 }
 
 ScopedScratch::ScopedScratch(Scratch & s, PhysAddr a) : scratch(s) {
-  addr = a;
+  addr = InvertPhys(a);
   ++scopeUsage;
 }
 
@@ -30,7 +31,7 @@ VirtAddr ScopedScratch::GetVirtAddr() {
 }
 
 void ScopedScratch::Reassign(PhysAddr a) {
-  addr = a;
+  addr = InvertPhys(a);
 }
 
 void ScopedScratch::InvalidateCache() {

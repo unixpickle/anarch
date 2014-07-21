@@ -1,7 +1,8 @@
 #include "../../src/arch/x64/vmm/page-table.hpp"
 #include "../../src/arch/x64/vmm/scratch.hpp"
-#include "identity-memory/identity-scoped-scratch.hpp"
-#include "identity-memory/posix-allocator.hpp"
+#include "inverse-memory/inverse-scoped-scratch.hpp"
+#include "inverse-memory/posix-allocator.hpp"
+#include "inverse-memory/inverter.hpp"
 #include <stdlib-api/scoped-pass>
 #include <stdlib-api/assert>
 #include <ansa/cstring>
@@ -34,7 +35,8 @@ void TestSetFirstPage() {
   if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
     Die("Failed to allocate PML4");
   }
-  ansa::Bzero((void *)thePML4, 0x1000);
+  
+  ansa::Bzero((void *)InvertPhys(thePML4), 0x1000);
   PageTable table(allocator, scratch, thePML4);
   
   Assert(allocator.GetAllocationCount() == 1);
@@ -85,7 +87,7 @@ void TestSetFragmented() {
   if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
     Die("Failed to allocate PML4");
   }
-  ansa::Bzero((void *)thePML4, 0x1000);
+  ansa::Bzero((void *)InvertPhys(thePML4), 0x1000);
   PageTable table(allocator, scratch, thePML4);
   
   Assert(allocator.GetAllocationCount() == 1);
@@ -132,7 +134,7 @@ void TestUnset() {
   if (!allocator.Alloc(thePML4, 0x1000, 0x1000)) {
     Die("Failed to allocate PML4");
   }
-  ansa::Bzero((void *)thePML4, 0x1000);
+  ansa::Bzero((void *)InvertPhys(thePML4), 0x1000);
   PageTable table(allocator, scratch, thePML4);
   
   Assert(allocator.GetAllocationCount() == 1);

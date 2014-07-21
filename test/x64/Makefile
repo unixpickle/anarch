@@ -8,16 +8,16 @@ TEST_SOURCES=../stdlib-api/build/*.o build/util/*.o build/dummy-api/*.o build/an
 
 all: build/page-table
 
-build/page-table: build/dummy-api build/identity-memory build/ansa build/util ../stdlib-api/build
-	$(CXX) $(CXXFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) build/identity-memory/*.o ../../src/arch/api/allocator.cpp ../../src/arch/x64/vmm/page-table.cpp test-page-table.cpp -o build/page-table
+build/page-table: build/dummy-api build/inverse-memory build/ansa build/util ../stdlib-api/build
+	$(CXX) $(CXXFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) build/inverse-memory/*.o ../../src/arch/api/allocator.cpp ../../src/arch/x64/vmm/page-table.cpp test-page-table.cpp -o build/page-table
 
 build/util: build
 	mkdir build/util
 	../build-objects $(CXX) $(CXXFLAGS) $(TEST_INCLUDES) -c ../../src/util/*.cpp -o build/util
 
-build/identity-memory: build
-	mkdir build/identity-memory
-	../build-objects $(CXX) $(CXXFLAGS) $(TEST_INCLUDES) -c identity-memory/*.cpp -o build/identity-memory
+build/inverse-memory: build
+	mkdir build/inverse-memory
+	../build-objects $(CXX) $(CXXFLAGS) $(TEST_INCLUDES) -c inverse-memory/*.cpp -o build/inverse-memory
 
 build/dummy-api: build
 	mkdir build/dummy-api

@@ -29,7 +29,7 @@ public:
   virtual void Set() = 0;
   
   // all @noncritical
-  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr);
+  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr) = 0;
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &) = 0;
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &) = 0;
   virtual void Unmap(VirtAddr, Size) = 0;

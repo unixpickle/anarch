@@ -1,4 +1,5 @@
 #include "posix-allocator.hpp"
+#include "inverter.hpp"
 #include <cstddef>
 
 extern "C" {
@@ -15,13 +16,13 @@ bool PosixAllocator::Alloc(PhysAddr & result, PhysSize size, PhysSize align) {
   if (posix_memalign(&ptr, (size_t)align, (size_t)size)) {
     return false;
   }
-  result = (PhysAddr)ptr;
+  result = InvertPhys((PhysAddr)ptr);
   ++allocationCount;
   return true;
 }
 
 void PosixAllocator::Free(PhysAddr address) {
-  free((void *)address);
+  free((void *)InvertPhys(address));
   --allocationCount;
 }
 

@@ -1,5 +1,5 @@
-#ifndef __ANARCH_TEST_IDENTITY_GLOBAL_MAP_HPP__
-#define __ANARCH_TEST_IDENTITY_GLOBAL_MAP_HPP__
+#ifndef __ANARCH_TEST_INVERSE_GLOBAL_MAP_HPP__
+#define __ANARCH_TEST_INVERSE_GLOBAL_MAP_HPP__
 
 #include <anarch/api/global-map>
 
@@ -11,6 +11,8 @@ class IdentityGlobalMap : public GlobalMap {
 public:
   virtual void Set();
 
+  virtual bool Read(PhysAddr * physOut, Attributes * attrOut,
+                    PhysSize * sizeOut, VirtAddr addr);
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &);
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &);
   virtual void Unmap(VirtAddr, Size);
