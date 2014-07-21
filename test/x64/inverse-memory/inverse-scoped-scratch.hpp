@@ -5,7 +5,7 @@ namespace anarch {
 
 namespace x64 {
 
-long GetIdentityScopedScratchUsage();
+long GetInverseScopedScratchUsage();
 
 }
 

@@ -1,5 +1,5 @@
-#ifndef __ANARCH_TEST_IDENTITY_SCRATCH_HPP__
-#define __ANARCH_TEST_IDENTITY_SCRATCH_HPP__
+#ifndef __ANARCH_TEST_INVERSE_SCRATCH_HPP__
+#define __ANARCH_TEST_INVERSE_SCRATCH_HPP__
 
 #include "inverter.hpp"
 #include "../../../src/arch/x64/vmm/scratch.hpp"
@@ -21,7 +21,7 @@ bool Scratch::Alloc(VirtAddr & addr, PhysAddr page) {
 }
 
 void Scratch::Reassign(VirtAddr, PhysAddr) {
-  Panic("identity scratch does not support Reassign()");
+  Panic("inverse scratch does not support Reassign()");
 }
 
 void Scratch::Free(VirtAddr) {

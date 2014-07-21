@@ -9,7 +9,7 @@ namespace x64 {
 
 ansa::Atomic<long> scopeUsage;
 
-long GetIdentityScopedScratchUsage() {
+long GetInverseScopedScratchUsage() {
   return scopeUsage;
 }
 

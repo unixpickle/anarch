@@ -6,7 +6,7 @@ namespace anarch {
 
 namespace {
 
-dummy::IdentityGlobalMap gObject;
+dummy::InverseGlobalMap gObject;
 
 }
 
@@ -64,43 +64,43 @@ bool GlobalMap::SupportsUncached() {
 
 namespace dummy {
 
-void IdentityGlobalMap::Set() {
+void InverseGlobalMap::Set() {
 }
 
-bool IdentityGlobalMap::Read(PhysAddr * physOut, Attributes *,
+bool InverseGlobalMap::Read(PhysAddr * physOut, Attributes *,
                              PhysSize * sizeOut, VirtAddr addr) {
   if (physOut) *physOut = InvertPhys(addr);
   if (sizeOut) *sizeOut = 0x1000;
   return true;
 }
 
-bool IdentityGlobalMap::Map(VirtAddr & res, PhysAddr phys,
+bool InverseGlobalMap::Map(VirtAddr & res, PhysAddr phys,
                             Size, const Attributes &) {
   res = InvertPhys(phys);
   return true;
 }
 
-void IdentityGlobalMap::MapAt(VirtAddr, PhysAddr, Size, const Attributes &) {
-  Panic("IdentityGlobalMap::MapAt() - not supported");
+void InverseGlobalMap::MapAt(VirtAddr, PhysAddr, Size, const Attributes &) {
+  Panic("InverseGlobalMap::MapAt() - not supported");
 }
 
-void IdentityGlobalMap::Unmap(VirtAddr, Size) {
+void InverseGlobalMap::Unmap(VirtAddr, Size) {
 }
 
-bool IdentityGlobalMap::Reserve(VirtAddr &, Size) {
-  Panic("IdentityGlobalMap::Reserve() - not supported");
+bool InverseGlobalMap::Reserve(VirtAddr &, Size) {
+  Panic("InverseGlobalMap::Reserve() - not supported");
   return false;
 }
 
-void IdentityGlobalMap::ReserveAt(VirtAddr, Size) {
-  Panic("IdentityGlobalMap::ReserveAt() - not supported");
+void InverseGlobalMap::ReserveAt(VirtAddr, Size) {
+  Panic("InverseGlobalMap::ReserveAt() - not supported");
 }
 
-ansa::DepList IdentityGlobalMap::GetDependencies() {
+ansa::DepList InverseGlobalMap::GetDependencies() {
   return ansa::DepList();
 }
 
-void IdentityGlobalMap::Initialize() {
+void InverseGlobalMap::Initialize() {
 }
 
 }

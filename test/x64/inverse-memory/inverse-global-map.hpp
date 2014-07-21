@@ -7,7 +7,7 @@ namespace anarch {
 
 namespace dummy {
 
-class IdentityGlobalMap : public GlobalMap {
+class InverseGlobalMap : public GlobalMap {
 public:
   virtual void Set();
 

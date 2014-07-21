@@ -1,3 +1,6 @@
+#ifndef __ANARCH_TEST_POSIX_ALLOCATOR_HPP__
+#define __ANARCH_TEST_POSIX_ALLOCATOR_HPP__
+
 #include <anarch/api/allocator>
 #include <ansa/atomic>
 
@@ -22,3 +25,5 @@ private:
 }
 
 }
+
+#endif
