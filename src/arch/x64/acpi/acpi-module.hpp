@@ -3,6 +3,7 @@
 
 #include <ansa/module>
 #include "acpi-root.hpp"
+#include "apic-table.hpp"
 
 namespace anarch {
 
@@ -14,6 +15,7 @@ public:
   static AcpiModule & GetGlobal();
   
   AcpiRoot & GetRoot();
+  ApicTable * GetApicTable();
   
 protected:
   virtual ansa::DepList GetDependencies();
@@ -21,6 +23,7 @@ protected:
   
 private:
   AcpiRoot * root;
+  ApicTable * apicTable = NULL;
 };
 
 }

@@ -25,6 +25,10 @@ AcpiRoot & AcpiModule::GetRoot() {
   return *root;
 }
 
+ApicTable * AcpiModule::GetApicTable() {
+  return apicTable;
+}
+
 ansa::DepList AcpiModule::GetDependencies() {
   return ansa::DepList(&GlobalMalloc::GetGlobal());
 }
@@ -34,6 +38,14 @@ void AcpiModule::Initialize() {
   assert(pointer != NULL);
   
   root = pointer->GenerateRoot();
+  assert(root != NULL);
+  
+  VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
+  
+  int apicIndex = GetRoot().FindTable("APIC");
+  if (apicIndex >= 0) {
+    apicTable = allocator.New<ApicTable>(GetRoot().GetTable(apicIndex));
+  }
 }
 
 }
