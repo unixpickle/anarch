@@ -1,5 +1,5 @@
-#ifndef __ANARCH_X64_ACPI_APIC_TABLE_HPP__
-#define __ANARCH_X64_ACPI_APIC_TABLE_HPP__
+#ifndef __ANARCH_X64_ACPI_Apic_TABLE_HPP__
+#define __ANARCH_X64_ACPI_Apic_TABLE_HPP__
 
 #include <anarch/easy-map>
 #include <anarch/stdint>
@@ -14,16 +14,16 @@ namespace x64 {
 class ApicTable {
 public:
   struct Header;
-  struct ISO;
-  struct LocalAPIC;
-  struct LocalAPIC2;
-  struct IOAPIC;
+  struct Iso;
+  struct LocalApic;
+  struct LocalApic2;
+  struct IOApic;
   class Iterator;
   
-  static const uint8_t TypeLAPIC = 0;
-  static const uint8_t TypeIOAPIC = 1;
-  static const uint8_t TypeISO = 2;
-  static const uint8_t TypeX2APIC = 9;
+  static const uint8_t TypeLapic = 0;
+  static const uint8_t TypeIOApic = 1;
+  static const uint8_t TypeIso = 2;
+  static const uint8_t TypeX2Apic = 9;
   
   ApicTable(PhysAddr baseAddr); // @noncritical
   
@@ -36,14 +36,14 @@ public:
   
   bool SystemHas8259(); // @ambicritical
   int CountType(uint8_t type); // @ambicritical
-  int CountIOAPICs(); // @ambicritical
-  int CountLAPICs(bool checkUsable); // @ambicritical
+  int CountIOApics(); // @ambicritical
+  int CountLapics(bool checkUsable); // @ambicritical
   
-  ISO * LookupISO(uint8_t physIRQ); // @ambicritical
-  IOAPIC * LookupIOAPIC(uint32_t base); // @ambicritical
+  Iso * LookupIso(uint8_t physIRQ); // @ambicritical
+  IOApic * LookupIOApic(uint32_t base); // @ambicritical
   
   struct Header {
-    uint32_t signature; // APIC
+    uint32_t signature; // Apic
     uint32_t length;
     uint8_t revision;
     uint8_t checksum;
@@ -56,7 +56,7 @@ public:
     uint32_t flags;
   } ANSA_PACKED;
   
-  struct ISO {
+  struct Iso {
     uint8_t type;
     uint8_t length;
     uint8_t bus;
@@ -65,7 +65,7 @@ public:
     uint16_t flags;
   } ANSA_PACKED;
 
-  struct LocalAPIC {
+  struct LocalApic {
     uint8_t type; // should be 0
     uint8_t length;
     uint8_t apicpuId;
@@ -73,7 +73,7 @@ public:
     uint32_t flags; // bit 0 set = usable
   } ANSA_PACKED;
 
-  struct LocalAPIC2 {
+  struct LocalApic2 {
     uint8_t type; // should be 9
     uint8_t length;
     uint16_t reserved;
@@ -82,7 +82,7 @@ public:
     uint32_t x2apicpuId;
   } ANSA_PACKED;
 
-  struct IOAPIC {
+  struct IOApic {
     uint8_t type;
     uint8_t length;
     uint8_t identifier;

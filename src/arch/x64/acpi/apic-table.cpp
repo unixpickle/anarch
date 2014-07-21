@@ -47,28 +47,28 @@ int ApicTable::CountType(uint8_t type) {
   return count;
 }
 
-int ApicTable::CountIOAPICs() {
-  return CountType(TypeIOAPIC);
+int ApicTable::CountIOApics() {
+  return CountType(TypeIOApic);
 }
 
-int ApicTable::CountLAPICs(bool checkUsable) {
+int ApicTable::CountLapics(bool checkUsable) {
   if (!CanIterate()) return 0;
   
   int count = 0;
   Iterator it = GetIterator();
   do {
-    if (it.GetType() == TypeLAPIC) {
+    if (it.GetType() == TypeLapic) {
       if (!checkUsable) {
         count++;
       } else {
-        LocalAPIC * apic = (LocalAPIC *)it.GetData();
+        LocalApic * apic = (LocalApic *)it.GetData();
         if (apic->flags & 1) count++;
       }
-    } else if (it.GetType() == TypeX2APIC) {
+    } else if (it.GetType() == TypeX2Apic) {
       if (!checkUsable) {
         count++;
       } else {
-        LocalAPIC2 * apic = (LocalAPIC2 *)it.GetData();
+        LocalApic2 * apic = (LocalApic2 *)it.GetData();
         if (apic->flags & 1) count++;
       }
     }
@@ -77,12 +77,12 @@ int ApicTable::CountLAPICs(bool checkUsable) {
   return count;
 }
 
-ApicTable::ISO * ApicTable::LookupISO(uint8_t physIRQ) {
+ApicTable::Iso * ApicTable::LookupIso(uint8_t physIRQ) {
   if (!CanIterate()) return NULL;
   Iterator it = GetIterator();
   do {
-    if (it.GetType() != TypeISO) continue;
-    ISO * iso = (ISO *)it.GetData();
+    if (it.GetType() != TypeIso) continue;
+    Iso * iso = (Iso *)it.GetData();
     if (iso->source == physIRQ && iso->bus == 0) {
       return iso;
     }
@@ -90,12 +90,12 @@ ApicTable::ISO * ApicTable::LookupISO(uint8_t physIRQ) {
   return NULL;
 }
 
-ApicTable::IOAPIC * ApicTable::LookupIOAPIC(uint32_t base) {
+ApicTable::IOApic * ApicTable::LookupIOApic(uint32_t base) {
   if (!CanIterate()) return NULL;
   Iterator it = GetIterator();
   do {
-    if (it.GetType() != TypeIOAPIC) continue;
-    IOAPIC * info = (IOAPIC *)it.GetData();
+    if (it.GetType() != TypeIOApic) continue;
+    IOApic * info = (IOApic *)it.GetData();
     if (info->interruptBase == base) return info;
   } while (it.Next());
   return NULL;
