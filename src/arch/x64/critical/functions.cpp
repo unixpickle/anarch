@@ -1,15 +1,9 @@
-#include "critical.hpp"
+#include "module.hpp"
 
 namespace anarch {
 
-namespace {
-
-bool ignoreCriticality = true;
-
-}
-
 bool IgnoreCriticality() {
-  return ignoreCriticality;
+  return x64::CriticalModule::GetGlobal().IsInitialized();
 }
 
 bool GetCritical() {
@@ -29,14 +23,6 @@ void SetCritical(bool flag) {
   } else {
     __asm__("sti");
   }
-}
-
-namespace x64 {
-
-void SetIgnoreCriticality(bool flag) {
-  ignoreCriticality = flag;
-}
-
 }
 
 }

@@ -1,7 +1,6 @@
 #include "irt.hpp"
 #include "idt.hpp"
 #include "raw-isr.hpp"
-#include "pic.hpp"
 #include <anarch/new>
 
 namespace anarch {
@@ -55,10 +54,6 @@ void Irt::Configure() {
 
 ansa::DepList Irt::GetDependencies() {
   return ansa::DepList(&Idt::GetGlobal());
-}
-
-ansa::DepList Irt::GetSuperDependencies() {
-  return ansa::DepList(&Pic::GetGlobal());
 }
 
 void Irt::Initialize() {

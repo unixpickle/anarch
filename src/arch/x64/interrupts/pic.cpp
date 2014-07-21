@@ -1,6 +1,5 @@
 #include "pic.hpp"
 #include "irt.hpp"
-#include "../critical/critical.hpp"
 #include "../common.hpp"
 #include <anarch/critical>
 #include <anarch/new>
@@ -65,14 +64,7 @@ ansa::DepList Pic::GetDependencies() {
 }
 
 void Pic::Initialize() {
-  Irt::GetGlobal().ConfigurePicEoi();
   Remap(0xf0, 0xf8, 0xff, 0xff);
-  __asm__ __volatile__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
-                       "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\ncli");
-  Irt::GetGlobal().Configure();
-  
-  SetIgnoreCriticality(false);
-  SetCritical(false);
 }
 
 }

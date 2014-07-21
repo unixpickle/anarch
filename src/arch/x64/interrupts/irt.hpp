@@ -23,7 +23,6 @@ public:
   
 protected:
   virtual ansa::DepList GetDependencies();
-  virtual ansa::DepList GetSuperDependencies();
   virtual void Initialize();
   
 private:
