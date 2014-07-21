@@ -10,8 +10,8 @@ class DomainList : public ansa::Module {
 public:
   static DomainList & GetGlobal();
   
-  virtual int GetCount();
-  virtual Domain & operator[](int idx);
+  virtual int GetCount() = 0;
+  virtual Domain & operator[](int idx) = 0;
 };
 
 }
