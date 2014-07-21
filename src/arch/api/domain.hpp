@@ -34,6 +34,6 @@ public:
   virtual void Free(void *);
 };
 
-
+}
 
 #endif

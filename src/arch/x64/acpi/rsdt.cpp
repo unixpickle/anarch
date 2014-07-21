@@ -12,7 +12,7 @@ int Rsdt::GetCount() {
 }
 
 PhysAddr Rsdt::GetTable(int i) {
-  uint32_t * ptr = (uint32_t *)(map->GetStart() + 0x24);
+  uint32_t * ptr = (uint32_t *)(map.GetStart() + 0x24);
   return (PhysAddr)ptr[i];
 }
 

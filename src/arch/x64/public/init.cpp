@@ -1,8 +1,10 @@
 #include "init.hpp"
 #include "../vmm/tlb.hpp"
 #include "../vmm/global/global-map.hpp"
+#include "../vmm/global/global-malloc.hpp"
 #include "../console/text-console.hpp"
 #include "../panic/panic.hpp"
+#include "../acpi/acpi-module.hpp"
 #include <anarch/stream>
 #include <anarch/assert>
 #include <anarch/stddef>
@@ -20,9 +22,11 @@ const BootInfo * bootInfo = NULL;
 void InitializeSingletons() {
   bootInfo = NULL;
   GlobalMap::InitGlobal();
+  GlobalMalloc::InitGlobal();
   TLB::InitGlobal();
   TextConsole::InitGlobal();
   PanicModule::InitGlobal();
+  AcpiModule::InitGlobal();
   
   StreamModule::InitGlobal();
 }

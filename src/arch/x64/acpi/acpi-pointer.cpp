@@ -30,7 +30,7 @@ AcpiRoot * AcpiPointer::GenerateRoot() {
   }
 }
 
-static AcpiPointer * AcpiPointer::Find() {
+AcpiPointer * AcpiPointer::Find() {
   // find the RSDP in the BIOS areas.
   const char * signature = "RSD PTR ";
   uintptr_t ptr;

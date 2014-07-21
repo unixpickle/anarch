@@ -1,5 +1,5 @@
-#ifndef __ANARCH_VIRTUAL_ALLOCATOR_HPP__
-#define __ANARCH_VIRTUAL_ALLOCATOR_HPP__
+#ifndef __ANARCH_API_VIRTUAL_ALLOCATOR_HPP__
+#define __ANARCH_API_VIRTUAL_ALLOCATOR_HPP__
 
 #include <anarch/stddef>
 #include <anarch/types>
@@ -14,14 +14,14 @@ public:
   virtual bool Owns(void * ptr) = 0; // @noncritical
   
   template <typename T, typename... Args>
-  virtual T * New(Args... args) {
+  T * New(Args... args) {
     void * buf;
     if (!Alloc(buf, sizeof(T))) return NULL;
     return new(buf) T(args...);
   }
   
   template <typename T>
-  virtual void Delete(T * ptr) {
+  void Delete(T * ptr) {
     ptr->~T();
     Free((void *)ptr);
   }

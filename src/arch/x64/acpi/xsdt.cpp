@@ -12,7 +12,7 @@ int Xsdt::GetCount() {
 }
 
 PhysAddr Xsdt::GetTable(int i) {
-  uint64_t * ptr = (uint64_t *)(map->GetStart() + 0x24);
+  uint64_t * ptr = (uint64_t *)(map.GetStart() + 0x24);
   return ptr[i];
 }
 

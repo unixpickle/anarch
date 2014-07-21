@@ -10,7 +10,7 @@ EasyMap::EasyMap(PhysAddr _start, PhysSize _size) {
   
   // TODO: here, attempt to use larger page sizes and then fall back
   
-  pageAlign = GlobalMap::GetPageAlignment(0);
+  pageAlign = GlobalMap::GetPageSizeAlign(0);
   pageSize = GlobalMap::GetPageSize(0);
   
   // this is a jumble of variables that some day will get cleaned up
