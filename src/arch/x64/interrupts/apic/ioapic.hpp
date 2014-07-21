@@ -2,14 +2,13 @@
 #define __ANARCH_X64_IOAPIC_HPP__
 
 #include <anarch/lock>
-#include <ansa/module>
 #include "../../acpi/apic-table.hpp"
 
 namespace anarch {
 
 namespace x64 {
 
-class IOApic : public ansa::Module {
+class IOApic {
 public:
   struct Entry;
   static const int RegVersion = 1;
