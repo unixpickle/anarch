@@ -1,6 +1,7 @@
 #include "module.hpp"
 #include "../interrupts/pic.hpp"
 #include "../interrupts/irt.hpp"
+#include <anarch/stream>
 #include <anarch/new>
 
 namespace anarch {
@@ -22,10 +23,13 @@ CriticalModule & CriticalModule::GetGlobal() {
 }
 
 ansa::DepList CriticalModule::GetDependencies() {
-  return ansa::DepList(&Irt::GetGlobal(), &Pic::GetGlobal());
+  return ansa::DepList(&Irt::GetGlobal(), &Pic::GetGlobal(),
+                       &StreamModule::GetGlobal());
 }
 
 void CriticalModule::Initialize() {
+  cout << "Initializing criticality subsystem..." << endl;
+  
   Irt::GetGlobal().ConfigurePicEoi();
   __asm__ __volatile__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
                        "nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\ncli");

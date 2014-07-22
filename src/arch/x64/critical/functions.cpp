@@ -3,7 +3,7 @@
 namespace anarch {
 
 bool IgnoreCriticality() {
-  return x64::CriticalModule::GetGlobal().IsInitialized();
+  return !x64::CriticalModule::GetGlobal().IsInitialized();
 }
 
 bool GetCritical() {
