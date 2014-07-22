@@ -6,12 +6,13 @@
 #include <anarch/stddef>
 #include <anarch/types>
 #include <ansa/macros>
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class ApicTable {
+class ApicTable : public ansa::NoCopy {
 public:
   struct Header;
   struct Iso;

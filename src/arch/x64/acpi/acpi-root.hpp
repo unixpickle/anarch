@@ -2,12 +2,13 @@
 #define __ANARCH_X64_ACPI_ROOT_HPP__
 
 #include <anarch/easy-map>
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class AcpiRoot {
+class AcpiRoot : public ansa::NoCopy {
 public:
   AcpiRoot(PhysAddr tableBase); // @noncritical
   

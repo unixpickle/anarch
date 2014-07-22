@@ -1,6 +1,8 @@
 #ifndef __ANARCH_API_THREAD_HPP__
 #define __ANARCH_API_THREAD_HPP__
 
+#include <ansa/nocopy>
+
 namespace anarch {
 
 class Domain;
@@ -8,7 +10,7 @@ class Domain;
 /**
  * Represents a hardware thread, not a software thread!
  */
-class Thread {
+class Thread : public ansa::NoCopy {
 public:
   // implemented in Thread.cpp
   static void * GetUserInfo(); // @critical

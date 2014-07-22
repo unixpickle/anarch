@@ -3,10 +3,11 @@
 
 #include <ansa/rational>
 #include <ansa/macros>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class Timer {
+class Timer : public ansa::NoCopy {
 public:
   static Timer & GetCurrent();
   

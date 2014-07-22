@@ -2,10 +2,11 @@
 #define __ANARCH_API_MEMORY_MAP_HPP__
 
 #include <anarch/types>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class MemoryMap {
+class MemoryMap : public ansa::NoCopy {
 public:
   struct Attributes {
     bool executable = true;

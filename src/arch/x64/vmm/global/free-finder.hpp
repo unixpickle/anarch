@@ -2,12 +2,13 @@
 #define __ANARCH_X64_FREE_FINDER_HPP__
 
 #include "../page-table.hpp"
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class FreeFinder {
+class FreeFinder : public ansa::NoCopy {
 public:
   FreeFinder(PageTable & pt);
   

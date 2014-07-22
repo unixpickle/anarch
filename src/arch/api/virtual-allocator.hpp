@@ -4,10 +4,11 @@
 #include <anarch/stddef>
 #include <anarch/types>
 #include <anarch/new>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class VirtualAllocator {
+class VirtualAllocator : public ansa::NoCopy {
 public:
   virtual bool Alloc(void *& addr, size_t size) = 0; // @noncritical
   virtual void Free(void * addr) = 0; // @noncritical

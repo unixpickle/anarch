@@ -5,10 +5,11 @@
 #include "allocator.hpp"
 #include "virtual-allocator.hpp"
 #include <anarch/stddef>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class Domain {
+class Domain : public ansa::NoCopy {
 public:
   /**
    * Get the current domain of the current hardware thread.

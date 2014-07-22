@@ -1,14 +1,15 @@
 #ifndef __ANARCH_X64_IOAPIC_HPP__
 #define __ANARCH_X64_IOAPIC_HPP__
 
-#include <anarch/lock>
 #include "../../acpi/apic-table.hpp"
+#include <anarch/lock>
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class IOApic {
+class IOApic : public ansa::NoCopy {
 public:
   struct Entry;
   static const int RegVersion = 1;

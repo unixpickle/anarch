@@ -2,10 +2,11 @@
 #define __ANARCH_API_ALLOCATOR_HPP__
 
 #include <anarch/types>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class Allocator {
+class Allocator : public ansa::NoCopy {
 public:
   /**
    * Allocate aligned physical memory.

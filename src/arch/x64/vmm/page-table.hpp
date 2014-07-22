@@ -3,6 +3,7 @@
 
 #include <anarch/api/memory-map>
 #include <anarch/api/allocator>
+#include <ansa/nocopy>
 #include "scratch.hpp"
 
 namespace anarch {
@@ -12,7 +13,7 @@ namespace x64 {
 /**
  * This class facilitates page table manipulation.
  */
-class PageTable {
+class PageTable : public ansa::NoCopy {
 public:
   static int CalcDepth(PhysSize size);
   static uint64_t CalcMask(PhysSize, bool kernel,

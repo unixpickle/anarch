@@ -5,12 +5,13 @@
 #include <anarch/lock>
 #include <anarch/api/allocator>
 #include <ansa/bit-list>
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class Scratch {
+class Scratch : public ansa::NoCopy {
 public:
   static const int PTCount = 1;
   static const VirtAddr StartAddr = 0x7FC0000000L;

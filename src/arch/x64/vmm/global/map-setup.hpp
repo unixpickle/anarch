@@ -6,6 +6,7 @@
 #include "../page-table.hpp"
 #include "../../pmm/buddy-allocator.hpp"
 #include "../../pmm/step-allocator.hpp"
+#include <ansa/nocopy>
 
 namespace anarch {
 
@@ -14,7 +15,7 @@ namespace x64 {
 /**
  * Configure the GlobalMap nice and easy
  */
-class MapSetup {
+class MapSetup : public ansa::NoCopy {
 public:
   MapSetup();
   

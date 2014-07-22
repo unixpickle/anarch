@@ -11,7 +11,7 @@ namespace anarch {
  * memory to virtual memory. Additionally, it can provide a simple scoping
  * mechanism for memory mapping (if you're into that kinda thing).
  */
-class EasyMap : ansa::NoCopy {
+class EasyMap : public ansa::NoCopy {
 private:
   VirtAddr mapStart;
   PhysSize pageSize;

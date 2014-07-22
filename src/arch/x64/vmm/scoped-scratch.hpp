@@ -2,12 +2,13 @@
 #define __ANARCH_X64_SCOPED_SCRATCH_X64_HPP__
 
 #include "scratch.hpp"
+#include <ansa/nocopy>
 
 namespace anarch {
 
 namespace x64 {
 
-class ScopedScratch {
+class ScopedScratch : public ansa::NoCopy {
 public:
   ScopedScratch(Scratch &, PhysAddr); // @critical
   ~ScopedScratch(); // @critical

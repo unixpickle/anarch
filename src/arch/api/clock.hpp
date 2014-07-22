@@ -1,12 +1,13 @@
 #ifndef __ANARCH_API_CLOCK_HPP__
 #define __ANARCH_API_CLOCK_HPP__
 
-#include <ansa/rational>
 #include <anarch/stdint>
+#include <ansa/rational>
+#include <ansa/nocopy>
 
 namespace anarch {
 
-class Clock {
+class Clock : public ansa::NoCopy {
 public:
   /**
    * Returns the time in "ticks"
