@@ -2,9 +2,14 @@
 #include "../vmm/tlb.hpp"
 #include "../vmm/global/global-map.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include "../interrupts/idt.hpp"
+#include "../interrupts/irt.hpp"
+#include "../interrupts/apic/ioapic-module.hpp"
 #include "../console/text-console.hpp"
 #include "../panic/panic.hpp"
 #include "../acpi/acpi-module.hpp"
+#include "../domains/domain-list.hpp"
+#include "../critical/module.hpp"
 #include <anarch/stream>
 #include <anarch/assert>
 #include <anarch/stddef>
@@ -27,6 +32,11 @@ void InitializeSingletons() {
   TextConsole::InitGlobal();
   PanicModule::InitGlobal();
   AcpiModule::InitGlobal();
+  Idt::InitGlobal();
+  Irt::InitGlobal();
+  IOApicModule::InitGlobal();
+  DomainList::InitGlobal();
+  CriticalModule::InitGlobal();
   
   StreamModule::InitGlobal();
 }
