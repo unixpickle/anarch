@@ -1,6 +1,7 @@
 #include "irt.hpp"
-#include "idt.hpp"
 #include "raw-isr.hpp"
+#include "idt.hpp"
+#include <anarch/stream>
 #include <anarch/new>
 
 namespace anarch {
@@ -53,11 +54,13 @@ void Irt::Configure() {
 }
 
 ansa::DepList Irt::GetDependencies() {
-  return ansa::DepList(&Idt::GetGlobal());
+  return ansa::DepList(&Idt::GetGlobal(), &StreamModule::GetGlobal());
 }
 
 void Irt::Initialize() {
+  cout << "Initializing Interrupt Routine Table...";
   Idt::GetGlobal().Set();
+  cout << " [OK]" << endl;
 }
 
 }

@@ -1,7 +1,7 @@
 #include "pic.hpp"
-#include "irt.hpp"
 #include "../common.hpp"
 #include <anarch/critical>
+#include <anarch/stream>
 #include <anarch/new>
 
 namespace anarch {
@@ -60,11 +60,13 @@ void Pic::Remap(uint8_t masterBase, uint8_t slaveBase, uint8_t masterMask,
 }
 
 ansa::DepList Pic::GetDependencies() {
-  return ansa::DepList(&Irt::GetGlobal());
+  return ansa::DepList(&StreamModule::GetGlobal());
 }
 
 void Pic::Initialize() {
+  cout << "Initializing legacy PIC...";
   Remap(0xf0, 0xf8, 0xff, 0xff);
+  cout << " [OK]" << endl;
 }
 
 }

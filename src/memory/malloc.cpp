@@ -77,7 +77,7 @@ bool Malloc::AllocNoNewSegment(void *& addr, size_t size) {
     segment = segment->next;
   }
   
-  return true;
+  return false;
 }
 
 void Malloc::CreateSegment() {

@@ -35,8 +35,8 @@ Domain & DomainList::operator[](int) {
 }
 
 ansa::DepList DomainList::GetDependencies() {
-  return ansa::DepList(&IOApicModule::GetGlobal(),
-                       &CriticalModule::GetGlobal());
+  return ansa::DepList(&CriticalModule::GetGlobal(),
+                       &IOApicModule::GetGlobal());
 }
 
 void DomainList::Initialize() {

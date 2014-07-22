@@ -56,6 +56,7 @@ void TLB::WillSetAddressSpace(MemoryMap &) {
 }
 
 void TLB::DistributeInvlpg(VirtAddr start, PhysSize size) {
+  ScopedCritical scope;
   Invlpgs(start, size);
 }
   

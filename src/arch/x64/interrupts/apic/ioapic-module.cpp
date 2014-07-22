@@ -33,6 +33,8 @@ ansa::DepList IOApicModule::GetDependencies() {
 }
 
 void IOApicModule::Initialize() {
+  cout << "Initializing I/O APIC..." << endl;
+  
   if (!AcpiModule::GetGlobal().GetApicTable()) {
     Panic("IOApicModule::Initialize() - no APIC table in ACPI");
   }

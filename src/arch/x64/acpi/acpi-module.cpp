@@ -2,6 +2,7 @@
 #include "acpi-pointer.hpp"
 #include "../vmm/global/global-malloc.hpp"
 #include <anarch/assert>
+#include <anarch/stream>
 
 namespace anarch {
 
@@ -30,10 +31,12 @@ ApicTable * AcpiModule::GetApicTable() {
 }
 
 ansa::DepList AcpiModule::GetDependencies() {
-  return ansa::DepList(&GlobalMalloc::GetGlobal());
+  return ansa::DepList(&GlobalMalloc::GetGlobal(),
+                       &StreamModule::GetGlobal());
 }
 
 void AcpiModule::Initialize() {
+  cout << "Initializing ACPI subsystem...";
   AcpiPointer * pointer = AcpiPointer::Find();
   assert(pointer != NULL);
   
@@ -47,6 +50,7 @@ void AcpiModule::Initialize() {
     apicTable = allocator.New<ApicTable>(GetRoot().GetTable(apicIndex));
     assert(apicTable != NULL);
   }
+  cout << " [OK]" << endl;
 }
 
 }

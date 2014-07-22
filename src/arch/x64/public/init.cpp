@@ -4,6 +4,7 @@
 #include "../vmm/global/global-malloc.hpp"
 #include "../interrupts/idt.hpp"
 #include "../interrupts/irt.hpp"
+#include "../interrupts/pic.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../console/text-console.hpp"
 #include "../panic/panic.hpp"
@@ -34,6 +35,7 @@ void InitializeSingletons() {
   AcpiModule::InitGlobal();
   Idt::InitGlobal();
   Irt::InitGlobal();
+  Pic::InitGlobal();
   IOApicModule::InitGlobal();
   DomainList::InitGlobal();
   CriticalModule::InitGlobal();

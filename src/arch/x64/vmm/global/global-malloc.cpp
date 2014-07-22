@@ -1,5 +1,6 @@
 #include "global-malloc.hpp"
 #include "global-map.hpp"
+#include <anarch/stream>
 #include <anarch/new>
 
 namespace anarch {
@@ -25,12 +26,14 @@ VirtualAllocator & GlobalMalloc::GetAllocator() {
 }
 
 ansa::DepList GlobalMalloc::GetDependencies() {
-  return ansa::DepList(&GlobalMap::GetGlobal());
+  return ansa::DepList(&GlobalMap::GetGlobal(), &StreamModule::GetGlobal());
 }
 
 void GlobalMalloc::Initialize() {
+  cout << "Initializing GlobalMalloc...";
   Malloc * mallocPtr = (Malloc *)mallocBuf;
   new(mallocPtr) Malloc(0x200000, GlobalMap::GetGlobal().GetPageAllocator());
+  cout << " [OK]" << endl;
 }
 
 }

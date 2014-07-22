@@ -28,7 +28,7 @@ ansa::DepList CriticalModule::GetDependencies() {
 }
 
 void CriticalModule::Initialize() {
-  cout << "Initializing criticality subsystem..." << endl;
+  cout << "Initializing criticality subsystem...";
   
   Irt::GetGlobal().ConfigurePicEoi();
   __asm__ __volatile__("sti\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n"
@@ -36,6 +36,7 @@ void CriticalModule::Initialize() {
   Irt::GetGlobal().Configure();
   
   __asm__ __volatile__("sti");
+  cout << " [OK]" << endl;
 }
 
 }

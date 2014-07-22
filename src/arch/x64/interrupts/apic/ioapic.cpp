@@ -29,7 +29,7 @@ uint32_t IOApic::ReadReg(uint8_t reg) {
 }
 
 uint32_t IOApic::GetVersion() {
-  return ReadReg(RegVersion);
+  return ReadReg(RegVersion) & 0xff;
 }
 
 uint32_t IOApic::GetPinCount() {
