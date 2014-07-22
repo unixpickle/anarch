@@ -2,8 +2,6 @@
 #include <anarch/phys-copy>
 #include <anarch/assert>
 
-#include <anarch/stream> // TODO: delete this
-
 namespace anarch {
 
 namespace x64 {
@@ -21,7 +19,6 @@ uint32_t ReadLength(PhysAddr addr) {
 ApicTable::ApicTable(PhysAddr baseAddr)
   : dataSize((PhysSize)ReadLength(baseAddr + 4)),
     map(baseAddr, dataSize) {
-  cout << "acpitable mapped to " << map.GetStart() << endl;
 }
 
 bool ApicTable::CanIterate() {

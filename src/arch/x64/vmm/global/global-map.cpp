@@ -150,8 +150,6 @@ bool GlobalMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
     return false;
   }
   
-  cout << "GlobalMap::Map() - giving out " << addr << endl;
-  
   uint64_t mask = PageTable::CalcMask(size.pageSize, true, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 3);
   
@@ -171,9 +169,6 @@ void GlobalMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
 }
 
 void GlobalMap::Unmap(VirtAddr addr, Size size) {
-  cout << "GlobalMap::Unmap(" << addr << ", " << size.pageSize <<
-    ", " << size.pageCount << ")" << endl;
-  
   AssertNoncritical();
   ScopedLock scope(lock);
   

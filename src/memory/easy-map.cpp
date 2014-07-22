@@ -3,8 +3,6 @@
 #include <anarch/api/panic>
 #include <anarch/critical>
 
-#include <anarch/stream> // TODO: delete this
-
 namespace anarch {
 
 EasyMap::EasyMap(PhysAddr _start, PhysSize _size) {
@@ -33,13 +31,9 @@ EasyMap::EasyMap(PhysAddr _start, PhysSize _size) {
     Panic("EasyMap() - failed to map memory");
   }
   start = mapStart + alignOffset;
-  cout << "easy map " << (uint64_t)this << " created with mapStart="
-    << mapStart << endl;
 }
 
 EasyMap::~EasyMap() {
-  cout << "easy map " << (uint64_t)this << " destroyed with mapStart="
-    << mapStart << endl;
   AssertNoncritical();
   GlobalMap::Size size(pageSize, pageCount);
   GlobalMap::GetGlobal().Unmap(mapStart, size);
