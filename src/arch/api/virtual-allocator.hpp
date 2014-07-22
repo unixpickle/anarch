@@ -20,13 +20,6 @@ public:
     return new(buf) T(args...);
   }
   
-  template <typename T, typename... Args>
-  T * New(Args... args) {
-    void * buf;
-    if (!Alloc(buf, sizeof(T))) return NULL;
-    return new(buf) T(args...);
-  }
-  
   template <typename T>
   void Delete(T * ptr) {
     ptr->~T();

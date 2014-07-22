@@ -2,6 +2,7 @@
 #define __ANARCH_EASY_MAP_HPP__
 
 #include <anarch/api/memory-map>
+#include <ansa/nocopy>
 
 namespace anarch {
 
@@ -10,7 +11,7 @@ namespace anarch {
  * memory to virtual memory. Additionally, it can provide a simple scoping
  * mechanism for memory mapping (if you're into that kinda thing).
  */
-class EasyMap {
+class EasyMap : ansa::NoCopy {
 private:
   VirtAddr mapStart;
   PhysSize pageSize;
