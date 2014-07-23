@@ -10,7 +10,7 @@ void OutB(uint16_t port, uint8_t byte) {
   __asm__("outb %%al, %%dx" : : "a" (byte), "d" (port));
 }
 
-void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
+void CpuID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
   AssertCritical();
   uint32_t ebxIn = ebx ? *ebx : 0;
   uint32_t ecxIn = ecx ? *ecx : 0;
@@ -24,7 +24,7 @@ void CPUID(uint32_t eax, uint32_t * ebx, uint32_t * edx, uint32_t * ecx) {
   if (edx) *edx = (uint32_t)rdxOut;
 }
 
-uint64_t ReadMSR(uint32_t cell) {
+uint64_t ReadMsr(uint32_t cell) {
   AssertCritical();
   uint64_t higher;
   uint64_t lower;
@@ -34,7 +34,7 @@ uint64_t ReadMSR(uint32_t cell) {
   return (higher << 0x20) | lower;
 }
 
-void WriteMSR(uint32_t cell, uint64_t value) {
+void WriteMsr(uint32_t cell, uint64_t value) {
   AssertCritical();
   uint64_t lower = value & 0xffffffff;
   uint64_t higher = value >> 0x20;

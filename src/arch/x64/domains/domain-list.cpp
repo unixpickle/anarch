@@ -1,7 +1,8 @@
 #include "domain-list.hpp"
 #include "../acpi/acpi-module.hpp"
-#include "../interrupts/apic/ioapic-module.hpp"
 #include "../critical/module.hpp"
+#include "../time/module.hpp"
+#include "../interrupts/apic/ioapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
 
 namespace {
@@ -36,7 +37,8 @@ Domain & DomainList::operator[](int) {
 
 ansa::DepList DomainList::GetDependencies() {
   return ansa::DepList(&CriticalModule::GetGlobal(),
-                       &IOApicModule::GetGlobal());
+                       &IOApicModule::GetGlobal(),
+                       &ClockModule::GetGlobal());
 }
 
 void DomainList::Initialize() {
