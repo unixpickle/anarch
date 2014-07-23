@@ -1,17 +1,18 @@
 #include "init.hpp"
 #include "../vmm/tlb.hpp"
-#include "../vmm/global/global-map.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include "../vmm/global/global-map.hpp"
 #include "../interrupts/idt.hpp"
 #include "../interrupts/irt.hpp"
 #include "../interrupts/pic.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../console/text-console.hpp"
-#include "../panic/panic.hpp"
-#include "../acpi/acpi-module.hpp"
 #include "../domains/domain-list.hpp"
+#include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
+#include "../panic/panic.hpp"
+#include "../time/module.hpp"
 #include <anarch/stream>
 #include <anarch/assert>
 #include <anarch/stddef>
@@ -41,6 +42,7 @@ void InitializeSingletons() {
   LapicModule::InitGlobal();
   DomainList::InitGlobal();
   CriticalModule::InitGlobal();
+  ClockModule::InitGlobal();
   
   StreamModule::InitGlobal();
 }

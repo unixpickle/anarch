@@ -48,12 +48,11 @@ void Pit::Stop() {
   OutB(0x40, 0xff);
   OutB(0x40, 0xff);
   
-  // TODO: there is a race condition here when we unset the PIT in the IOAPIC
-  // and in the IRT while there's still a PIT interrupt pending. Idea: never
-  // actually unset the PIT from the IRT
   IOApic & ioApic = IOApicModule::GetGlobal().GetBaseIOApic();
   ioApic.MaskIrq(IntVectors::Pit);
-  Irt::GetGlobal().Unset(IntVectors::Pit);
+  
+  // don't unset the handler in the IRT because there may be another PIT
+  // interrupt pending on some CPU which would cause a race condition
 }
 
 uint64_t Pit::GetTicks() {

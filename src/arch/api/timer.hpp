@@ -9,8 +9,6 @@ namespace anarch {
 
 class Timer : public ansa::NoCopy {
 public:
-  static Timer & GetCurrent();
-  
   /**
    * @ambicritical
    */
