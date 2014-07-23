@@ -6,6 +6,7 @@
 #include "../interrupts/irt.hpp"
 #include "../interrupts/pic.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
+#include "../interrupts/apic/lapic-module.hpp"
 #include "../console/text-console.hpp"
 #include "../panic/panic.hpp"
 #include "../acpi/acpi-module.hpp"
@@ -37,6 +38,7 @@ void InitializeSingletons() {
   Irt::InitGlobal();
   Pic::InitGlobal();
   IOApicModule::InitGlobal();
+  LapicModule::InitGlobal();
   DomainList::InitGlobal();
   CriticalModule::InitGlobal();
   
