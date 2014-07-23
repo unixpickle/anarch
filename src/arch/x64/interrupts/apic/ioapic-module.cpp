@@ -1,7 +1,10 @@
 #include "ioapic-module.hpp"
-#include "../../vmm/global/global-malloc.hpp"
+#include "../../common.hpp"
 #include "../../acpi/acpi-module.hpp"
+#include "../../critical/module.hpp"
+#include "../../vmm/global/global-malloc.hpp"
 #include <anarch/api/panic>
+#include <anarch/critical>
 #include <anarch/stream>
 #include <anarch/new>
 
@@ -29,7 +32,8 @@ IOApic & IOApicModule::GetBaseIOApic() {
 
 ansa::DepList IOApicModule::GetDependencies() {
   return ansa::DepList(&AcpiModule::GetGlobal(), &GlobalMalloc::GetGlobal(),
-                       &StreamModule::GetGlobal());
+                       &StreamModule::GetGlobal(), 
+                       &CriticalModule::GetGlobal());
 }
 
 void IOApicModule::Initialize() {
@@ -47,6 +51,12 @@ void IOApicModule::Initialize() {
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
   baseIOApic = allocator.New<IOApic, ApicTable &>(table, info);
   assert(baseIOApic != NULL);
+  
+  // enable I/O APIC on all motherboards
+  SetCritical(true);
+  OutB(0x22, 0x70);
+  OutB(0x23, 0x01);
+  SetCritical(false);
   
   cout << "Initialized I/O APIC; version=" << baseIOApic->GetVersion() << endl;
 }

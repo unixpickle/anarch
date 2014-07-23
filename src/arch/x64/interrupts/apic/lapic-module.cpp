@@ -49,6 +49,11 @@ void LapicModule::Initialize() {
   new(xapicData) XApic((PhysAddr)table->GetHeader().lapicAddr);
   new(x2apicData) X2Apic();
   
+  SetCritical(true);
+  GetLapic().Enable();
+  GetLapic().SetDefaults();
+  SetCritical(false);
+  
   cout << " [OK]" << endl;
 }
 

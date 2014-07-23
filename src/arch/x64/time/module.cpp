@@ -47,7 +47,9 @@ void ClockModule::Initialize() {
   // TODO: potentially use the HPET if it is available
   
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
-  clock = allocator.New<Pit, uint16_t>(1193); // ~100Hz
+  clock = allocator.New<Pit, uint16_t>(1193); // ~1000Hz
+  
+  clock->Start();
 }
 
 }

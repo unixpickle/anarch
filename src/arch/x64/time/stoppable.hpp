@@ -12,8 +12,8 @@ public:
   virtual ~StoppableClock() {
   }
   
-  virtual void Start() = 0; // @critical
-  virtual void Stop() = 0; // @critical
+  virtual void Start() = 0; // @noncritical
+  virtual void Stop() = 0; // @noncritical
 };
 
 }

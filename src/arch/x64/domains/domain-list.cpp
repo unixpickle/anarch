@@ -4,6 +4,7 @@
 #include "../time/module.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include <anarch/stream>
 
 namespace {
 
@@ -48,6 +49,15 @@ void DomainList::Initialize() {
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
   mainDomain = allocator.New<Domain>(lapicCount);
   assert(mainDomain != NULL);
+  
+  cout << "i'm going to tick/tock now!" << endl;
+  Clock & clock = ClockModule::GetGlobal().GetClock();
+  while (1) {
+    clock.MicroSleep(500000);
+    cout << "tick" << endl;
+    clock.MicroSleep(500000);
+    cout << "tock" << endl;
+  }
 }
 
 }

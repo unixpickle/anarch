@@ -43,6 +43,8 @@ public:
     unsigned destfield : 8; // RW - APIC ID or "set of processors"
   } ANSA_PACKED;
   
+  static_assert(sizeof(Entry) == 8, "invalid IOApic::Entry size");
+  
 private:
   ApicTable & table;
   ApicTable::IOApic info;
