@@ -16,7 +16,7 @@ uint64_t ExtractTicksPerMin(EasyMap & map) {
 
 Hpet::Hpet(const HpetTable & info)
   : map(info.address.address, 0x1000),
-    microsPerTick(60000000, ExtractTicksPerMin(map)) {  
+    microsPerTick(60000000, ExtractTicksPerMin(map)) {
 }
 
 void Hpet::Start() {
