@@ -15,7 +15,7 @@ namespace anarch {
  */
 class Malloc : public VirtualAllocator {
 public:
-  Malloc(size_t poolSize, Allocator & allocator); // @ambicritical
+  Malloc(size_t poolSize, Allocator & allocator, bool bigPages = true);
   virtual ~Malloc(); // @noncritical
   
   virtual bool Alloc(void *& addr, size_t size); // @noncritical
@@ -24,6 +24,7 @@ public:
   
 protected:
   size_t poolSize;
+  bool bigPages;
   
   struct Segment {
     ANAlloc::Malloc * allocator;
@@ -36,7 +37,7 @@ protected:
   NoncriticalLock firstLock;
   
   bool AllocNoNewSegment(void *& addr, size_t size);
-  void CreateSegment();
+  bool CreateSegment();
 };
 
 }

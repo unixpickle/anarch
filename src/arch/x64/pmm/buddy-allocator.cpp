@@ -1,4 +1,5 @@
 #include "buddy-allocator.hpp"
+#include <anarch/api/panic>
 #include <anarch/critical>
 
 namespace anarch {
@@ -110,7 +111,10 @@ void BuddyAllocator::InitializeCluster(ANAlloc::MutableCluster & cluster,
   ANAlloc::ClusterBuilder<ANAlloc::BBTree> builder(descs, cluster, 12);
   ANAlloc::UInt space = builder.RequiredSpace();
   
-  VirtAddr newAddress = tempAllocator.AllocAndMap((PhysSize)space);
+  VirtAddr newAddress;
+  if (!tempAllocator.AllocAndMap(newAddress, (PhysSize)space)) {
+    Panic("BuddyAllocator::InitializeCluster() - allocation failed");
+  }
   builder.CreateAllocators((uint8_t *)newAddress);
 }
 

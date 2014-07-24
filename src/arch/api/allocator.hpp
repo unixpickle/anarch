@@ -39,17 +39,28 @@ public:
   virtual PhysSize Total() = 0;
   
   /**
-   * Allocate physical memory and map it into contiguous virtual memory. This
-   * makes no guarantees about which page size it will use. If the allocation
-   * fails, this function will Panic() the kernel.
+   * Allocate physical memory and map it into contiguous virtual memory.
    */
-  virtual VirtAddr AllocAndMap(PhysSize size);
+  virtual bool AllocAndMap(VirtAddr &, PhysSize, bool bigPages = true);
   
   /**
    * Do the inverse of AllocAndMap(). This method looks up each page, unmaps
    * it, frees it, and moves on to the next one.
    */
   virtual void FreeAndUnmap(VirtAddr addr, PhysSize size);
+  
+  /**
+   * Attempt to allocate a contiguous buffer of pages and map it into the
+   * global address space.
+   */
+  virtual bool AllocAndMapContiguous(VirtAddr &, PhysSize,
+                                     bool bigPages = true);
+  
+  /**
+   * Attempt to free a contiguous buffer of pages and unmap it from the global
+   * address space.
+   */
+  virtual void FreeAndUnmapContiguous(VirtAddr, PhysSize);
 };
 
 }

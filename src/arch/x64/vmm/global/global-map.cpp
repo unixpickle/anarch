@@ -32,40 +32,14 @@ PhysSize GlobalMap::GetPageSizeAlign(int idx) {
   return GetPageSize(idx);
 }
 
-bool GlobalMap::SupportsReadAddress() {
-  return true;
-}
-
-bool GlobalMap::SupportsReadAttributes() {
-  return true;
-}
-
-bool GlobalMap::SupportsReadSize() {
-  return true;
-}
-
-bool GlobalMap::SupportsReserveAt() {
-  return true;
-}
-
-bool GlobalMap::SupportsReserve() {
-  return true;
-}
-
-bool GlobalMap::SupportsMapAt() {
-  return true;
-}
-
-bool GlobalMap::SupportsNX() {
-  return true;
-}
-
-bool GlobalMap::SupportsRO() {
-  return true;
-}
-
-bool GlobalMap::SupportsUncached() {
-  return true;
+MemoryMap::Capabilities GlobalMap::GetCapabilities() {
+  Capabilities caps;
+  caps.placementReserve = true;
+  caps.placementMap = true;
+  caps.executableFlag = true;
+  caps.writableFlag = true;
+  caps.cachableFlag = false; // TODO: figure this one out
+  return caps;
 }
 
 namespace x64 {

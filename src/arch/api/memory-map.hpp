@@ -14,6 +14,22 @@ public:
     bool cachable = true;
   };
   
+  struct Capabilities {
+    /**
+     * This is true when ReserveAt() is available.
+     */
+    bool placementReserve;
+    
+    /**
+     * This is true when MapAt() and Reserve() are available.
+     */
+    bool placementMap;
+    
+    bool executableFlag;
+    bool writableFlag;
+    bool cachableFlag;
+  };
+  
   struct Size {
     PhysSize pageSize;
     PhysSize pageCount;

@@ -7,6 +7,7 @@
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
 #include <anarch/critical>
+#include <anarch/stream>
 #include <anarch/new>
 
 namespace anarch {
@@ -43,7 +44,7 @@ Clock & ClockModule::GetClock() {
 ansa::DepList ClockModule::GetDependencies() {
   return ansa::DepList(&Irt::GetGlobal(), &IOApicModule::GetGlobal(),
                        &LapicModule::GetGlobal(), &GlobalMalloc::GetGlobal(),
-                       &AcpiModule::GetGlobal());
+                       &AcpiModule::GetGlobal(), &StreamModule::GetGlobal());
 }
 
 void ClockModule::Initialize() {
@@ -51,8 +52,10 @@ void ClockModule::Initialize() {
   HpetTable * hpetInfo = AcpiModule::GetGlobal().GetHpetTable();
   if (hpetInfo) {
     clock = allocator.New<Hpet, const HpetTable &>(*hpetInfo);
+    cout << "HPET clock initialized" << endl;
   } else {
     clock = allocator.New<Pit, uint16_t>(1193); // ~1000Hz
+    cout << "PIT clock initialized" << endl;
   }
   clock->Start();
 }

@@ -5,8 +5,8 @@
 
 namespace anarch {
 
-Malloc::Malloc(size_t pool, Allocator & _allocator)
-  : poolSize(pool), allocator(_allocator) {
+Malloc::Malloc(size_t pool, Allocator & _allocator, bool _bigPages)
+  : poolSize(pool), bigPages(_bigPages), allocator(_allocator) {
 }
 
 Malloc::~Malloc() {
@@ -22,7 +22,7 @@ bool Malloc::Alloc(void *& addr, size_t size) {
   if (size >= poolSize / 2) return false;
   
   if (!AllocNoNewSegment(addr, size)) {
-    CreateSegment();
+    if (!CreateSegment()) return false;
     return AllocNoNewSegment(addr, size);
   }
   return true;
@@ -80,8 +80,11 @@ bool Malloc::AllocNoNewSegment(void *& addr, size_t size) {
   return false;
 }
 
-void Malloc::CreateSegment() {
-  VirtAddr freshMemory = allocator.AllocAndMap((PhysSize)poolSize);
+bool Malloc::CreateSegment() {
+  VirtAddr freshMemory;
+  if (!allocator.AllocAndMap(freshMemory, (PhysSize)poolSize, bigPages)) {
+    return false;
+  }
   
   assert(!(freshMemory % ANARCH_OBJECT_ALIGN));
   
@@ -93,6 +96,8 @@ void Malloc::CreateSegment() {
   ScopedLock scope(firstLock);
   segPtr->next = firstSegment;
   firstSegment = segPtr;
+  
+  return true;
 }
 
 }
