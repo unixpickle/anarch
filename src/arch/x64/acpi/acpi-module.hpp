@@ -4,6 +4,7 @@
 #include <ansa/module>
 #include "acpi-root.hpp"
 #include "apic-table.hpp"
+#include "hpet-table.hpp"
 
 namespace anarch {
 
@@ -16,6 +17,7 @@ public:
   
   AcpiRoot & GetRoot();
   ApicTable * GetApicTable();
+  HpetTable * GetHpetTable();
   
 protected:
   virtual ansa::DepList GetDependencies();
@@ -24,6 +26,8 @@ protected:
 private:
   AcpiRoot * root;
   ApicTable * apicTable = NULL;
+  HpetTable * hpetTable = NULL;
+  
 };
 
 }

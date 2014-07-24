@@ -1,6 +1,7 @@
 #include "acpi-module.hpp"
 #include "acpi-pointer.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include <anarch/phys-copy>
 #include <anarch/assert>
 #include <anarch/stream>
 
@@ -49,6 +50,12 @@ void AcpiModule::Initialize() {
   if (apicIndex >= 0) {
     apicTable = allocator.New<ApicTable>(GetRoot().GetTable(apicIndex));
     assert(apicTable != NULL);
+  }
+  int hpetIndex = GetRoot().FindTable("HPET");
+  if (hpetIndex >= 0) {
+    hpetTable = allocator.New<HpetTable>();
+    PhysCopy((void *)&hpetTable, GetRoot().GetTable(hpetIndex),
+             sizeof(hpetTable));
   }
   cout << " [OK]" << endl;
 }

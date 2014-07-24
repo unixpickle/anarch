@@ -1,5 +1,7 @@
 #include "module.hpp"
+#include "hpet.hpp"
 #include "pit.hpp"
+#include "../acpi/acpi-module.hpp"
 #include "../interrupts/irt.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
@@ -40,15 +42,18 @@ Clock & ClockModule::GetClock() {
 
 ansa::DepList ClockModule::GetDependencies() {
   return ansa::DepList(&Irt::GetGlobal(), &IOApicModule::GetGlobal(),
-                       &LapicModule::GetGlobal(), &GlobalMalloc::GetGlobal());
+                       &LapicModule::GetGlobal(), &GlobalMalloc::GetGlobal(),
+                       &AcpiModule::GetGlobal());
 }
 
 void ClockModule::Initialize() {
-  // TODO: potentially use the HPET if it is available
-  
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
-  clock = allocator.New<Pit, uint16_t>(1193); // ~1000Hz
-  
+  HpetTable * hpetInfo = AcpiModule::GetGlobal().GetHpetTable();
+  if (hpetInfo) {
+    clock = allocator.New<Hpet, const HpetTable &>(*hpetInfo);
+  } else {
+    clock = allocator.New<Pit, uint16_t>(1193); // ~1000Hz
+  }
   clock->Start();
 }
 
