@@ -31,6 +31,10 @@ ApicTable * AcpiModule::GetApicTable() {
   return apicTable;
 }
 
+HpetTable * AcpiModule::GetHpetTable() {
+  return hpetTable;
+}
+
 ansa::DepList AcpiModule::GetDependencies() {
   return ansa::DepList(&GlobalMalloc::GetGlobal(),
                        &StreamModule::GetGlobal());
@@ -46,17 +50,21 @@ void AcpiModule::Initialize() {
   
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
   
+  // find the APIC table
   int apicIndex = GetRoot().FindTable("APIC");
   if (apicIndex >= 0) {
     apicTable = allocator.New<ApicTable>(GetRoot().GetTable(apicIndex));
     assert(apicTable != NULL);
   }
+  
+  // find the HPET table
   int hpetIndex = GetRoot().FindTable("HPET");
   if (hpetIndex >= 0) {
     hpetTable = allocator.New<HpetTable>();
     PhysCopy((void *)&hpetTable, GetRoot().GetTable(hpetIndex),
              sizeof(hpetTable));
   }
+  
   cout << " [OK]" << endl;
 }
 
