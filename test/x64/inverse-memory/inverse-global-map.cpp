@@ -15,68 +15,68 @@ GlobalMap & GlobalMap::GetGlobal() {
 }
 
 int GlobalMap::GetPageSizeCount() {
-  return 1;
+  return 2;
 }
 
-PhysSize GlobalMap::GetPageSize(int) {
-  return 0x1000;
+PhysSize GlobalMap::GetPageSize(int i) {
+  if (i == 0) return 0x1000;
+  return 0x200000;
 }
 
-PhysSize GlobalMap::GetPageSizeAlign(int) {
-  return 0x1000;
+PhysSize GlobalMap::GetPageSizeAlign(int i) {
+  return GetPageSize(i);
 }
 
-bool GlobalMap::SupportsReadAddress() {
-  return true;
-}
-
-bool GlobalMap::SupportsReadAttributes() {
-  return false;
-}
-
-bool GlobalMap::SupportsReadSize() {
-  return true;
-}
-
-bool GlobalMap::SupportsReserveAt() {
-  return false;
-}
-
-bool GlobalMap::SupportsReserve() {
-  return false;
-}
-
-bool GlobalMap::SupportsMapAt() {
-  return false;
-}
-
-bool GlobalMap::SupportsNX() {
-  return false;
-}
-
-bool GlobalMap::SupportsRO() {
-  return false;
-}
-
-bool GlobalMap::SupportsUncached() {
-  return false;
+GlobalMap::Capabilities GlobalMap::GetCapabilities() {
+  Capabilities caps;
+  caps.placementReserve = false;
+  caps.placementMap = false;
+  caps.executableFlag = false;
+  caps.writableFlag = false;
+  caps.cachableFlag = false;
+  return caps;
 }
 
 namespace dummy {
+
+InverseGlobalMap & InverseGlobalMap::GetGlobal() {
+  return gObject;
+}
 
 void InverseGlobalMap::Set() {
 }
 
 bool InverseGlobalMap::Read(PhysAddr * physOut, Attributes *,
-                             PhysSize * sizeOut, VirtAddr addr) {
+                            PhysSize * sizeOut, VirtAddr addr) {
   if (physOut) *physOut = InvertPhys(addr);
-  if (sizeOut) *sizeOut = 0x1000;
+  if (sizeOut) *sizeOut = allowedPageSize;
+  
+  LogEntry * entry = new LogEntry();
+  entry->type = LogEntry::ReadType;
+  entry->virtualAddr = addr;
+  entry->physicalAddr = InvertPhys(addr);
+  entry->pageSize = allowedPageSize;
+  log.Push(entry);
+  
   return true;
 }
 
 bool InverseGlobalMap::Map(VirtAddr & res, PhysAddr phys,
-                            Size, const Attributes &) {
+                            Size theSize, const Attributes &) {
   res = InvertPhys(phys);
+  
+  LogEntry * entry = new LogEntry();
+  entry->type = LogEntry::MapType;
+  entry->virtualAddr = res;
+  entry->physicalAddr = phys;
+  entry->pageSize = theSize.pageSize;
+  entry->pageCount = theSize.pageCount;
+  log.Push(entry);
+  
+  if (theSize.pageSize != allowedPageSize) {
+    return false;
+  }
+  
   return true;
 }
 
@@ -84,7 +84,14 @@ void InverseGlobalMap::MapAt(VirtAddr, PhysAddr, Size, const Attributes &) {
   Panic("InverseGlobalMap::MapAt() - not supported");
 }
 
-void InverseGlobalMap::Unmap(VirtAddr, Size) {
+void InverseGlobalMap::Unmap(VirtAddr virt, Size size) {
+  LogEntry * entry = new LogEntry();
+  entry->type = LogEntry::UnmapType;
+  entry->virtualAddr = virt;
+  entry->physicalAddr = InvertPhys(virt);
+  entry->pageSize = size.pageSize;
+  entry->pageCount = size.pageCount;
+  log.Push(entry);
 }
 
 bool InverseGlobalMap::Reserve(VirtAddr &, Size) {

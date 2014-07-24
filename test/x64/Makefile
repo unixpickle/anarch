@@ -6,10 +6,13 @@ CCFLAGS=-Wall -Wextra -nostdinc $(ARCH_FLAG)
 TEST_INCLUDES=-I../../include -I../dependencies/ansa/include -I../../src/stdlib/h -I../../src/stdlib/hpp -I../stdlib-api/include
 TEST_SOURCES=../stdlib-api/build/*.o build/util/*.o build/dummy-api/*.o build/ansa/*.o
 
-all: build/page-table
+all: build/page-table build/allocation
 
 build/page-table: build/dummy-api build/inverse-memory build/ansa build/util ../stdlib-api/build
 	$(CXX) $(CXXFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) build/inverse-memory/*.o ../../src/arch/api/allocator.cpp ../../src/arch/x64/vmm/page-table.cpp test-page-table.cpp -o build/page-table
+
+build/allocation: build/dummy-api build/inverse-memory build/ansa build/util ../stdlib-api/build
+	$(CXX) $(CXXFLAGS) $(TEST_INCLUDES) $(TEST_SOURCES) build/inverse-memory/*.o ../../src/arch/api/allocator.cpp test-allocation.cpp -o build/allocation
 
 build/util: build
 	mkdir build/util

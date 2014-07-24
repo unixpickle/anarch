@@ -1,6 +1,7 @@
 #ifndef __ANARCH_TEST_POSIX_ALLOCATOR_HPP__
 #define __ANARCH_TEST_POSIX_ALLOCATOR_HPP__
 
+#include "log-list.hpp"
 #include <anarch/api/allocator>
 #include <ansa/atomic>
 
@@ -17,6 +18,21 @@ public:
   virtual PhysSize Total();
   
   long GetAllocationCount();
+  
+  struct LogEntry {
+    bool allocation;
+    PhysAddr address;
+    
+    PhysSize size;
+    PhysSize align;
+    
+    LogEntry * logNext = NULL;
+    
+    LogEntry(bool a, PhysAddr b, PhysSize c, PhysSize d)
+      : allocation(a), address(b), size(c), align(d) {}
+  };
+  
+  LogList<LogEntry> log;
   
 private:
   ansa::Atomic<long> allocationCount;
