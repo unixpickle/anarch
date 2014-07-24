@@ -50,6 +50,7 @@ ansa::DepList ClockModule::GetDependencies() {
 void ClockModule::Initialize() {
   VirtualAllocator & allocator = GlobalMalloc::GetGlobal().GetAllocator();
   HpetTable * hpetInfo = AcpiModule::GetGlobal().GetHpetTable();
+  
   if (hpetInfo) {
     clock = allocator.New<Hpet, const HpetTable &>(*hpetInfo);
     cout << "HPET clock initialized" << endl;

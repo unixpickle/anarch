@@ -61,8 +61,8 @@ void AcpiModule::Initialize() {
   int hpetIndex = GetRoot().FindTable("HPET");
   if (hpetIndex >= 0) {
     hpetTable = allocator.New<HpetTable>();
-    PhysCopy((void *)&hpetTable, GetRoot().GetTable(hpetIndex),
-             sizeof(hpetTable));
+    PhysCopy((void *)hpetTable, GetRoot().GetTable(hpetIndex),
+             sizeof(HpetTable));
   }
   
   cout << " [OK]" << endl;

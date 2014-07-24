@@ -52,6 +52,8 @@ void IOApicModule::Initialize() {
   baseIOApic = allocator.New<IOApic, ApicTable &>(table, info);
   assert(baseIOApic != NULL);
   
+  // TODO: mask everything on the base I/O APIC
+  
   // enable I/O APIC on all motherboards
   SetCritical(true);
   OutB(0x22, 0x70);
