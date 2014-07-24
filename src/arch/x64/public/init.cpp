@@ -11,8 +11,8 @@
 #include "../domains/domain-list.hpp"
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
+#include "../clock/module.hpp"
 #include "../panic/panic.hpp"
-#include "../time/module.hpp"
 #include <anarch/stream>
 #include <anarch/assert>
 #include <anarch/stddef>

@@ -1,7 +1,7 @@
 #include "domain-list.hpp"
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
-#include "../time/module.hpp"
+#include "../clock/module.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
 #include <anarch/stream>
