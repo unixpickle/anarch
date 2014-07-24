@@ -7,6 +7,7 @@
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include <anarch/critical>
 #include <anarch/stream>
 
 namespace {
@@ -56,7 +57,7 @@ void DomainList::Initialize() {
   mainDomain = allocator.New<Domain>(lapicCount);
   assert(mainDomain != NULL);
   
-  void StartCpus();
+  StartCpus();
 }
 
 void DomainList::StartCpus() {
@@ -84,6 +85,7 @@ void DomainList::StartCpus() {
 }
 
 void DomainList::BootstrapCpu(uint32_t apicId) {
+  ScopedCritical critical;
   if (apicId == LapicModule::GetGlobal().GetLapic().GetId()) {
     return;
   }

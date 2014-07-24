@@ -52,9 +52,14 @@ void Gdt::Initialize() {
   ansa::Bzero(buffer, 0x10000);
   
   // get the current GDT pointer info
+  SetCritical(true);
   Pointer current = Pointer::GetCurrent();
+  SetCritical(false);
   amountUsed = (size_t)current.limit + 1;
   ansa::Memcpy(buffer, (void *)current.start, amountUsed);
+  
+  ScopedCritical critical;
+  Set();
 }
 
 }

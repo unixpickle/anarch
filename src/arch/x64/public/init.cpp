@@ -11,6 +11,7 @@
 #include "../domains/domain-list.hpp"
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
+#include "../segments/gdt.hpp"
 #include "../clock/module.hpp"
 #include "../panic/panic.hpp"
 #include <anarch/stream>
@@ -43,6 +44,7 @@ void InitializeSingletons() {
   DomainList::InitGlobal();
   CriticalModule::InitGlobal();
   ClockModule::InitGlobal();
+  Gdt::InitGlobal();
   
   StreamModule::InitGlobal();
 }
