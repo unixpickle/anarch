@@ -1,5 +1,6 @@
 #include "cpu.hpp"
 #include "../segments/local-segment.hpp"
+#include "../segments/gdt.hpp"
 #include "../domains/domain-list.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
@@ -40,6 +41,10 @@ Cpu::Cpu() {
   
   ScopedCritical critical;
   LocalSegment::Write((uint64_t)&localData);
+  
+  TssDescriptor desc(&taskSegment);
+  uint16_t seg = Gdt::GetGlobal().PushTssDescriptor(desc);
+  __asm__ __volatile__("ltr %%ax" : : "a" (seg));
 }
 
 Cpu::~Cpu() {

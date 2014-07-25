@@ -1,6 +1,7 @@
 #ifndef __ANARCH_X64_CPU_HPP__
 #define __ANARCH_X64_CPU_HPP__
 
+#include "../segments/tss.hpp"
 #include <anarch/stddef>
 #include <anarch/api/thread>
 #include <ansa/macros>
@@ -32,6 +33,7 @@ private:
   } ANSA_PACKED;
   
   LocalData localData;
+  Tss taskSegment;
 };
 
 }

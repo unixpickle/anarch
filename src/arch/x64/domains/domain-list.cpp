@@ -132,22 +132,33 @@ void DomainList::CpuEntrance() {
   DomainList & list = DomainList::GetGlobal();
   list.initLock.Seize();
   
+  // set various CPU structures
   Idt::GetGlobal().Set();
   GlobalMap::GetGlobal().Set();
+  Gdt::GetGlobal().Set();
   
+  // configure LAPIC
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
   lapic.Enable();
   lapic.SetDefaults();
   
+  // create actual CPU object, which sets up TSS and GS automatically
   SetCritical(false);
-  list.mainDomain->InitNewCpu();
+  int idx = list.mainDomain->InitNewCpu();
+  Cpu & cpu = list.mainDomain->GetCpu(idx);
   SetCritical(true);
   
+  // transition to CPU stack and call CpuStall; I use a `call` instead of a
+  // `jmp` to preserve 16-byte alignment in compliance with the System V ABI.
+  __asm__ __volatile__("mov %%rax, %%rsp\ncall *%%rbx"
+                       : : "a" (cpu.GetStackTop()), "b" (&CpuStall));
+}
+
+void DomainList::CpuStall() {
   cout << " [OK]" << endl;
+  DomainList & list = DomainList::GetGlobal();
   list.initFlag = true;
   list.initLock.Release();
-  
-  __asm__("cli\nhlt");
 }
 
 }

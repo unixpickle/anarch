@@ -30,6 +30,22 @@ Gdt & Gdt::GetGlobal() {
   return gGdt;
 }
 
+uint16_t Gdt::PushShortDescriptor(const ShortDescriptor & desc) {
+  assert(amountUsed + 8 <= 0x10000);
+  uint16_t sel = (uint16_t)amountUsed;
+  ansa::Memcpy((void *)((uint64_t)buffer + amountUsed), (void *)&desc, 8);
+  amountUsed += 8;
+  return sel;
+}
+
+uint16_t Gdt::PushTssDescriptor(const TssDescriptor & desc) {
+  assert(amountUsed + 0x10 <= 0x10000);
+  uint16_t sel = (uint16_t)amountUsed;
+  ansa::Memcpy((void *)((uint64_t)buffer + amountUsed), (void *)&desc, 0x10);
+  amountUsed += 0x10;
+  return sel;
+}
+
 void Gdt::Set() {
   AssertCritical();
   Pointer ptr = GetPointer();
@@ -51,12 +67,13 @@ void Gdt::Initialize() {
   }
   ansa::Bzero(buffer, 0x10000);
   
-  // get the current GDT pointer info
-  SetCritical(true);
-  Pointer current = Pointer::GetCurrent();
-  SetCritical(false);
-  amountUsed = (size_t)current.limit + 1;
-  ansa::Memcpy(buffer, (void *)current.start, amountUsed);
+  amountUsed = 8;
+  
+  // code, data, user data, user code
+  PushShortDescriptor(ShortDescriptor(true, true)); // kernel code
+  PushShortDescriptor(ShortDescriptor(true, false)); // kernel data
+  PushShortDescriptor(ShortDescriptor(false, false)); // user data
+  PushShortDescriptor(ShortDescriptor(false, true)); // user code
   
   ScopedCritical critical;
   Set();

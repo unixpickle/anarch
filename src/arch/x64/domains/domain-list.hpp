@@ -33,6 +33,7 @@ private:
   void StartCpus();
   void BootstrapCpu(uint32_t apicId);
   static void CpuEntrance();
+  static void CpuStall();
 };
 
 }
