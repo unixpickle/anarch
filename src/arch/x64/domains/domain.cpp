@@ -32,6 +32,13 @@ Cpu & Domain::GetCpu(int idx) {
   return cpuPtr[idx];
 }
 
+int Domain::InitNewCpu() {
+  assert(count < capacity);
+  Cpu * cpuPtr = (Cpu *)cpuData + count;
+  new(cpuPtr) Cpu();
+  return count++;
+}
+
 anarch::Domain & Domain::GetSibling(int) {
   Panic("Domain::GetSibling() - not supported by x64");
   return *((anarch::Domain *)NULL);

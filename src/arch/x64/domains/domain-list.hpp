@@ -3,6 +3,7 @@
 
 #include "domain.hpp"
 #include <anarch/api/domain-list>
+#include <anarch/lock>
 
 namespace anarch {
 
@@ -26,7 +27,8 @@ protected:
   
 private:
   Domain * mainDomain;
-  ansa::Atomic<uint8_t> initFlag;
+  CriticalLock initLock;
+  bool initFlag;
   
   void StartCpus();
   void BootstrapCpu(uint32_t apicId);

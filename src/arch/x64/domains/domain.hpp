@@ -14,6 +14,7 @@ public:
   ~Domain();
 
   Cpu & GetCpu(int idx);
+  int InitNewCpu();
 
   // anarch::Domain
   virtual anarch::Domain & GetSibling(int);

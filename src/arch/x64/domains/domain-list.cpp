@@ -57,6 +57,8 @@ void DomainList::Initialize() {
   mainDomain = allocator.New<Domain>(lapicCount);
   assert(mainDomain != NULL);
   
+  mainDomain->InitNewCpu();
+  
   StartCpus();
 }
 
@@ -115,6 +117,8 @@ void DomainList::BootstrapCpu(uint32_t apicId) {
       SetCritical(false);
       clock.MicroSleep(10000);
       SetCritical(true);
+      
+      ScopedLock scope(initLock);
       if (initFlag) return;
     }
   }
@@ -123,8 +127,17 @@ void DomainList::BootstrapCpu(uint32_t apicId) {
 }
 
 void DomainList::CpuEntrance() {
+  DomainList & list = DomainList::GetGlobal();
+  list.initLock.Seize();
+  
+  list.mainDomain->InitNewCpu();
+  
+  // TODO: here, load IDT, GDT, GlobalMap, GS segment, etc.
+  
   cout << " [OK]" << endl;
-  DomainList::GetGlobal().initFlag = 1;
+  list.initFlag = true;
+  list.initLock.Release();
+  
   __asm__("cli\nhlt");
 }
 
