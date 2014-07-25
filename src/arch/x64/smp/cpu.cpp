@@ -2,6 +2,7 @@
 #include "../segments/local-segment.hpp"
 #include "../domains/domain-list.hpp"
 #include <anarch/api/panic>
+#include <anarch/critical>
 
 namespace anarch {
 
@@ -37,6 +38,7 @@ Cpu::Cpu() {
   }
   localData.stackTop = (void *)((uint64_t)stack + StackSize);
   
+  ScopedCritical critical;
   LocalSegment::Write((uint64_t)&localData);
 }
 
