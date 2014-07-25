@@ -13,8 +13,8 @@ public:
   Domain(int capacity);
   ~Domain();
 
-  Cpu & GetCpu(int idx);
-  int InitNewCpu();
+  Cpu & GetCpu(int idx); // @ambicritical
+  int InitNewCpu(); // @noncritical
 
   // anarch::Domain
   virtual anarch::Domain & GetSibling(int);

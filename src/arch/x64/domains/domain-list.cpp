@@ -4,9 +4,11 @@
 #include "../critical/module.hpp"
 #include "../segments/gdt.hpp"
 #include "../clock/module.hpp"
+#include "../interrupts/idt.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
+#include "../vmm/global/global-map.hpp"
 #include <anarch/critical>
 #include <anarch/stream>
 
@@ -130,9 +132,16 @@ void DomainList::CpuEntrance() {
   DomainList & list = DomainList::GetGlobal();
   list.initLock.Seize();
   
-  list.mainDomain->InitNewCpu();
+  Idt::GetGlobal().Set();
+  GlobalMap::GetGlobal().Set();
   
-  // TODO: here, load IDT, GDT, GlobalMap, GS segment, etc.
+  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  lapic.Enable();
+  lapic.SetDefaults();
+  
+  SetCritical(false);
+  list.mainDomain->InitNewCpu();
+  SetCritical(true);
   
   cout << " [OK]" << endl;
   list.initFlag = true;

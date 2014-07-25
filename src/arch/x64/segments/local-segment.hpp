@@ -8,6 +8,7 @@ namespace anarch {
 namespace x64 {
 
 class LocalSegment {
+public:
   static void Swap(); // @critical
   static uint64_t Read(); // @critical
   static void Write(uint64_t); // @critical

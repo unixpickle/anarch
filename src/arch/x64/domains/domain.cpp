@@ -3,6 +3,7 @@
 #include "../vmm/global/global-map.hpp"
 #include "../vmm/global/global-malloc.hpp"
 #include <anarch/api/panic>
+#include <anarch/critical>
 
 namespace anarch {
 
@@ -33,6 +34,8 @@ Cpu & Domain::GetCpu(int idx) {
 }
 
 int Domain::InitNewCpu() {
+  AssertNoncritical();
+  
   assert(count < capacity);
   Cpu * cpuPtr = (Cpu *)cpuData + count;
   new(cpuPtr) Cpu();

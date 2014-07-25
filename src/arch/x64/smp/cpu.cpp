@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include "../segments/local-segment.hpp"
 #include "../domains/domain-list.hpp"
 #include <anarch/api/panic>
 
@@ -35,6 +36,8 @@ Cpu::Cpu() {
     Panic("Cpu::Cpu() - failed to allocate stack");
   }
   localData.stackTop = (void *)((uint64_t)stack + StackSize);
+  
+  LocalSegment::Write((uint64_t)&localData);
 }
 
 Cpu::~Cpu() {
