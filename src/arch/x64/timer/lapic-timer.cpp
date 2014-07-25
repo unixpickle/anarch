@@ -24,6 +24,8 @@ void LapicTimer::GeneralTimerCallback() {
         || lapic.IsRequested(IntVectors::LapicTimer)) {
       return;
     }
+  } else {
+    lapic.SendEoi();
   }
   
   timer.isExpecting = false;

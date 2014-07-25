@@ -16,17 +16,15 @@ public:
   virtual ansa::Rational<uint64_t> GetTicksPerMicro() = 0;
   
   /**
-   * Set a timeout on this timer. This timer MUST be the current timer.
+   * Set a timeout on this timer WHICH MUST BE THE CURRENT TIMER.
    * @critical
    */
   virtual void SetTimeout(uint64_t ticks, void (* func)()) = 0;
   
   /**
-   * Attempts to cancel the current timeout. This timer MUST be the current
-   * timer.
-   * @discussion This does not have to clear a timeout if it has already fired
-   * while in a critical section. When/if this does occur, the timeout may
-   * fire directly after the critical section has been exited.
+   * Cancel this timer WHICH MUST BE THE CURRENT TIMER.
+   * @discussion If a timeout has already fired but has not yet been handled,
+   * calling this method will suppress the call to the handler.
    * @critical
    */
   virtual void ClearTimeout() = 0;

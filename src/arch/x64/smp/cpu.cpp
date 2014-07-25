@@ -71,9 +71,7 @@ anarch::Domain & Cpu::GetDomain() {
 }
 
 anarch::Timer & Cpu::GetTimer() {
-  // TODO: this
-  Panic("TODO: implement Cpu::GetTimer()");
-  return *(anarch::Timer *)0;
+  return GetLapicTimer();
 }
 
 int Cpu::GetPriority() {

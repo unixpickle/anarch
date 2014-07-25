@@ -5,6 +5,7 @@
 #include "../interrupts/irt.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
 #include <anarch/critical>
+#include <anarch/stream>
 
 namespace anarch {
 
@@ -30,6 +31,8 @@ ansa::DepList TimerModule::GetDependencies() {
 
 void TimerModule::Initialize() {
   ScopedCritical critical;
+  
+  cout << "Initializing LAPIC timer subsystem...";
   
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
   Irt::GetGlobal().Set(IntVectors::Calibrate, (void *)&CalibrateMethod);
@@ -60,6 +63,8 @@ void TimerModule::Initialize() {
   Irt::GetGlobal().Unset(IntVectors::Calibrate);
   Irt::GetGlobal().Set(IntVectors::LapicTimer,
                        (void *)&LapicTimer::GeneralTimerCallback);
+  
+  cout << " [OK]" << endl;
 }
 
 void TimerModule::CalibrateMethod() {

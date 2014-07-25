@@ -12,6 +12,10 @@
 
 namespace anarch {
 
+ClockModule & ClockModule::GetGlobal() {
+  return x64::ClockModule::GetGlobal();
+}
+
 namespace x64 {
 
 namespace {
