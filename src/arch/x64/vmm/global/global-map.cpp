@@ -217,6 +217,8 @@ void GlobalMap::Initialize() {
   
   setup.GenerateBuddyAllocator();
   pageAllocator = setup.GetBuddyAllocator();
+  
+  pdpt = setup.GetPDPT();
 }
 
 }

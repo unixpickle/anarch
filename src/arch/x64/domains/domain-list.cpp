@@ -73,11 +73,13 @@ void DomainList::StartCpus() {
     if (iterator.GetType() == ApicTable::TypeLapic) {
       void * data = iterator.GetData();
       ApicTable::LocalApic * info = (ApicTable::LocalApic *)data;
+      
       startupCode.ResetStartupStack();
       BootstrapCpu((uint32_t)info->apicId);
     } else if (iterator.GetType() == ApicTable::TypeX2Apic) {
       void * data = iterator.GetData();
       ApicTable::LocalApic2 * info = (ApicTable::LocalApic2 *)data;
+      
       startupCode.ResetStartupStack();
       BootstrapCpu(info->x2apicId);
     }
@@ -86,19 +88,44 @@ void DomainList::StartCpus() {
 
 void DomainList::BootstrapCpu(uint32_t apicId) {
   ScopedCritical critical;
-  if (apicId == LapicModule::GetGlobal().GetLapic().GetId()) {
-    return;
-  }
-  
+  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Clock & clock = ClockModule::GetGlobal().GetClock();
+  if (apicId == lapic.GetId()) return;
   cout << "Starting CPU " << apicId << "...";
   
-  // TODO: here, attempt to run the bootstrap code via an IPI
+  lapic.ClearErrors();
+  lapic.SendIpi(apicId, 0, 5, 1, 1);
   
-  cerr << "[FAIL]" << endl;
+  SetCritical(false);
+  clock.Sleep(1);
+  SetCritical(true);
+  
+  lapic.SendIpi(apicId, 0, 5, 0, 1);
+  
+  initFlag = 0;
+  // send STARTUP IPI (and resend if needed, as it is on some AMD systems)
+  for (int j = 0; j < 2; j++) {
+    lapic.ClearErrors();
+    
+    // send vector 5 for address 0x5000
+    lapic.SendIpi(apicId, 5, 6, 1, 0);
+
+    // wait a maximum of 200ms before sending another IPI or failing
+    for (int i = 0; i < 20; i++) {
+      SetCritical(false);
+      clock.MicroSleep(10000);
+      SetCritical(true);
+      if (initFlag) return;
+    }
+  }
+  
+  cerr << " [FAIL]" << endl;
 }
 
 void DomainList::CpuEntrance() {
-  cout << "IN CPU ENTRANCE !!!!" << endl;
+  cout << " [OK]" << endl;
+  DomainList::GetGlobal().initFlag = 1;
+  __asm__("cli\nhlt");
 }
 
 }

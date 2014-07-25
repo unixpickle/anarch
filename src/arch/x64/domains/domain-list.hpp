@@ -26,6 +26,8 @@ protected:
   
 private:
   Domain * mainDomain;
+  ansa::Atomic<uint8_t> initFlag;
+  
   void StartCpus();
   void BootstrapCpu(uint32_t apicId);
   static void CpuEntrance();
