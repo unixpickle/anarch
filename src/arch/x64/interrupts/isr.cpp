@@ -16,7 +16,7 @@ void InterruptCoded(uint64_t vector, anarch::x64::IsrStack * stack,
   void * routine = anarch::x64::Irt::GetGlobal().Get((uint8_t)vector);
   if (routine) {
     ((RoutineCall)routine)(stack, code);
-  } else {
+  } else if (vector < 0xf0) {
     anarch::cerr << "InterruptCoded(" << vector << ", " << (uint64_t)stack
       << ", " << code << ") - caller=" << stack->rip << anarch::endl;
     anarch::Panic("unhandled exception");
@@ -29,7 +29,7 @@ void InterruptNonCoded(uint64_t vector, anarch::x64::IsrStack * stack) {
   void * routine = anarch::x64::Irt::GetGlobal().Get((uint8_t)vector);
   if (routine) {
     ((RoutineCall)routine)(stack, 0);
-  } else {
+  } else if (vector < 0xf0) {
     anarch::cerr << "InterruptCoded(" << vector << ", " << (uint64_t)stack
       << ") - caller=" << stack->rip << anarch::endl;
     anarch::Panic("unhandled interrupt");

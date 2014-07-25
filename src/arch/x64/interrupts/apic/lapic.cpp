@@ -61,6 +61,11 @@ void Lapic::ClearTimeout() {
   WriteReg(RegLvtTimer, 0x10000);
 }
 
+bool Lapic::IsTimerRunning() {
+  if (ReadReg(RegLvtTimer) & 0x10000) return false;
+  return ReadReg(RegTimerCurrCount) != 0;
+}
+
 }
 
 }

@@ -12,6 +12,7 @@
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
 #include "../segments/gdt.hpp"
+#include "../timer/module.hpp"
 #include "../clock/module.hpp"
 #include "../panic/panic.hpp"
 #include <anarch/stream>
@@ -30,20 +31,21 @@ const BootInfo * bootInfo = NULL;
 
 void InitializeSingletons() {
   bootInfo = NULL;
-  GlobalMap::InitGlobal();
+  CriticalModule::InitGlobal();
   GlobalMalloc::InitGlobal();
-  TLB::InitGlobal();
+  IOApicModule::InitGlobal();
   TextConsole::InitGlobal();
   PanicModule::InitGlobal();
+  LapicModule::InitGlobal();
+  TimerModule::InitGlobal();
+  ClockModule::InitGlobal();
+  DomainList::InitGlobal();
   AcpiModule::InitGlobal();
+  GlobalMap::InitGlobal();
+  Tlb::InitGlobal();
   Idt::InitGlobal();
   Irt::InitGlobal();
   Pic::InitGlobal();
-  IOApicModule::InitGlobal();
-  LapicModule::InitGlobal();
-  DomainList::InitGlobal();
-  CriticalModule::InitGlobal();
-  ClockModule::InitGlobal();
   Gdt::InitGlobal();
   
   StreamModule::InitGlobal();

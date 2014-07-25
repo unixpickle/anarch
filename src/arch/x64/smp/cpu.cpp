@@ -2,6 +2,7 @@
 #include "../segments/local-segment.hpp"
 #include "../segments/gdt.hpp"
 #include "../domains/domain-list.hpp"
+#include "../interrupts/apic/lapic-module.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
 
@@ -45,10 +46,24 @@ Cpu::Cpu() {
   TssDescriptor desc(&taskSegment);
   uint16_t seg = Gdt::GetGlobal().PushTssDescriptor(desc);
   __asm__ __volatile__("ltr %%ax" : : "a" (seg));
+  
+  apicId = LapicModule::GetGlobal().GetLapic().GetId();
 }
 
 Cpu::~Cpu() {
   Panic("Cpu::~Cpu() - CPU cannot be destroyed!");
+}
+
+void * Cpu::GetStackTop() {
+  return localData.stackTop;
+}
+
+uint32_t Cpu::GetApicId() {
+  return apicId;
+}
+
+LapicTimer & Cpu::GetLapicTimer() {
+  return lapicTimer;
 }
 
 anarch::Domain & Cpu::GetDomain() {
@@ -64,10 +79,6 @@ anarch::Timer & Cpu::GetTimer() {
 int Cpu::GetPriority() {
   // TODO: return the index in the CPU core
   return 0;
-}
-
-void * Cpu::GetStackTop() {
-  return localData.stackTop;
 }
 
 }

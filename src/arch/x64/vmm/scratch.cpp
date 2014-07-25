@@ -37,7 +37,7 @@ bool Scratch::Alloc(VirtAddr & addr, PhysAddr page) {
       bitmap[i] = true;
       pageTables[i] = page | 3;
       addr = CellVirtual(i);
-      TLB::Invlpg(addr);
+      Tlb::Invlpg(addr);
       return true;
     }
   }
@@ -48,7 +48,7 @@ void Scratch::Reassign(VirtAddr addr, PhysAddr newAddr) {
   AssertCritical();
   size_t idx = (addr - CellVirtual(0)) / 0x1000;
   pageTables[idx] = newAddr | 3;
-  TLB::Invlpg(addr);
+  Tlb::Invlpg(addr);
 }
 
 void Scratch::Free(VirtAddr addr) {

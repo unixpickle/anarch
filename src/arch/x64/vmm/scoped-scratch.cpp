@@ -33,7 +33,7 @@ void ScopedScratch::Reassign(PhysAddr phys) {
 
 void ScopedScratch::InvalidateCache() {
   AssertCritical();
-  TLB::Invlpg(addr);
+  Tlb::Invlpg(addr);
 }
 
 }

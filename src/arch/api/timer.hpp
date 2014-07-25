@@ -1,6 +1,7 @@
 #ifndef __ANARCH_API_TIMER_HPP__
 #define __ANARCH_API_TIMER_HPP__
 
+#include <anarch/stdint>
 #include <ansa/rational>
 #include <ansa/macros>
 #include <ansa/nocopy>
@@ -12,7 +13,7 @@ public:
   /**
    * @ambicritical
    */
-  virtual Rational<uint64_t> GetTicksPerMicro() = 0;
+  virtual ansa::Rational<uint64_t> GetTicksPerMicro() = 0;
   
   /**
    * Set a timeout on this timer. This timer MUST be the current timer.

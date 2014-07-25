@@ -80,7 +80,7 @@ PhysAddr GlobalMap::GetPDPT() {
 
 void GlobalMap::Set() {
   AssertCritical();
-  TLB::GetGlobal().WillSetAddressSpace(*this);
+  Tlb::GetGlobal().WillSetAddressSpace(*this);
   __asm__("mov %0, %%cr3" : : "r" (GetPageTable().GetPML4()));
 }
 
@@ -139,7 +139,7 @@ void GlobalMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 3);
 
   // we may have overwritten something
-  TLB::GetGlobal().DistributeInvlpg(addr, size.Bytes());
+  Tlb::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
 void GlobalMap::Unmap(VirtAddr addr, Size size) {
@@ -158,7 +158,7 @@ void GlobalMap::Unmap(VirtAddr addr, Size size) {
   
   // we should invalidate the old memory before releasing the lock since new
   // mappings might not invalidate it.
-  TLB::GetGlobal().DistributeInvlpg(addr, size.Bytes());
+  Tlb::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
 bool GlobalMap::Reserve(VirtAddr & addr, Size size) {

@@ -23,6 +23,7 @@ public:
 
   virtual void SetTimeout(uint8_t vector, uint32_t ticks); // @critical
   virtual void ClearTimeout();
+  virtual bool IsTimerRunning();
 
   /**
    * @critical

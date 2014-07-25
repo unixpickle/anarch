@@ -3,6 +3,7 @@
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
 #include "../segments/gdt.hpp"
+#include "../timer/module.hpp"
 #include "../clock/module.hpp"
 #include "../interrupts/idt.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
@@ -49,6 +50,10 @@ ansa::DepList DomainList::GetDependencies() {
                        &ClockModule::GetGlobal(),
                        &Gdt::GetGlobal(),
                        &StreamModule::GetGlobal());
+}
+
+ansa::DepList DomainList::GetSuperDependencies() {
+  return ansa::DepList(&TimerModule::GetGlobal());
 }
 
 void DomainList::Initialize() {

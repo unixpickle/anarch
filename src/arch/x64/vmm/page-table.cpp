@@ -71,7 +71,7 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry, PhysSize * size) {
     }
     table.Reassign(nextPage & 0x7ffffffffffff000);
   }
-  if (table[indexes[depth]] & 0x80 || depth == 3) {
+  if (depth == 3 || (table[indexes[depth]] & 0x80)) {
     entry = table[indexes[depth]];
     if (size) *size = 0x1000L << (27 - 9 * depth);
     return depth;

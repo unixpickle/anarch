@@ -9,16 +9,16 @@ namespace x64 {
 
 namespace {
 
-TLB globalTLB;
+Tlb globalTlb;
 
 }
 
-void TLB::Invlpg(VirtAddr addr) {
+void Tlb::Invlpg(VirtAddr addr) {
   AssertCritical();
   __asm__ __volatile__("invlpg (%0)" : : "r" (addr) : "memory");
 }
 
-void TLB::Invlpgs(VirtAddr start, PhysSize size) {
+void Tlb::Invlpgs(VirtAddr start, PhysSize size) {
   AssertCritical();
   if (size > 0x200000L) {
     // at this point, it's more efficient to just clear all the caches
@@ -42,30 +42,30 @@ void TLB::Invlpgs(VirtAddr start, PhysSize size) {
   }
 }
 
-void TLB::InitGlobal() {
-  new(&globalTLB) TLB();
+void Tlb::InitGlobal() {
+  new(&globalTlb) Tlb();
 }
 
-TLB & TLB::GetGlobal() {
-  return globalTLB;
+Tlb & Tlb::GetGlobal() {
+  return globalTlb;
 }
 
-void TLB::WillSetAddressSpace(MemoryMap &) {
+void Tlb::WillSetAddressSpace(MemoryMap &) {
   // TODO: something here
   AssertCritical();
 }
 
-void TLB::DistributeInvlpg(VirtAddr start, PhysSize size) {
+void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
   ScopedCritical scope;
   Invlpgs(start, size);
 }
   
-ansa::DepList TLB::GetDependencies() {
+ansa::DepList Tlb::GetDependencies() {
   // TODO: something here
   return ansa::DepList();
 }
 
-void TLB::Initialize() {
+void Tlb::Initialize() {
   // TODO: this
 }
 
