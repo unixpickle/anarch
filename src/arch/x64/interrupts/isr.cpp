@@ -1,6 +1,7 @@
 #include "isr.hpp"
 #include "irt.hpp"
 #include "../common.hpp"
+#include "../segments/local-segment.hpp"
 #include <anarch/stream>
 #include <anarch/api/panic>
 
@@ -10,6 +11,8 @@ extern "C" {
 
 void InterruptCoded(uint64_t vector, anarch::x64::IsrStack * stack,
                     uint64_t code) {
+  anarch::x64::LocalSegment::SwapScope scope(vector, *stack);
+  
   void * routine = anarch::x64::Irt::GetGlobal().Get((uint8_t)vector);
   if (routine) {
     ((RoutineCall)routine)(stack, code);
@@ -21,6 +24,8 @@ void InterruptCoded(uint64_t vector, anarch::x64::IsrStack * stack,
 }
 
 void InterruptNonCoded(uint64_t vector, anarch::x64::IsrStack * stack) {
+  anarch::x64::LocalSegment::SwapScope scope(vector, *stack);
+  
   void * routine = anarch::x64::Irt::GetGlobal().Get((uint8_t)vector);
   if (routine) {
     ((RoutineCall)routine)(stack, 0);

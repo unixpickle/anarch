@@ -27,7 +27,8 @@ struct ShortDescriptor {
   unsigned limitHigh : 4;
   
   // flags half-byte
-  unsigned reservedZero : 2;
+  unsigned reservedZero : 1;
+  unsigned longMode : 1;
   unsigned size : 1;
   unsigned granularity : 1;
   

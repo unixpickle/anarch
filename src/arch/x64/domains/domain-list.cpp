@@ -159,6 +159,12 @@ void DomainList::CpuStall() {
   DomainList & list = DomainList::GetGlobal();
   list.initFlag = true;
   list.initLock.Release();
+  
+  SetCritical(false);
+  
+  while (1) {
+    __asm__ __volatile__("hlt");
+  }
 }
 
 }

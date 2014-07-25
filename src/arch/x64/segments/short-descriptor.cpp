@@ -9,7 +9,7 @@ ShortDescriptor::ShortDescriptor(bool privileged, bool executable)
     writable(executable ? 0 : 1), direction(0),
     executable(executable ? 1 : 0), reservedOne(1),
     privilege(privileged ? 0 : 3), present(1), limitHigh(0), reservedZero(0),
-    size(1), granularity(0), baseHigh(0) {
+    longMode(1), size(0), granularity(0), baseHigh(0) {
 }
 
 }
