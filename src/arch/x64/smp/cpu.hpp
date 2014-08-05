@@ -5,6 +5,7 @@
 #include "../timer/lapic-timer.hpp"
 #include <anarch/stddef>
 #include <anarch/api/thread>
+#include <anarch/api/memory-map>
 #include <ansa/macros>
 
 namespace anarch {
@@ -25,6 +26,10 @@ public:
   virtual anarch::Domain & GetDomain(); // @ambicritical
   virtual anarch::Timer & GetTimer(); // @critical
   virtual int GetPriority(); // @ambicritical
+  
+protected:
+  MemoryMap * currentMap = NULL;
+  friend class Tlb;
   
 private:
   static const size_t StackSize = 0x10000;

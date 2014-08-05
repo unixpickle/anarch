@@ -10,6 +10,7 @@
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
 #include "../vmm/global/global-map.hpp"
+#include "../vmm/tlb.hpp"
 #include <anarch/critical>
 #include <anarch/stream>
 
@@ -53,7 +54,7 @@ ansa::DepList DomainList::GetDependencies() {
 }
 
 ansa::DepList DomainList::GetSuperDependencies() {
-  return ansa::DepList(&TimerModule::GetGlobal());
+  return ansa::DepList(&Tlb::GetGlobal(), &TimerModule::GetGlobal());
 }
 
 void DomainList::Initialize() {
