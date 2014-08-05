@@ -1,4 +1,8 @@
 #include "panic.hpp"
+#include "../interrupts/irt.hpp"
+#include "../interrupts/vectors.hpp"
+#include "../interrupts/apic/lapic-module.hpp"
+#include "../domains/domain-list.hpp"
 #include <anarch/api/panic>
 #include <anarch/stdint>
 #include <anarch/new>
@@ -44,17 +48,27 @@ void PanicModule::Panic(const char * msg) {
 }
 
 void PanicModule::Initialize() {
-  // TODO: here, register the Panic IPI, etc.
+  Irt::GetGlobal().Set(IntVectors::Panic, (void *)HaltCpu);
 }
 
 ansa::DepList PanicModule::GetDependencies() {
-  // TODO: here, we return whatever module will initialize the CPU list
-  return ansa::DepList();
+  return ansa::DepList(&Irt::GetGlobal(), &LapicModule::GetGlobal(),
+                       &DomainList::GetGlobal());
 }
 
 void PanicModule::DistributeError() {
   if (!IsInitialized()) return;
-  // TODO: here, use IPIs to halt other CPUs
+  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Cpu * current = &Cpu::GetCurrent();
+  DomainList & domains = DomainList::GetGlobal();
+  for (int i = 0; i < domains.GetCount(); i++) {
+    Domain & domain = domains[i];
+    for (int j = 0; j < domain.GetThreadCount(); j++) {
+      Cpu * cpu = &domain.GetCpu(j);
+      if (cpu == current) continue;
+      lapic.SendIpi(cpu->GetApicId(), IntVectors::Panic);
+    }
+  }
 }
 
 void PanicModule::WriteError(const char * msg) {
@@ -71,6 +85,12 @@ void PanicModule::WriteError(const char * msg) {
     msg++;
   }
   buf[i] = 0xf920; // space at the end for aesthetics
+}
+
+void PanicModule::HaltCpu() {
+  while (1) {
+    __asm__ __volatile__("cli\nhlt");
+  }
 }
 
 }

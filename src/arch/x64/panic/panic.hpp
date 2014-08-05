@@ -25,6 +25,7 @@ private:
   
   void DistributeError();
   static void WriteError(const char * msg);
+  static void HaltCpu();
 };
 
 }

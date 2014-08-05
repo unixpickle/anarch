@@ -94,7 +94,8 @@ void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
 }
   
 ansa::DepList Tlb::GetDependencies() {
-  return ansa::DepList(&DomainList::GetGlobal());
+  return ansa::DepList(&Irt::GetGlobal(), &LapicModule::GetGlobal(),
+                       &DomainList::GetGlobal());
 }
 
 void Tlb::Initialize() {

@@ -1,6 +1,7 @@
 #include "domain-list.hpp"
 #include "../smp/startup-code.hpp"
 #include "../acpi/acpi-module.hpp"
+#include "../panic/panic.hpp"
 #include "../critical/module.hpp"
 #include "../segments/gdt.hpp"
 #include "../timer/module.hpp"
@@ -54,7 +55,8 @@ ansa::DepList DomainList::GetDependencies() {
 }
 
 ansa::DepList DomainList::GetSuperDependencies() {
-  return ansa::DepList(&Tlb::GetGlobal(), &TimerModule::GetGlobal());
+  return ansa::DepList(&PanicModule::GetGlobal(), &Tlb::GetGlobal(),
+                       &TimerModule::GetGlobal());
 }
 
 void DomainList::Initialize() {
