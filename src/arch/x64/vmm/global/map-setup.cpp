@@ -81,7 +81,7 @@ BuddyAllocator * MapSetup::GetBuddyAllocator() {
     + sizeof(FreeFinder));
 }
 
-PhysAddr MapSetup::GetPDPT() {
+PhysAddr MapSetup::GetPdpt() {
   return (PhysAddr)pdpt;
 }
 

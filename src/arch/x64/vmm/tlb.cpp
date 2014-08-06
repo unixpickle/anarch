@@ -65,6 +65,10 @@ void Tlb::WillSetAddressSpace(MemoryMap & map) {
 }
 
 void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
+  AssertNoncritical();
+  assert(start + size < Scratch::StartAddr);
+  assert(start < Scratch::StartAddr);
+  
   if (!IsInitialized()) {
     ScopedCritical crit;
     Invlpgs(start, size);
@@ -75,14 +79,20 @@ void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
   ScopedCritical critical;
   
   Invlpgs(start, size);
-  
-  if (start < Scratch::StartAddr) {
-    DistributeKernel(start, size);
-  } else {
-    DistributeUser(start, size);
-  }
+  DistributeKernel(start, size);
 }
+
+void Tlb::DistributeUserInvlpg(VirtAddr start, PhysSize size,
+                               MemoryMap & map) {
+  AssertNoncritical();
+  assert(start > Scratch::StartAddr);
+  assert(start + size > Scratch::StartAddr);
   
+  ScopedLock scope(lock);
+  ScopedCritical critical;
+  DistributeUser(start, size, &map);
+}
+
 ansa::DepList Tlb::GetDependencies() {
   return ansa::DepList(&Irt::GetGlobal(), &LapicModule::GetGlobal(),
                        &DomainList::GetGlobal());
@@ -118,13 +128,14 @@ void Tlb::DistributeKernel(VirtAddr a, PhysSize b) {
       ++ipiCount;
     }
   }
-  while (ipiCount) {
-  }
+  while (ipiCount) {}
 }
 
-void Tlb::DistributeUser(VirtAddr a, PhysSize b) {
+void Tlb::DistributeUser(VirtAddr a, PhysSize b, MemoryMap * map) {
   Cpu * current = &Cpu::GetCurrent();
-  MemoryMap * myMap = current->currentMap;
+  if (current->currentMap == map) {
+    Invlpgs(a, b);
+  }
   
   invlAddress = a;
   invlSize = b;
@@ -138,15 +149,14 @@ void Tlb::DistributeUser(VirtAddr a, PhysSize b) {
     Domain & domain = list[i];
     for (int j = 0; j < domain.GetThreadCount(); j++) {
       Cpu * cpu = &domain.GetCpu(j);
-      if (cpu->currentMap != myMap || cpu == current) {
+      if (cpu->currentMap != map || cpu == current) {
         continue;
       }
       lapic.SendIpi(cpu->GetApicId(), IntVectors::Invlpg);
       ++ipiCount;
     }
   }
-  while (ipiCount) {
-  }
+  while (ipiCount) {}
 }
 
 }

@@ -31,8 +31,28 @@ public:
   virtual Allocator & GetAllocator() = 0; // @ambicritical
   virtual VirtualAllocator & GetVirtualAllocator() = 0; // @ambicritical
   
-  virtual bool Alloc(void *&, size_t);
-  virtual void Free(void *);
+  virtual bool Alloc(void *&, size_t); // @noncritical
+  virtual void Free(void *); // @noncritical
+  
+  /**
+   * Allocate an object, preferably from this Domain's allocator.
+   */
+  template <typename T, typename... Args>
+  T * New(Args... args) {
+    void * buf;
+    if (!Alloc(buf, sizeof(T))) return NULL;
+    return new(buf) T(args...);
+  }
+  
+  /**
+   * Delete an object which was most likely allocated on this Domain's
+   * allocator.
+   */
+  template <typename T>
+  void Delete(T * ptr) {
+    ptr->~T();
+    Free((void *)ptr);
+  }
 };
 
 }

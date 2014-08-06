@@ -1,0 +1,191 @@
+#include "free-list.hpp"
+#include <anarch/api/domain>
+#include <anarch/critical>
+
+namespace anarch {
+
+namespace x64 {
+
+FreeList::~FreeList() {
+  Region * reg = first;
+  while (reg) {
+    Region * next = reg->next;
+    FreeRegion(reg);
+    reg = next;
+  }
+}
+
+bool FreeList::AllocAt(VirtAddr start, PhysSize pageSize,
+                       PhysSize pageCount) {
+  if (start % pageSize) return false;
+  
+  Region * reg = first;
+  Region * last = NULL;
+  
+  Region requested(start, pageSize * pageCount);
+  
+  while (reg) {
+    if (!reg->Contains(requested)) {
+      last = reg;
+      reg = reg->next;
+      continue;
+    }
+    AllocInRegion(reg, last, requested);
+    return true;
+  }
+  return false;
+}
+
+VirtAddr FreeList::Alloc(PhysSize pageSize, PhysSize pageCount) {
+  AssertNoncritical();
+  Region * last = NULL;
+  Region * reg = first;
+  
+  PhysSize totalSize = pageSize * pageCount;
+  
+  while (reg) {
+    if (!reg->CanHold(pageSize, pageCount)) {
+      last = reg;
+      reg = reg->next;
+      continue;
+    }
+    
+    PhysSize chopSize = 0;
+    if (reg->start % pageSize) {
+      chopSize = pageSize - (reg->start % pageSize);
+    }
+    Region requested(reg->start + chopSize, totalSize);
+    AllocInRegion(reg, last, requested);
+    return requested.start;
+  }
+  
+  return 0;
+}
+
+void FreeList::Free(VirtAddr addr, PhysSize pageSize, PhysSize pageCount) {
+  AssertNoncritical();
+  
+  Region * reg = first;
+  Region * last = NULL;
+  
+  Region releasing(addr, pageSize * pageCount);
+  
+  while (reg) {
+    if (reg->IsAdjacentBehind(addr)) {
+      // |...|reg|releasing|...|
+      
+      reg->size += releasing.size;
+      while (reg->next) {
+        Region * theNext = reg->next;
+        if (!reg->IsAdjacentBehind(theNext->start)) break;
+        reg->size += theNext->size;
+        reg->next = theNext->next;
+        FreeRegion(theNext);
+      }
+      return;
+    } else if (releasing.IsAdjacentBehind(reg->start)) {
+      // |...|releasing|reg|...|
+      
+      reg->start -= releasing.size;
+      reg->size += releasing.size;
+      return;
+    } else if (releasing.IsBehind(reg->start)) {
+      // |...|releasing|...|reg|...|
+      
+      break;
+    }
+    
+    last = reg;
+    reg = reg->next;
+  }
+  
+  Region * newRegion = AllocRegion(addr, releasing.size);
+  newRegion->next = reg;
+  if (last) last->next = newRegion;
+  else first = newRegion;
+}
+
+// FreeList::Region
+
+FreeList::Region::Region(VirtAddr _start, PhysSize _size)
+  : start(_start), size(_size) {
+  assert(start + size > start || start + size == 0);
+}
+
+VirtAddr FreeList::Region::End() {
+  return start + size;
+}
+
+bool FreeList::Region::CanHold(PhysSize pageSize, PhysSize pageCount) {
+  PhysSize chopSize = 0;
+  if (start % pageSize) {
+    chopSize += pageSize - (start % pageSize);
+  }
+  return chopSize + (pageSize * pageCount) <= size;
+}
+
+bool FreeList::Region::IsAdjacentBehind(VirtAddr addr) {
+  if (start + size == 0) return false;
+  return start + size == addr;
+}
+
+bool FreeList::Region::Contains(FreeList::Region & reg) {
+  if (start > reg.start) return false;
+  if (start + size != 0) {
+    if (reg.start + reg.size == 0) return false;
+    return reg.start + reg.size <= start + size;
+  }
+  return true;
+}
+
+bool FreeList::Region::IsBehind(VirtAddr addr) {
+  if (start + size == 0) return false;
+  return (start + size <= addr);
+}
+
+bool FreeList::Region::IsFilledBy(FreeList::Region & reg) {
+  return reg.start == start && reg.size == size;
+}
+
+bool FreeList::Region::IsEndedBy(FreeList::Region & reg) {
+  return reg.start + reg.size == start + size;
+}
+
+bool FreeList::Region::IsStartedBy(FreeList::Region & reg) {
+  return reg.start == start;
+}
+
+// FreeList private
+
+FreeList::Region * FreeList::AllocRegion(VirtAddr start, PhysSize size) {
+  AssertNoncritical();
+  return Domain::GetCurrent().New<Region>(start, size);
+}
+
+void FreeList::FreeRegion(FreeList::Region * reg) {
+  AssertNoncritical();
+  Domain::GetCurrent().Delete(reg);
+}
+
+void FreeList::AllocInRegion(Region * reg, Region * last,
+                             Region & requested) {
+  if (reg->IsFilledBy(requested)) {
+    if (last) last->next = reg->next;
+    else first = reg->next;
+    FreeRegion(reg);
+  } else if (reg->IsStartedBy(requested)) {
+    reg->start += requested.size;
+  } else if (reg->IsEndedBy(requested)) {
+    reg->size -= requested.size;
+  } else {
+    PhysSize suffixSize = reg->End() - requested.End();
+    Region * suffix = AllocRegion(requested.End(), suffixSize);
+    reg->size = requested.start - reg->start;
+    suffix->next = reg->next;
+    reg->next = suffix;
+  }
+}
+
+}
+
+}

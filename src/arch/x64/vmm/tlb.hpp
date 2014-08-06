@@ -27,6 +27,12 @@ public:
    */
   virtual void DistributeInvlpg(VirtAddr start, PhysSize size);
   
+  /**
+   * @noncritical
+   */
+  virtual void DistributeUserInvlpg(VirtAddr start, PhysSize size,
+                                    MemoryMap & map);
+  
 protected:
   ansa::DepList GetDependencies();
   virtual void Initialize();
@@ -35,7 +41,7 @@ private:
   NoncriticalLock lock;
   static void HandleNotification();
   void DistributeKernel(VirtAddr, PhysSize); // @critical
-  void DistributeUser(VirtAddr, PhysSize); // @critical
+  void DistributeUser(VirtAddr, PhysSize, MemoryMap *); // @critical
 };
 
 }

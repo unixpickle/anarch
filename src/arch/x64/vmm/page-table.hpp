@@ -22,11 +22,13 @@ public:
   PageTable(Allocator &, Scratch &, PhysAddr pml4);
   PageTable(Allocator &, Scratch &);
   
-  void SetPML4(PhysAddr);
-  PhysAddr GetPML4();
+  void SetPml4(PhysAddr);
+  PhysAddr GetPml4();
   
   void SetAllocator(Allocator &);
   Allocator & GetAllocator();
+  
+  Scratch & GetScratch();
   
   /**
    * @return The depth of the entry found (0-3 inclusive) or -1 if not mapped.
@@ -63,6 +65,12 @@ public:
    */
   void SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
                uint64_t parentMask);
+  
+  /**
+   * Perform a memory map read operation. Panic()s if a Set() fails.
+   * @noncritical
+   */
+  bool Read(PhysAddr *, MemoryMap::Attributes *, PhysSize *, VirtAddr);
   
   /**
    * Free all of the page table structures including the PML4.

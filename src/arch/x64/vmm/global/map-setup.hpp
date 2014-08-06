@@ -30,7 +30,7 @@ public:
   FreeFinder * GetFreeFinder();
   BuddyAllocator * GetBuddyAllocator();
   
-  PhysAddr GetPDPT();
+  PhysAddr GetPdpt();
   
 private:
   PhysAddr kernelEnd;

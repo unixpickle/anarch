@@ -21,7 +21,7 @@ public:
   virtual PageTable & GetPageTable();
   virtual FreeFinder & GetFreeFinder();
   virtual Allocator & GetPageAllocator();
-  virtual PhysAddr GetPDPT();
+  virtual PhysAddr GetPdpt();
   
   // anarch::MemoryMap
   virtual void Set();

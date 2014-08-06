@@ -44,6 +44,5 @@ I have implemented the following features:
 
 I plan to implement the following features in the following order:
 
- * Implement a `UserMap` with a free region list
  * Create a `State` class which uses IRET to restore state
  * Create a `SyscallArgs` class for syscall arguments

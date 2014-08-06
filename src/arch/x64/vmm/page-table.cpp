@@ -36,11 +36,11 @@ PageTable::PageTable(Allocator & a, Scratch & s, PhysAddr p)
 PageTable::PageTable(Allocator & a, Scratch & s) : allocator(&a), scratch(s) {
 }
 
-void PageTable::SetPML4(PhysAddr _pml4) {
+void PageTable::SetPml4(PhysAddr _pml4) {
   pml4 = _pml4;
 }
 
-PhysAddr PageTable::GetPML4() {
+PhysAddr PageTable::GetPml4() {
   return pml4;
 }
 
@@ -50,6 +50,10 @@ void PageTable::SetAllocator(Allocator & a) {
 
 Allocator & PageTable::GetAllocator() {
   return *allocator;
+}
+
+Scratch & PageTable::GetScratch() {
+  return scratch;
 }
 
 int PageTable::Walk(VirtAddr addr, uint64_t & entry, PhysSize * size) {
@@ -200,6 +204,36 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
     curPhys += size.pageSize;
     curVirt += size.pageSize;
   }
+}
+
+bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
+                     PhysSize * sizeOut, VirtAddr addr) {
+  AssertNoncritical();
+  
+  uint64_t entry;
+  int depth = Walk(addr, entry, sizeOut);
+  if (depth < 0) return false;
+  if (!entry) return false;
+  
+  assert(depth >= 2);
+  
+  if (physOut) {
+    if (depth == 3) {
+      *physOut = entry & 0x7ffffffffffff000UL;
+    } else {
+      *physOut = entry & 0x7fffffffffe00000UL;
+    }
+  }
+  
+  if (attrOut) {
+    attrOut->executable = (entry & (1UL << 63)) != 0;
+    attrOut->writable = (entry & 2) != 0;
+  
+    // TODO: set cachable flag properly here
+    attrOut->cachable = true;
+  }
+  
+  return true;
 }
 
 void PageTable::FreeTable(int start) {

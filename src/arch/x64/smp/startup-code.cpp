@@ -24,7 +24,7 @@ StartupCode::StartupCode(void (*_cb)()) : callbackFunc((uint64_t)_cb) {
   ansa::Memcpy(dataBackup, (void *)PageTableBase, 0x3000);
   
   // set the PDPT in the dummy PML4
-  PhysAddr pdpt = GlobalMap::GetGlobal().GetPDPT();
+  PhysAddr pdpt = GlobalMap::GetGlobal().GetPdpt();
   *((uint64_t *)PageTableBase) = pdpt | 3;
   
   // copy the GDT pointer
@@ -48,7 +48,7 @@ StartupCode::~StartupCode() {
 
 void StartupCode::ResetStartupStack() {
   uint64_t * bootstrapStack = (uint64_t *)CodeBase - 2;
-  PhysAddr pml4 = GlobalMap::GetGlobal().GetPageTable().GetPML4();
+  PhysAddr pml4 = GlobalMap::GetGlobal().GetPageTable().GetPml4();
   bootstrapStack[0] = (uint64_t)pml4;
   bootstrapStack[1] = callbackFunc;
 }
