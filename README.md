@@ -44,8 +44,6 @@ I have implemented the following features:
 
 I plan to implement the following features in the following order:
 
- * Create a Thread `Wakeup()` method and implement it with IPIs
  * Implement a `UserMap` with a free region list
  * Create a `State` class which uses IRET to restore state
- * Come up with a `PlatformDelegate` interface which notifies a delegate about memory faults and system calls.
  * Create a `SyscallArgs` class for syscall arguments
