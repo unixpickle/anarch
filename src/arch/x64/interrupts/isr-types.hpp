@@ -14,7 +14,9 @@ struct IsrStack {
   uint64_t rflags;
   uint64_t rsp;
   uint64_t ss;
-} ANSA_PACKED;
+};
+
+static_assert(sizeof(IsrStack) == 0x28, "invalid IRETQ stack size");
 
 }
 

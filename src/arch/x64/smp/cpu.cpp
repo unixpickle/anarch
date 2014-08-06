@@ -44,10 +44,10 @@ Cpu::Cpu() {
   localData.userData = NULL;
   
   void * stack;
-  if (!GetDomain().GetVirtualAllocator().Alloc(stack, StackSize)) {
+  if (!GetDomain().Alloc(stack, StackSize)) {
     Panic("Cpu::Cpu() - failed to allocate stack");
   }
-  localData.stackTop = (void *)((uint64_t)stack + StackSize);
+  stackTop = (void *)((uint64_t)stack + StackSize);
   
   ScopedCritical critical;
   LocalSegment::Write((uint64_t)&localData);
@@ -63,8 +63,13 @@ Cpu::~Cpu() {
   Panic("Cpu::~Cpu() - CPU cannot be destroyed!");
 }
 
+void Cpu::SetAsyncKernelTop(void * stack) {
+  taskSegment.rsp[0] = (uint64_t)stack;
+  localData.syscallStack = stack;
+}
+
 void * Cpu::GetStackTop() {
-  return localData.stackTop;
+  return stackTop;
 }
 
 uint32_t Cpu::GetApicId() {
