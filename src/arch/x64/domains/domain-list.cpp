@@ -7,6 +7,8 @@
 #include "../timer/module.hpp"
 #include "../clock/module.hpp"
 #include "../interrupts/idt.hpp"
+#include "../interrupts/irt.hpp"
+#include "../interrupts/vectors.hpp"
 #include "../interrupts/apic/ioapic-module.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
 #include "../vmm/global/global-malloc.hpp"
@@ -51,7 +53,8 @@ ansa::DepList DomainList::GetDependencies() {
                        &LapicModule::GetGlobal(),
                        &ClockModule::GetGlobal(),
                        &Gdt::GetGlobal(),
-                       &StreamModule::GetGlobal());
+                       &StreamModule::GetGlobal(),
+                       &Irt::GetGlobal());
 }
 
 ansa::DepList DomainList::GetSuperDependencies() {
@@ -60,6 +63,8 @@ ansa::DepList DomainList::GetSuperDependencies() {
 }
 
 void DomainList::Initialize() {
+  Irt::GetGlobal().Set(IntVectors::Wakeup, (void *)&Cpu::HandleWakeup);
+  
   ApicTable & apicTable = *AcpiModule::GetGlobal().GetApicTable();
   int lapicCount = apicTable.CountLapics(true);
   

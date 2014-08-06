@@ -11,8 +11,6 @@ namespace x64 {
 
 class Tlb : public ansa::Module {
 public:
-  static const VirtAddr UserStart = 0x8000000000UL;
-  
   static void Invlpg(VirtAddr addr); // @critical
   static void Invlpgs(VirtAddr, PhysSize); // @critical
   

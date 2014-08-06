@@ -31,6 +31,14 @@ public:
    * @ambicritical
    */
   virtual int GetPriority() = 0;
+  
+  /**
+   * Asynchronously send this Thread a message by causing it to run a function.
+   * If this is called multiple times before the thread receives a message, the
+   * thread may not receive every message, but it will receive at least one.
+   * @critical
+   */
+  virtual void RunAsync(void (*)()) = 0;
 };
 
 }

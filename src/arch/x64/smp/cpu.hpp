@@ -15,6 +15,7 @@ namespace x64 {
 class Cpu : public Thread {
 public:
   static Cpu & GetCurrent();
+  static void HandleWakeup();
   
   Cpu(); // @noncritical
   ~Cpu(); // @panic
@@ -26,6 +27,7 @@ public:
   virtual anarch::Domain & GetDomain(); // @ambicritical
   virtual anarch::Timer & GetTimer(); // @critical
   virtual int GetPriority(); // @ambicritical
+  virtual void RunAsync(void (*)()); // @critical
   
 protected:
   MemoryMap * currentMap = NULL;
@@ -39,6 +41,8 @@ private:
     void * userData;
     void * stackTop;
   } ANSA_PACKED;
+  
+  void (* wakeupFunction)();
   
   LapicTimer lapicTimer;
   LocalData localData;

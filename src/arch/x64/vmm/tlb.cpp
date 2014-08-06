@@ -17,6 +17,7 @@ namespace {
 Tlb globalTlb;
 VirtAddr invlAddress;
 PhysSize invlSize;
+ansa::Atomic<int> ipiCount;
 
 }
 
@@ -75,21 +76,10 @@ void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
   
   Invlpgs(start, size);
   
-  // split up the invlpg request into user and kernel addresses.
-  // TODO: possibly just assert that the invlpg doesn't cross boundaries
-  if (start < UserStart) {
-    if (start + size > UserStart) {
-      DistributeKernel(start, UserStart - start);
-    } else {
-      DistributeKernel(start, size);
-    }
-  }
-  if (start + size > UserStart) {
-    if (start < UserStart) {
-      DistributeUser(UserStart, start + size - UserStart);
-    } else {
-      DistributeUser(start, size);
-    }
+  if (start < Scratch::StartAddr) {
+    DistributeKernel(start, size);
+  } else {
+    DistributeUser(start, size);
   }
 }
   
@@ -105,11 +95,14 @@ void Tlb::Initialize() {
 void Tlb::HandleNotification() {
   AssertCritical();
   Invlpgs(invlAddress, invlSize);
+  --ipiCount;
+  LapicModule::GetGlobal().GetLapic().SendEoi();
 }
 
 void Tlb::DistributeKernel(VirtAddr a, PhysSize b) {
   invlAddress = a;
   invlSize = b;
+  ipiCount = 0;
   
   // send the invlpg request to every CPU
   Cpu * current = &Cpu::GetCurrent();
@@ -122,7 +115,10 @@ void Tlb::DistributeKernel(VirtAddr a, PhysSize b) {
       Cpu * cpu = &domain.GetCpu(j);
       if (cpu == current) continue;
       lapic.SendIpi(cpu->GetApicId(), IntVectors::Invlpg);
+      ++ipiCount;
     }
+  }
+  while (ipiCount) {
   }
 }
 
@@ -132,6 +128,7 @@ void Tlb::DistributeUser(VirtAddr a, PhysSize b) {
   
   invlAddress = a;
   invlSize = b;
+  ipiCount = 0;
   
   // send the invlpg request to every CPU with our memory map
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
@@ -145,7 +142,10 @@ void Tlb::DistributeUser(VirtAddr a, PhysSize b) {
         continue;
       }
       lapic.SendIpi(cpu->GetApicId(), IntVectors::Invlpg);
+      ++ipiCount;
     }
+  }
+  while (ipiCount) {
   }
 }
 

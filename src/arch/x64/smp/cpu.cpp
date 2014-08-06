@@ -3,6 +3,7 @@
 #include "../segments/gdt.hpp"
 #include "../domains/domain-list.hpp"
 #include "../interrupts/apic/lapic-module.hpp"
+#include "../interrupts/vectors.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
 
@@ -28,6 +29,14 @@ Cpu & Cpu::GetCurrent() {
   Cpu * ptr;
   __asm__("mov %%gs:(0x0), %0" : "=r" (ptr));
   return *ptr;
+}
+
+void Cpu::HandleWakeup() {
+  LapicModule::GetGlobal().GetLapic().SendEoi();
+  Cpu & cur = GetCurrent();
+  
+  // wakeupFunction has an atomic value because of automatic alignment
+  cur.wakeupFunction();
 }
 
 Cpu::Cpu() {
@@ -77,6 +86,13 @@ anarch::Timer & Cpu::GetTimer() {
 int Cpu::GetPriority() {
   // TODO: return the index in the CPU core
   return 0;
+}
+
+void Cpu::RunAsync(void (* func)()) {
+  AssertCritical();
+  wakeupFunction = func;
+  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  lapic.SendIpi(GetApicId(), IntVectors::Wakeup);
 }
 
 }

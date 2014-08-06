@@ -88,6 +88,8 @@ void PanicModule::WriteError(const char * msg) {
 }
 
 void PanicModule::HaltCpu() {
+  // should I even bother sending an EOI, like really
+  LapicModule::GetGlobal().GetLapic().SendEoi();
   while (1) {
     __asm__ __volatile__("cli\nhlt");
   }
