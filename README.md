@@ -44,4 +44,6 @@ I have implemented the following features:
 
 I plan to implement the following features in the following order:
 
- * Create a `SyscallArgs` class for syscall arguments
+ * Implement a `SyscallModule`
+   * I am debating if `Delegate` or `SyscallModule` should have syscall handler
+ * Initialize `SyscallModule` as part of CPU initialization

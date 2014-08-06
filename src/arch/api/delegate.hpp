@@ -1,6 +1,7 @@
 #ifndef __ANARCH_API_DELEGATE_HPP__
 #define __ANARCH_API_DELEGATE_HPP__
 
+#include "syscall-args.hpp"
 #include <anarch/types>
 
 namespace anarch {
@@ -25,6 +26,11 @@ public:
    * management.
    */
   virtual void PageFault(VirtAddr address, bool write) = 0;
+  
+  /**
+   * Called when a user-space task performs a system call.
+   */
+  virtual void Syscall(const SyscallArgs & args);
 };
 
 }
