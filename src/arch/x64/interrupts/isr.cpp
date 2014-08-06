@@ -4,7 +4,7 @@
 #include "../segments/local-segment.hpp"
 #include <anarch/stream>
 #include <anarch/api/panic>
-#include <anarch/api/delegate>
+#include <anarch/api/page-delegate>
 
 typedef void (* RoutineCall)(anarch::x64::IsrStack * stack, uint64_t code);
 
@@ -18,9 +18,9 @@ void InterruptCoded(uint64_t vector, anarch::x64::IsrStack * stack,
   if (vector == 0xe) {
     uint64_t addr;
     __asm__("mov %%cr2, %0" : "=r" (addr));
-    // send the page fault to the delegate if its set
-    if (anarch::Delegate::GetGlobalDelegate()) {
-      anarch::Delegate::GetGlobalDelegate()->PageFault(addr, (code & 2) != 0);
+    // send the page fault to the delegate if it's set
+    if (anarch::PageDelegate::GetGlobal()) {
+      anarch::PageDelegate::GetGlobal()->PageFault(addr, (code & 2) != 0);
       return;
     }
   }

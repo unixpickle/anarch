@@ -2,7 +2,7 @@
 #include "../tlb.hpp"
 #include "../scoped-scratch.hpp"
 #include "../global/global-map.hpp"
-#include <anarch/api/delegate>
+#include <anarch/api/page-delegate>
 #include <anarch/api/domain>
 #include <anarch/api/panic>
 #include <anarch/critical>
@@ -145,10 +145,10 @@ void UserMap::Delete() {
 
 void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
   if (start + size < start || start < SpaceStart) {
-    if (!Delegate::GetGlobalDelegate()) {
+    if (!PageDelegate::GetGlobal()) {
       Panic("UserMap::CopyToKernel() - page fault with no delegate");
     }
-    Delegate::GetGlobalDelegate()->PageFault(start, false);
+    PageDelegate::GetGlobal()->PageFault(start, false);
     return;
   }
 
@@ -157,10 +157,10 @@ void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
 
 void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
   if (dest + size < dest || dest < SpaceStart) {
-    if (!Delegate::GetGlobalDelegate()) {
+    if (!PageDelegate::GetGlobal()) {
       Panic("UserMap::CopyFromKernel() - page fault with no delegate");
     }
-    Delegate::GetGlobalDelegate()->PageFault(dest, true);
+    PageDelegate::GetGlobal()->PageFault(dest, true);
     return;
   }
   
