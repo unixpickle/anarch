@@ -32,13 +32,20 @@ Architecture-specific APIs will have to be initialized by the operating system's
 
 # TODO
 
-Right now, I am working on getting memory management up and running under Alux on real x86-64 hardware (and, of course, a VM).
+I have implemented the following features:
 
- * Implement Panic() x86-64 API
- * Implement critical x86-64 API
- * Implement console x86-64 API
- * Test what we have so far on real hardware!
- * Pull in the existing Alux source piece by piece
-   * ACPI subsystem
-   * Interrupt subsystem
- * Implement EasyMap and other utilities
+ * Physical and virtual memory management
+ * The Interrupt Routine Table subsystem
+ * ACPI
+ * APIC and I/O APIC
+ * CPU bootstrap code for SMP initialization
+ * A time mechanism with PIT, HPET, and APIC timer support
+ * Distributed Panic() and TLB invalidations
+
+I plan to implement the following features in the following order:
+
+ * Create a Thread `Wakeup()` method and implement it with IPIs
+ * Implement a `UserMap` with a free region list
+ * Create a `State` class which uses IRET to restore state
+ * Come up with a `PlatformDelegate` interface which notifies a delegate about memory faults and system calls.
+ * Create a `SyscallArgs` class for syscall arguments
