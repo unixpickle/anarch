@@ -1,6 +1,7 @@
 #ifndef __ANARCH_API_STATE_HPP__
 #define __ANARCH_API_STATE_HPP__
 
+#include <ansa/macros>
 #include <ansa/nocopy>
 
 namespace anarch {
