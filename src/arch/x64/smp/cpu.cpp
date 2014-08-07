@@ -52,6 +52,10 @@ Cpu::Cpu() {
   ScopedCritical critical;
   LocalSegment::Write((uint64_t)&localData);
   
+  for (int i = 0; i < 7; ++i) {
+    taskSegment.ist[i] = (uint64_t)stackTop;
+  }
+  
   TssDescriptor desc(&taskSegment);
   uint16_t seg = Gdt::GetGlobal().PushTssDescriptor(desc);
   __asm__ __volatile__("ltr %%ax" : : "a" (seg));
