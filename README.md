@@ -47,10 +47,9 @@ I have implemented the following features for x86-64. This pretty much sums up e
  * User-space memory maps
  * A syscall handler mechanism
 
-Some basic things need to be done:
+Some basic things I'd like to do before v0.1.0
 
  * Change page callback to be a function pointer
- * Remove "calibrate" interrupts in favor of `Thread::RunAsync`.
  * Create a `VirtPhysSize` type for sizes that must fit in the physical address space as well as the virtual one.
 
-However, I have *not* implemented NUMA. In the future, this will be my next step at improving the x86-64 implementation.
+I have *not* implemented NUMA. In the future, this will be my next step at improving the x86-64 implementation.

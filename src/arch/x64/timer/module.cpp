@@ -34,16 +34,13 @@ void TimerModule::Initialize() {
   
   cout << "Initializing LAPIC timer subsystem...";
   
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
-  Irt::GetGlobal().Set(IntVectors::Calibrate, (void *)&CalibrateMethod);
-  
   DomainList & domains = DomainList::GetGlobal();
   for (int i = 0; i < domains.GetCount(); i++) {
     Domain & domain = domains[i];
     for (int i = 0; i < domain.GetThreadCount(); i++) {
-      Cpu & cpu = domain.GetCpu(i);
-      if (&cpu == &Cpu::GetCurrent()) continue;
-      lapic.SendIpi(cpu.GetApicId(), IntVectors::Calibrate);
+      Thread & thread = domain.GetThread(i);
+      if (&thread == &Thread::GetCurrent()) continue;
+      thread.RunAsync(CalibrateMethod);
     }
   }
   
@@ -60,7 +57,6 @@ void TimerModule::Initialize() {
     }
   }
   
-  Irt::GetGlobal().Unset(IntVectors::Calibrate);
   Irt::GetGlobal().Set(IntVectors::LapicTimer,
                        (void *)&LapicTimer::GeneralTimerCallback);
   
@@ -72,9 +68,6 @@ void TimerModule::CalibrateMethod() {
   LapicTimer & timer = Cpu::GetCurrent().GetLapicTimer();
   
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
-  if (lapic.IsInService(IntVectors::Calibrate)) {
-    lapic.SendEoi();
-  }
   lapic.WriteReg(Lapic::RegLvtTimer, 0xff);
   lapic.WriteReg(Lapic::RegTimerInitCount, 0xffffffff);
   
