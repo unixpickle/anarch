@@ -11,6 +11,7 @@
 #include "../domains/domain-list.hpp"
 #include "../acpi/acpi-module.hpp"
 #include "../critical/module.hpp"
+#include "../syscall/module.hpp"
 #include "../segments/gdt.hpp"
 #include "../timer/module.hpp"
 #include "../clock/module.hpp"
@@ -32,6 +33,7 @@ const BootInfo * bootInfo = NULL;
 void InitializeSingletons() {
   bootInfo = NULL;
   CriticalModule::InitGlobal();
+  SyscallModule::InitGlobal();
   GlobalMalloc::InitGlobal();
   IOApicModule::InitGlobal();
   TextConsole::InitGlobal();
