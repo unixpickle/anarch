@@ -18,4 +18,14 @@ typedef uint64_t PhysSize;
  */
 typedef uint64_t VirtAddr;
 
+/**
+ * A numerical type that is the native size of the processor.
+ */
+typedef int64_t NativeInt;
+
+/**
+ * An unsigned NativeInt
+ */
+typedef uint64_t NativeUInt;
+
 #endif
