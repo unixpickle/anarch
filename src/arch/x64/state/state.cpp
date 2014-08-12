@@ -99,6 +99,26 @@ void State::SuspendAndCall(void (* func)()) {
       "r15", "memory");
 }
 
+void State::SuspendAndCall(void (* func)(void *), void * arg) {
+  AssertCritical();
+  Cpu & cpu = Cpu::GetCurrent();
+  // we must be in kernel space, so we know the CS and SS
+  iretInfo.cs = 8;
+  iretInfo.ss = 0;
+  __asm__ __volatile__(
+    "movq $anarch_suspend_and_call_return2, (%%rsi)\n" // save RIP
+    "pushfq\n" // save RFLAGS
+    "pop %%rax\n"
+    "mov %%rax, 0x10(%%rsi)\n"
+    "mov %%rsp, 0x18(%%rsi)\n" // save RSP
+    "mov %%rcx, %%rsp\n" // load new RSP
+    "call *%%rbx\n" // call func(arg)
+    "anarch_suspend_and_call_return2:"
+    : : "c" (cpu.GetStackTop()), "b" (func), "S" (&iretInfo), "D" (arg)
+    : "rdx", "rax", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
+      "memory");
+}
+
 }
 
 }

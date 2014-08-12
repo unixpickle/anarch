@@ -18,6 +18,7 @@ public:
   
   virtual void Resume() ANSA_NORETURN = 0; // @critical
   virtual void SuspendAndCall(void (*)()) = 0; // @critical
+  virtual void SuspendAndCall(void (*)(void *), void *) = 0; // @critical
   
 protected:
   virtual ~State() {}

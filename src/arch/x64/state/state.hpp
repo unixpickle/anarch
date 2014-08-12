@@ -22,6 +22,7 @@ public:
   virtual void Delete();
   virtual void Resume() ANSA_NORETURN;
   virtual void SuspendAndCall(void (*)());
+  virtual void SuspendAndCall(void (*)(void *), void *);
   
 private:
   uint64_t rdi;
