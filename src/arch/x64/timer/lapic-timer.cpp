@@ -29,7 +29,7 @@ void LapicTimer::GeneralTimerCallback() {
   }
   
   timer.isExpecting = false;
-  ((void (*)())timer.callbackFunction)();
+  timer.callbackFunction(timer.callbackArg);
 }
 
 LapicTimer::LapicTimer() : ticksPerMicro(1, 0), calibrated(false) {
@@ -40,12 +40,17 @@ ansa::Rational<uint64_t> LapicTimer::GetTicksPerMicro() {
 }
 
 void LapicTimer::SetTimeout(uint64_t ticks, void (* func)()) {
+  SetTimeout(ticks, (void (*)(void *))func, NULL);
+}
+
+void LapicTimer::SetTimeout(uint64_t ticks, void (* fn)(void *), void * arg) {
   AssertCritical();
   assert(ticks < 0x100000000); // TODO: support bigger times
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
   lapic.SetTimeout(IntVectors::LapicTimer, (uint32_t)ticks);
   isExpecting = true;
-  callbackFunction = (void *)func;
+  callbackFunction = fn;
+  callbackArg = arg;
 }
 
 void LapicTimer::ClearTimeout() {

@@ -17,6 +17,7 @@ public:
   // anarch::Timer
   virtual ansa::Rational<uint64_t> GetTicksPerMicro();
   virtual void SetTimeout(uint64_t ticks, void (* func)());
+  virtual void SetTimeout(uint64_t, void (*)(void *), void *);
   virtual void ClearTimeout();
   virtual void WaitTimeout() ANSA_NORETURN;
   
@@ -30,7 +31,8 @@ protected:
   
 private:
   bool isExpecting = false;
-  void * callbackFunction;
+  void (* callbackFunction)(void *);
+  void * callbackArg;
 };
 
 }

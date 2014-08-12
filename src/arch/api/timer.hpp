@@ -22,6 +22,13 @@ public:
   virtual void SetTimeout(uint64_t ticks, void (* func)()) = 0;
   
   /**
+   * Like the above SetTimeout() definition, but with an argument passed to
+   * the function.
+   * @critical
+   */
+  virtual void SetTimeout(uint64_t, void (*)(void *), void *) = 0;
+  
+  /**
    * Cancel this timer WHICH MUST BE THE CURRENT TIMER.
    * @discussion If a timeout has already fired but has not yet been handled,
    * calling this method will suppress the call to the handler.
