@@ -1,5 +1,6 @@
 #include "lock.hpp"
 #include "critical.hpp"
+#include <anarch/api/thread>
 
 namespace anarch {
 
@@ -35,6 +36,55 @@ void NoncriticalLock::Release() {
 void NoncriticalLock::SeizeYielding() {
   AssertNoncritical();
   super::SeizeYielding();
+}
+
+// RecursiveLock //
+
+void RecursiveLock::Seize() {
+  AssertCritical();
+  holdingLock.Seize();
+  if (holding == &Thread::GetCurrent()) {
+    ++holdCount;
+    holdingLock.Release();
+  } else {
+    holdingLock.Release();
+    super::Seize();
+    
+    ScopedLock scope(holdingLock);
+    holding = &Thread::GetCurrent();
+    assert(holdCount == 0);
+    holdCount = 1;
+  }
+}
+
+void RecursiveLock::Release() {
+  AssertCritical();
+  ScopedLock scope(holdingLock);
+  if (holding == &Thread::GetCurrent()) {
+    if (!--holdCount) {
+      super::Release();
+      holding = NULL;
+    }
+  } else {
+    super::Release();
+  }
+}
+
+void RecursiveLock::SeizeYielding() {
+  AssertCritical();
+  holdingLock.Seize();
+  if (holding == &Thread::GetCurrent()) {
+    ++holdCount;
+    holdingLock.Release();
+  } else {
+    holdingLock.Release();
+    super::SeizeYielding();
+  
+    ScopedLock scope(holdingLock);
+    holding = &Thread::GetCurrent();
+    assert(holdCount == 0);
+    holdCount = 1;
+  }
 }
 
 // ScopedLock //
