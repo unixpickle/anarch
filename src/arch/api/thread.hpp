@@ -42,6 +42,13 @@ public:
    * @critical
    */
   virtual void RunAsync(void (*)()) = 0;
+  
+  /**
+   * Same as the other RunAsync, but allows you to pass an argument to the
+   * specified function.
+   * @critical
+   */
+  virtual void RunAsync(void (*)(void *), void *) = 0;
 };
 
 }

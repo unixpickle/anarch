@@ -3,6 +3,7 @@
 
 #include "../segments/tss.hpp"
 #include "../timer/lapic-timer.hpp"
+#include <anarch/lock>
 #include <anarch/stddef>
 #include <anarch/api/thread>
 #include <anarch/api/memory-map>
@@ -35,6 +36,7 @@ public:
   virtual anarch::Timer & GetTimer(); // @critical
   virtual int GetPriority(); // @ambicritical
   virtual void RunAsync(void (*)()); // @critical
+  virtual void RunAsync(void (*)(void *), void *); // @critical
   
 protected:
   MemoryMap * currentMap = NULL;
@@ -49,7 +51,9 @@ private:
     void * userData;
   } ANSA_PACKED;
   
-  void (* wakeupFunction)();
+  anarch::CriticalLock wakeupLock;
+  void (* wakeupFunction)(void *);
+  void * wakeupArg;
   
   LapicTimer lapicTimer;
   LocalData localData;

@@ -32,11 +32,18 @@ Cpu & Cpu::GetCurrent() {
 }
 
 void Cpu::HandleWakeup() {
+  AssertCritical();
   LapicModule::GetGlobal().GetLapic().SendEoi();
   Cpu & cur = GetCurrent();
   
-  // wakeupFunction has an atomic value because of automatic alignment
-  cur.wakeupFunction();
+  cur.wakeupLock.Seize();
+  auto func = cur.wakeupFunction;
+  auto arg = cur.wakeupArg;
+  cur.wakeupFunction = NULL;
+  cur.wakeupLock.Release();
+  
+  if (!func) return;
+  func(arg);
 }
 
 Cpu::Cpu() {
@@ -98,8 +105,15 @@ int Cpu::GetPriority() {
 }
 
 void Cpu::RunAsync(void (* func)()) {
+  RunAsync((void (*)(void *))func, NULL);
+}
+
+void Cpu::RunAsync(void (* func)(void *), void * arg) {
   AssertCritical();
+  wakeupLock.Seize();
   wakeupFunction = func;
+  wakeupArg = arg;
+  wakeupLock.Release();
   Lapic & lapic = LapicModule::GetGlobal().GetLapic();
   lapic.SendIpi(GetApicId(), IntVectors::Wakeup);
 }
