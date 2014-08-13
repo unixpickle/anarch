@@ -12,7 +12,7 @@ State & State::NewKernel(void (* fn)()) {
 
 State & State::NewKernel(void (* fn)(void *), void * arg) {
   return *Domain::GetCurrent().New<x64::State>((uint64_t)fn, (uint64_t)arg,
-                                             true);
+                                               true);
 }
 
 State & State::NewUser(void (* fn)()) {
@@ -21,7 +21,7 @@ State & State::NewUser(void (* fn)()) {
 
 State & State::NewUser(void (* fn)(void *), void * arg) {
   return *Domain::GetCurrent().New<x64::State>((uint64_t)fn, (uint64_t)arg,
-                                             false);
+                                               false);
 }
 
 namespace x64 {

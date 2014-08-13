@@ -36,6 +36,7 @@ public:
   
   /**
    * Allocate an object, preferably from this Domain's allocator.
+   * @noncritical
    */
   template <typename T, typename... Args>
   T * New(Args... args) {
@@ -47,6 +48,7 @@ public:
   /**
    * Delete an object which was most likely allocated on this Domain's
    * allocator.
+   * @noncritical
    */
   template <typename T>
   void Delete(T * ptr) {

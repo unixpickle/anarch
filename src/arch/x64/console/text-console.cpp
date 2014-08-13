@@ -46,6 +46,9 @@ void TextConsole::PrintString(const char * string) {
         y++;
         x = 0;
       }
+    } else if (theChar == '\r') {
+      x = 0;
+      continue;
     } else if (theChar == '\b') {
       if (x == 0) {
         if (y != 0) {

@@ -15,12 +15,12 @@ Thread & Thread::GetCurrent() {
 
 void * Thread::GetUserInfo() {
   void * res;
-  __asm__("mov %%gs:(0x8), %0" : "=r" (res) : : "memory");
+  __asm__("mov %%gs:(0x10), %0" : "=r" (res) : : "memory");
   return res;
 }
 
 void Thread::SetUserInfo(void * info) {
-  __asm__("mov %0, %%gs:(0x8)" : : "r" (info) : "memory");
+  __asm__("mov %0, %%gs:(0x10)" : : "r" (info) : "memory");
 }
 
 namespace x64 {
