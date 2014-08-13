@@ -17,8 +17,9 @@ public:
   static void InitGlobal();
   static TextConsole & GetGlobal();
   
-  virtual int GetWidth();
-  virtual int GetHeight();
+  int GetWidth();
+  int GetHeight();
+  uint16_t * GetBuffer();
   
   virtual void PrintString(const char * string);
   virtual void SetColor(Color color, bool bright);
@@ -29,12 +30,19 @@ protected:
   
 private:
   uint8_t color = 0xa;
-  int x = 0, y = 0;
-  uint16_t * buffer = (uint16_t *)0xb8000;
+  int x = 0;
+  int y = 0;
   CriticalLock lock;
   
-  virtual void MoveCursor();
-  virtual void ScrollUp();
+  void PrintNewline();
+  void PrintCarriageReturn();
+  void PrintBackspace();
+  void PrintCharacter(unsigned char theChar);
+  uint16_t GetBufferIndex();
+  uint16_t & CurrentCharacter();
+  
+  void PositionCursor();
+  void ScrollUp();
 };
 
 }

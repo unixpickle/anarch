@@ -34,6 +34,10 @@ int TextConsole::GetHeight() {
   return 25;
 }
 
+uint16_t * TextConsole::GetBuffer() {
+  return (uint16_t *)0xb8000;
+}
+
 void TextConsole::PrintString(const char * string) {
   ScopedCritical critical;
   ScopedLock scope(lock);
@@ -41,46 +45,25 @@ void TextConsole::PrintString(const char * string) {
   // this is some ugly logic that could probably be simplified
   while (*string) {
     unsigned char theChar = *(string++);
-    if (theChar == '\n') {
-      if (x != 0) {
-        y++;
-        x = 0;
-      }
-    } else if (theChar == '\r') {
-      x = 0;
-      continue;
-    } else if (theChar == '\b') {
-      if (x == 0) {
-        if (y != 0) {
-          y--;
-          // find the last character on this line
-          x = GetWidth() - 1;
-          int i, newLoc = (GetWidth() * y);
-          for (i = 0; i < GetWidth(); i++) {
-            if (!buffer[newLoc + i]) {
-              x = i;
-              break;
-            }
-          }
-        }
-      } else x--;
-      int loc = x + (GetWidth() * y);
-      buffer[loc] = color << 8;
-    } else {
-      int loc = x + (GetWidth() * y);
-      buffer[loc] = (uint16_t)theChar | (color << 8);
-      x++;
-    }
-    if (x >= GetWidth()) {
-      x = 0;
-      y++;
-    }
-    while (y >= GetHeight()) {
-      ScrollUp();
-      y--;
+    switch (theChar) {
+      case '\n':
+        PrintNewline();
+        break;
+      case '\r':
+        PrintCarriageReturn();
+        break;
+      case '\b':
+        PrintBackspace();
+        break;
+      default:
+        PrintCharacter(theChar);
+        break;
     }
   }
-  MoveCursor();
+  if (!(CurrentCharacter() & 0xff00)) {
+    CurrentCharacter() = color << 8;
+  }
+  PositionCursor();
 }
 
 void TextConsole::SetColor(Color _color, bool bright) {
@@ -95,11 +78,65 @@ ansa::DepList TextConsole::GetDependencies() {
 
 void TextConsole::Initialize() {
   // zero out the buffer
-  ansa::Bzero(buffer, GetWidth() * GetHeight() * 2);
+  ansa::Bzero(GetBuffer(), GetWidth() * GetHeight() * 2);
 }
 
-void TextConsole::MoveCursor() {
-  uint16_t position = (uint16_t)((y * GetWidth()) + x);
+void TextConsole::PrintNewline() {
+  x = 0;
+  ++y;
+  if (y >= GetHeight()) {
+    ScrollUp();
+  }
+}
+
+void TextConsole::PrintCarriageReturn() {
+  x = 0;
+}
+
+void TextConsole::PrintBackspace() {
+  if (x != 0) {
+    --x;
+    CurrentCharacter() = color << 8;
+    return;
+  }
+
+  // go to the previous line and find the last ASCII character on it
+  --y;
+  for (x = 0; x < GetWidth(); ++x) {
+    if (!(CurrentCharacter() & 0xff)) {
+      break;
+    }
+  }
+  if (x == GetWidth()) --x;
+  CurrentCharacter() = color << 8;
+}
+
+void TextConsole::PrintCharacter(unsigned char theChar) {
+  if (x == GetWidth()) {
+    PrintNewline();
+  }
+  CurrentCharacter() = (uint16_t)theChar | (color << 8);
+  ++x;
+  if (x == 80 && y == GetHeight() - 1) {
+    ScrollUp();
+    --y;
+  }
+}
+
+uint16_t TextConsole::GetBufferIndex() {
+  uint16_t pos = (uint16_t)((y * GetWidth()) + x);
+  if (pos >= GetWidth() * GetHeight()) {
+    pos = GetWidth() * GetHeight() - 1;
+  }
+  return pos;
+}
+
+uint16_t & TextConsole::CurrentCharacter() {
+  return GetBuffer()[GetBufferIndex()];
+}
+
+void TextConsole::PositionCursor() {
+  uint16_t position = GetBufferIndex();
   
   // tell the VGA index register we are sending the `low` byte
   x64::OutB(0x3D4, 0x0f);
@@ -107,11 +144,11 @@ void TextConsole::MoveCursor() {
   // and now send the `high` byte
   x64::OutB(0x3D4, 0x0e);
   x64::OutB(0x3D5, (unsigned char)((position >> 8) & 0xff));
-
-  buffer[position] = (uint16_t)color << 8;
 }
 
 void TextConsole::ScrollUp() {
+  uint16_t * buffer = GetBuffer();
+  
   // copy the buffer into itself, one line up
   int i;
   for (i = 0; i < GetWidth() * (GetHeight() - 1); i++) {
