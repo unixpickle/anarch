@@ -19,8 +19,8 @@ void InterruptCoded(uint64_t vector, anarch::x64::IsrStack * stack,
     uint64_t addr;
     __asm__("mov %%cr2, %0" : "=r" (addr));
     // send the page fault to the delegate if it's set
-    if (anarch::PageDelegate::GetGlobal()) {
-      anarch::PageDelegate::GetGlobal()->PageFault(addr, (code & 2) != 0);
+    if (anarch::GetGlobalPageDelegate()) {
+      anarch::GetGlobalPageDelegate()(addr, (code & 2) != 0);
       return;
     }
   }

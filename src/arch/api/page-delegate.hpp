@@ -5,27 +5,24 @@
 
 namespace anarch {
 
-class PageDelegate {
-public:
-  /**
-   * Get the current system delegate. This will return NULL until a delegate is
-   * set.
-   * @ambicritical
-   */
-  static PageDelegate * GetGlobal();
-  
-  /**
-   * Set the current system delegate. You should only call this once, early on
-   * in the startup process.
-   */
-  static void SetGlobal(PageDelegate *);
-  
-  /**
-   * Called when a page fault occurs on a system that supports dynamic memory
-   * management.
-   */
-  virtual void PageFault(VirtAddr address, bool write) = 0;
-};
+/**
+ * A function which may be called to handle a page fault.
+ */
+typedef void (* PageDelegate)(VirtAddr addr, bool write);
+
+/**
+ * Set the global page fault handler. You should call this before initializing
+ * any anarch modules.
+ * @ambicritical
+ */
+void SetGlobalPageDelegate(PageDelegate);
+
+/**
+ * Returns the global page delegate. If no delegate has been set, this returns
+ * `NULL`.
+ * @ambicritical
+ */
+PageDelegate GetGlobalPageDelegate();
 
 }
 

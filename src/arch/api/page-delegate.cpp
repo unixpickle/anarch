@@ -5,16 +5,16 @@ namespace anarch {
 
 namespace {
 
-PageDelegate * gDelegate = NULL;
+PageDelegate gDelegate = NULL;
 
 }
 
-PageDelegate * PageDelegate::GetGlobal() {
+void SetGlobalPageDelegate(PageDelegate obj) {
+  gDelegate = obj;
+}
+
+PageDelegate GetGlobalPageDelegate() {
   return gDelegate;
-}
-
-void PageDelegate::SetGlobal(PageDelegate * d) {
-  gDelegate = d;
 }
 
 }
