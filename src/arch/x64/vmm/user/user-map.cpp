@@ -145,10 +145,10 @@ void UserMap::Delete() {
 
 void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
   if (start + size < start || start < SpaceStart) {
-    if (!PageDelegate::GetGlobal()) {
+    if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyToKernel() - page fault with no delegate");
     }
-    PageDelegate::GetGlobal()->PageFault(start, false);
+    GetGlobalPageDelegate()(start, false);
     return;
   }
 
@@ -157,10 +157,10 @@ void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
 
 void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
   if (dest + size < dest || dest < SpaceStart) {
-    if (!PageDelegate::GetGlobal()) {
+    if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyFromKernel() - page fault with no delegate");
     }
-    PageDelegate::GetGlobal()->PageFault(dest, true);
+    GetGlobalPageDelegate()(dest, true);
     return;
   }
   
