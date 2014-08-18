@@ -34,6 +34,12 @@ Architecture-specific APIs will have to be initialized by the operating system's
 
 # TODO
 
+As I work on Alux, I find new things that I need to do in anarch. Here's my immediate TODO list:
+
+ * `AllocPhys()` and `FreePhys()` on Domain for cross-domain fallback
+ * A way to re-reserve a chunk of memory with a different page size
+ * A way to unmap reserved memory but keep it reserved
+
 I have implemented the following features for x86-64. This pretty much sums up every API that anarch will provide:
 
  * Physical and virtual memory management
