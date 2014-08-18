@@ -137,6 +137,26 @@ void GlobalMap::Unmap(VirtAddr addr, Size size) {
   Tlb::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
+void GlobalMap::UnmapAndReserve(VirtAddr addr, Size size) {
+  AssertNoncritical();
+  ScopedLock scope(lock);
+  
+  VirtAddr next = addr;
+  for (PhysSize i = 0; i < size.pageCount; i++) {
+    if (!GetPageTable().Unset(next)) {
+      Panic("GlobalMap::Unmap() - Unset() failed");
+    }
+    next += size.pageSize;
+  }
+  
+  uint64_t entry = size.pageSize | (size.pageSize == 0x1000 ? 0 : 0x80);
+  GetPageTable().SetList(addr, entry, size, 3);
+  
+  // we should invalidate the old memory before releasing the lock since new
+  // mappings might not invalidate it.
+  Tlb::GetGlobal().DistributeInvlpg(addr, size.Bytes());
+}
+
 bool GlobalMap::Reserve(VirtAddr & addr, Size size) {
   AssertNoncritical();
   ScopedLock scope(lock);
@@ -159,6 +179,34 @@ void GlobalMap::ReserveAt(VirtAddr addr, Size size) {
   
   uint64_t entry = size.pageSize | (size.pageSize == 0x1000 ? 0 : 0x80);
   GetPageTable().SetList(addr, entry, size, 3);
+}
+
+void GlobalMap::Unreserve(VirtAddr addr, Size size) {
+  AssertNoncritical();
+  Unmap(addr, size);
+}
+
+void GlobalMap::Rereserve(VirtAddr addr, Size size, PhysSize newPageSize) {
+  AssertNoncritical();
+  assert(size.Bytes() % newPageSize == 0);
+  assert(addr % newPageSize == 0);
+  ScopedLock scope(lock);
+  
+  VirtAddr next = addr;
+  for (PhysSize i = 0; i < size.pageCount; i++) {
+    if (!GetPageTable().Unset(next)) {
+      Panic("GlobalMap::Unmap() - Unset() failed");
+    }
+    next += size.pageSize;
+  }
+  
+  PhysSize pageCount = size.Bytes() / newPageSize;
+  uint64_t entry = newPageSize | (newPageSize == 0x1000 ? 0 : 0x80);
+  GetPageTable().SetList(addr, entry, Size(newPageSize, pageCount), 3);
+  
+  // we should invalidate the old memory before releasing the lock since new
+  // mappings might not invalidate it.
+  Tlb::GetGlobal().DistributeInvlpg(addr, size.Bytes());
 }
 
 ansa::DepList GlobalMap::GetDependencies() {

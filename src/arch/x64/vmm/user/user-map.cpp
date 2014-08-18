@@ -123,6 +123,21 @@ void UserMap::Unmap(VirtAddr addr, Size size) {
   DistInvlpg(addr, size.Bytes());
 }
 
+void UserMap::UnmapAndReserve(VirtAddr addr, Size size) {
+  AssertNoncritical();
+  ScopedLock scope(lock);
+  
+  VirtAddr next = addr;
+  for (PhysSize i = 0; i < size.pageCount; i++) {
+    if (!GetPageTable().Unset(next)) {
+      Panic("UserMap::Unmap() - Unset() failed");
+    }
+    next += size.pageSize;
+  }
+  
+  DistInvlpg(addr, size.Bytes());
+}
+
 bool UserMap::Reserve(VirtAddr & addr, Size size) {
   AssertNoncritical();
   ScopedLock scope(lock);
@@ -137,6 +152,24 @@ void UserMap::ReserveAt(VirtAddr addr, Size size) {
   if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
     Panic("UserMap::ReserveAt() - failed");
   }
+}
+
+void UserMap::Unreserve(VirtAddr addr, Size size) {
+  AssertNoncritical();
+  ScopedLock scope(lock);
+  freeList.Free(addr, size.pageSize, size.pageCount);
+}
+
+void UserMap::Rereserve(VirtAddr addr, Size oldSize, PhysSize newPageSize) {
+  // there isn't really anything to do here, but i'll still do some assertions
+  AssertNoncritical();
+  assert(oldSize.Bytes() % newPageSize == 0);
+  assert(addr % newPageSize == 0);
+  
+  // when are assert()s aren't compiled, this fixes warnings
+  (void)addr;
+  (void)oldSize;
+  (void)newPageSize;
 }
 
 void UserMap::Delete() {

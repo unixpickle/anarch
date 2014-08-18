@@ -21,7 +21,8 @@ public:
     bool placementReserve;
     
     /**
-     * This is true when MapAt() and Reserve() are available.
+     * This is true when MapAt(), UnmapAndReserve(), Reserve(), and Rereserve()
+     * are available.
      */
     bool placementMap;
     
@@ -50,8 +51,11 @@ public:
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &) = 0;
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &) = 0;
   virtual void Unmap(VirtAddr, Size) = 0;
+  virtual void UnmapAndReserve(VirtAddr, Size) = 0;
   virtual bool Reserve(VirtAddr &, Size) = 0;
   virtual void ReserveAt(VirtAddr, Size) = 0;
+  virtual void Unreserve(VirtAddr, Size) = 0;
+  virtual void Rereserve(VirtAddr, Size oldSize, PhysSize newPageSize) = 0;
 };
 
 }

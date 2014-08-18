@@ -5,8 +5,8 @@ if [ $# != 1 ]; then
   exit
 fi
 
-export CXXFLAGS=${CXXFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
-export CFLAGS=${CFLAGS}\ "-integrated-as -target x86_64-pc-none-elf64"
+export CXXFLAGS=${CXXFLAGS}\ "-nostdlib -nostdinc -ffreestanding -mno-red-zone -fno-exceptions -fno-rtti -Wno-long-long -Wall -Wextra -std=c++11 -mno-sse -mno-mmx -fno-stack-protector -fno-builtin -integrated-as -target x86_64-pc-none-elf64"
+export CFLAGS=${CFLAGS}\ "-nostdlib -nostdinc -ffreestanding -mno-red-zone -Wno-long-long -Wall -Wextra -mno-sse -mno-mmx -fno-stack-protector -fno-builtin -integrated-as -target x86_64-pc-none-elf64"
 export AR=$1
 
 make clean && make
