@@ -36,4 +36,38 @@ void Domain::Free(void * ptr) {
   Panic("Domain::Free() - no Domain owns the specified memory");
 }
 
+bool Domain::AllocPhys(PhysAddr & addrOut, PhysSize size, PhysSize align) {
+  if (GetAllocator().Alloc(addrOut, size, align)) {
+    return true;
+  }
+  
+  int siblingCount = DomainList::GetGlobal().GetCount() - 1;
+  for (int i = 0; i < siblingCount; ++i) {
+    Allocator & a = GetSibling(i).GetAllocator();
+    if (a.Alloc(addrOut, size, align)) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+void Domain::FreePhys(PhysAddr addr) {
+  if (GetAllocator().Owns(addr)) {
+    GetAllocator().Free(addr);
+    return;
+  }
+  
+  int siblingCount = DomainList::GetGlobal().GetCount() - 1;
+  for (int i = 0; i < siblingCount; ++i) {
+    Allocator & a = GetSibling(i).GetAllocator();
+    if (a.Owns(addr)) {
+      a.Free(addr);
+      return;
+    }
+  }
+  
+  Panic("Domain::FreePhys() - no Domain owns the physical address");
+}
+
 }

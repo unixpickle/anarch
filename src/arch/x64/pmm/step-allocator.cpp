@@ -53,6 +53,10 @@ void StepAllocator::Free(PhysAddr) {
   Panic("StepAllocator::Free() - unsupported");
 }
 
+bool Owns(PhysAddr) {
+  Panic("StepAllocator::Owns() - unsupported");
+}
+
 PhysSize StepAllocator::Used() {
   Panic("StepAllocator::Used() - unsupported");
 }

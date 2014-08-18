@@ -74,6 +74,18 @@ void BuddyAllocator::Free(PhysAddr address) {
   }
 }
 
+bool BuddyAllocator::Owns(PhysAddr address) {
+  if (hasUpper) {
+    if (upper.OwnsAddress((ANAlloc::UInt)address)) {
+      return true;
+    }
+  }
+  if (hasLower) {
+    return lower.OwnsAddress((ANAlloc::UInt)address);
+  }
+  return false;
+}
+
 PhysSize BuddyAllocator::Used() {
   AssertNoncritical();
   return totalSpace - Available();

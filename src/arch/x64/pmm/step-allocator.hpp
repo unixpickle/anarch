@@ -21,6 +21,7 @@ public:
   // anarch::Allocator
   virtual bool Alloc(PhysAddr & addr, PhysSize size, PhysSize align);
   virtual void Free(PhysAddr); // unsupported
+  virtual bool Owns(PhysAddr); // unsupported
   virtual PhysSize Used(); // unsupported
   virtual PhysSize Available(); // unsupported
   virtual PhysSize Total(); // unsupported

@@ -21,6 +21,13 @@ public:
   virtual void Free(PhysAddr address) = 0;
   
   /**
+   * Returns `false` if `address` could not have been allocated by this
+   * physical allocator
+   * @noncritical
+   */
+  virtual bool Owns(PhysAddr address) = 0;
+  
+  /**
    * Get the amount of physical memory in use by the system.
    * @noncritical
    */

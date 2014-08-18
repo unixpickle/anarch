@@ -34,6 +34,9 @@ public:
   virtual bool Alloc(void *&, size_t); // @noncritical
   virtual void Free(void *); // @noncritical
   
+  virtual bool AllocPhys(PhysAddr &, PhysSize, PhysSize align); // @noncritical
+  virtual void FreePhys(PhysAddr); // @noncritical
+  
   /**
    * Allocate an object, preferably from this Domain's allocator.
    * @noncritical
