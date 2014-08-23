@@ -38,6 +38,13 @@ public:
   
   /**
    * Wait for the timer to fire or for a platform-specific interrupt to occur.
+   *
+   * This method should be infinitely "recursable"--you should be able to call
+   * it in an interrupt handler and recursively wait for that interrupt handler
+   * to be called again and again. For many architectures, this means that your
+   * implementation of [WaitTimeout] should reset the stack to a CPU-specific
+   * stack pointer.
+   *
    * @critical -> @noncritical (no return)
    */
   virtual void WaitTimeout() ANSA_NORETURN = 0;
