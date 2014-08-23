@@ -85,6 +85,7 @@ void TextConsole::PrintNewline() {
   x = 0;
   ++y;
   if (y >= GetHeight()) {
+    y = GetHeight() - 1;
     ScrollUp();
   }
 }
