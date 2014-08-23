@@ -24,10 +24,12 @@ void Thread::SetUserInfo(void * info) {
 }
 
 void Thread::RunSync(void (* func)()) {
+  AssertCritical();
   RunSync((void (*)(void *))func, NULL);
 }
 
 void Thread::RunSync(void (* func)(void *), void * arg) {
+  AssertCritical();
   __asm__("mov %%rax, %%rsp\n"
           "call *%%rsi"
           : : "a" (x64::Cpu::GetCurrent().GetStackTop()),
