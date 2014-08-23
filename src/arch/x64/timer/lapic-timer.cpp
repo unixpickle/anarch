@@ -62,13 +62,10 @@ void LapicTimer::ClearTimeout() {
 
 void LapicTimer::WaitTimeout() {
   AssertCritical();
-  __asm__ __volatile__(
-    "mov %0, %%rsp\n"
-    "sti\n"
-    "_wait_timeout_loop:\n"
-    "hlt\n"
-    "jmp _wait_timeout_loop"
-    : : "r" (Cpu::GetCurrent().GetStackTop());
+  SetCritical(false);
+  while (1) {
+    __asm__ __volatile__("hlt");
+  }
 }
 
 }

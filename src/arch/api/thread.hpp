@@ -2,6 +2,7 @@
 #define __ANARCH_API_THREAD_HPP__
 
 #include <ansa/nocopy>
+#include <ansa/macros>
 
 namespace anarch {
 
@@ -13,9 +14,21 @@ class Timer;
  */
 class Thread : public ansa::NoCopy {
 public:
-  // implemented in Thread.cpp
   static void * GetUserInfo(); // @critical
   static void SetUserInfo(void *); // @critical
+  
+  /**
+   * Run a method on this hardware thread on a CPU stack. You should only call
+   * this method if no [State] is currently being run.
+   * @critical
+   */
+  static void RunSync(void (*)()) ANSA_NORETURN;
+  
+  /**
+   * Like the other [RunSync], but with an argument for the routine.
+   * @critical
+   */
+  static void RunSync(void (*)(void *), void *) ANSA_NORETURN;
   
   static Thread & GetCurrent(); // @critical
   

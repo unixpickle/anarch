@@ -23,6 +23,18 @@ void Thread::SetUserInfo(void * info) {
   __asm__("mov %0, %%gs:(0x10)" : : "r" (info) : "memory");
 }
 
+void Thread::RunSync(void (* func)()) {
+  RunSync((void (*)(void *))func, NULL);
+}
+
+void Thread::RunSync(void (* func)(void *), void * arg) {
+  __asm__("mov %%rax, %%rsp\n"
+          "call *%%rsi"
+          : : "a" (x64::Cpu::GetCurrent().GetStackTop()),
+              "S" (func), "D" (arg));
+  __builtin_unreachable();
+}
+
 namespace x64 {
 
 Cpu & Cpu::GetCurrent() {
