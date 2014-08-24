@@ -2,6 +2,7 @@
 #define __ANARCH_API_SYSCALL_ARGS_HPP__
 
 #include <anarch/types>
+#include <anarch/stddef>
 #include <anarch/stdint>
 
 namespace anarch {
@@ -17,6 +18,7 @@ public:
   virtual PhysAddr PopPhysAddr() = 0;
   virtual VirtAddr PopVirtAddr() = 0;
   virtual PhysSize PopPhysSize() = 0;
+  virtual size_t PopVirtSize() = 0;
 };
 
 }

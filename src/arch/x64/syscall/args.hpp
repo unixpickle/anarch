@@ -17,6 +17,7 @@ public:
   virtual PhysAddr PopPhysAddr();
   virtual VirtAddr PopVirtAddr();
   virtual PhysSize PopPhysSize();
+  virtual size_t PopVirtSize();
 
 private:
   uint64_t arguments[5];

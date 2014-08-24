@@ -47,6 +47,10 @@ PhysSize SyscallArgs::PopPhysSize() {
   return PopUInt64();
 }
 
+size_t SyscallArgs::PopVirtSize() {
+  return (size_t)PopUInt64();
+}
+
 }
 
 }
