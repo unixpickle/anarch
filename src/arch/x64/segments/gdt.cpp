@@ -5,8 +5,6 @@
 #include <anarch/new>
 #include <ansa/cstring>
 
-#include <anarch/stream> // TODO: delete this
-
 namespace anarch {
 
 namespace x64 {
