@@ -44,6 +44,8 @@ ansa::DepList SyscallModule::GetDependencies() {
 }
 
 void SyscallModule::Initialize() {
+  anarch::ScopedCritical critical;
+  
   // send an IPI to each CPU to setup the syscall registers
   DomainList & domains = DomainList::GetGlobal();
   for (int i = 0; i < domains.GetCount(); ++i) {
