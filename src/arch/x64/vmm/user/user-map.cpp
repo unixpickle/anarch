@@ -102,6 +102,8 @@ void UserMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
   AssertNoncritical();
   ScopedLock scope(lock);
   
+  assert(addr >= SpaceStart && addr + size.Bytes() >= SpaceStart);
+  
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
   DistInvlpg(addr, size.Bytes());
