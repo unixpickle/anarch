@@ -22,13 +22,13 @@ int GlobalMap::GetPageSizeCount() {
   return 2;
 }
 
-PhysSize GlobalMap::GetPageSize(int idx) {
+size_t GlobalMap::GetPageSize(int idx) {
   assert(idx >= 0 && idx < 2);
   if (idx == 0) return 0x1000;
   return 0x200000;
 }
 
-PhysSize GlobalMap::GetPageSizeAlign(int idx) {
+size_t GlobalMap::GetPageSizeAlign(int idx) {
   return GetPageSize(idx);
 }
 
@@ -85,7 +85,7 @@ void GlobalMap::Set() {
 }
 
 bool GlobalMap::Read(PhysAddr * physOut, Attributes * attrOut,
-                     PhysSize * sizeOut, VirtAddr addr) {
+                     size_t * sizeOut, VirtAddr addr) {
   AssertNoncritical();
   ScopedLock scope(lock);
   return GetPageTable().Read(physOut, attrOut, sizeOut, addr);
@@ -123,7 +123,7 @@ void GlobalMap::Unmap(VirtAddr addr, Size size) {
   ScopedLock scope(lock);
   
   VirtAddr next = addr;
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!GetPageTable().Unset(next)) {
       Panic("GlobalMap::Unmap() - Unset() failed");
     }
@@ -142,7 +142,7 @@ void GlobalMap::UnmapAndReserve(VirtAddr addr, Size size) {
   ScopedLock scope(lock);
   
   VirtAddr next = addr;
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!GetPageTable().Unset(next)) {
       Panic("GlobalMap::Unmap() - Unset() failed");
     }
@@ -186,21 +186,21 @@ void GlobalMap::Unreserve(VirtAddr addr, Size size) {
   Unmap(addr, size);
 }
 
-void GlobalMap::Rereserve(VirtAddr addr, Size size, PhysSize newPageSize) {
+void GlobalMap::Rereserve(VirtAddr addr, Size size, size_t newPageSize) {
   AssertNoncritical();
   assert(size.Bytes() % newPageSize == 0);
   assert(addr % newPageSize == 0);
   ScopedLock scope(lock);
   
   VirtAddr next = addr;
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!GetPageTable().Unset(next)) {
       Panic("GlobalMap::Unmap() - Unset() failed");
     }
     next += size.pageSize;
   }
   
-  PhysSize pageCount = size.Bytes() / newPageSize;
+  size_t pageCount = size.Bytes() / newPageSize;
   uint64_t entry = newPageSize | (newPageSize == 0x1000 ? 0 : 0x80);
   GetPageTable().SetList(addr, entry, Size(newPageSize, pageCount), 3);
   

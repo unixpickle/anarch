@@ -1,6 +1,7 @@
 #ifndef __ANARCH_API_MEMORY_MAP_HPP__
 #define __ANARCH_API_MEMORY_MAP_HPP__
 
+#include <anarch/stddef>
 #include <anarch/types>
 #include <ansa/nocopy>
 
@@ -32,13 +33,13 @@ public:
   };
   
   struct Size {
-    PhysSize pageSize;
-    PhysSize pageCount;
+    size_t pageSize;
+    size_t pageCount;
     
-    Size(PhysSize s, PhysSize c) : pageSize(s), pageCount(c) {
+    Size(size_t s, size_t c) : pageSize(s), pageCount(c) {
     }
     
-    inline PhysSize Bytes() const {
+    inline size_t Bytes() const {
       return pageSize * pageCount;
     }
   };
@@ -47,7 +48,7 @@ public:
   virtual void Set() = 0;
   
   // all @noncritical
-  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr) = 0;
+  virtual bool Read(PhysAddr *, Attributes *, size_t *, VirtAddr) = 0;
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &) = 0;
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &) = 0;
   virtual void Unmap(VirtAddr, Size) = 0;
@@ -55,7 +56,7 @@ public:
   virtual bool Reserve(VirtAddr &, Size) = 0;
   virtual void ReserveAt(VirtAddr, Size) = 0;
   virtual void Unreserve(VirtAddr, Size) = 0;
-  virtual void Rereserve(VirtAddr, Size oldSize, PhysSize newPageSize) = 0;
+  virtual void Rereserve(VirtAddr, Size oldSize, size_t newPageSize) = 0;
 };
 
 }

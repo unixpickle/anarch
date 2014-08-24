@@ -12,12 +12,12 @@ class FreeList {
 public:
   struct Region {
     VirtAddr start;
-    PhysSize size;
+    size_t size;
     Region * next = NULL;
   
-    Region(VirtAddr, PhysSize);
+    Region(VirtAddr, size_t);
     VirtAddr End();
-    bool CanHold(PhysSize pageSize, PhysSize pageCount);
+    bool CanHold(size_t pageSize, size_t pageCount);
     bool IsAdjacentBehind(VirtAddr addr);
     bool Contains(Region & reg);
     bool IsBehind(VirtAddr addr);
@@ -32,24 +32,24 @@ public:
    * Allocate a contiguous, aligned region at a specified address.
    * @noncritical
    */
-  bool AllocAt(VirtAddr start, PhysSize pageSize, PhysSize pageCount);
+  bool AllocAt(VirtAddr start, size_t pageSize, size_t pageCount);
 
   /**
    * Allocate a contiguous, aligned region of virtual memory.
    * @noncritical
    */
-  VirtAddr Alloc(PhysSize pageSize, PhysSize pageCount);
+  VirtAddr Alloc(size_t pageSize, size_t pageCount);
 
   /**
    * Free a contiguous region of virtual memory.
    * @noncritical
    */
-  void Free(VirtAddr addr, PhysSize pageSize, PhysSize pageCount);
+  void Free(VirtAddr addr, size_t pageSize, size_t pageCount);
 
 protected:
   Region * first = NULL;
 
-  static Region * AllocRegion(VirtAddr, PhysSize);
+  static Region * AllocRegion(VirtAddr, size_t);
   static void FreeRegion(Region * reg);
 
   void AllocInRegion(Region * reg, Region * last, Region & requested);

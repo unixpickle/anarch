@@ -25,7 +25,7 @@ public:
   virtual int FindTable(const char * name);
   
 protected:
-  PhysSize tableSize;
+  size_t tableSize;
   EasyMap map;
 };
 

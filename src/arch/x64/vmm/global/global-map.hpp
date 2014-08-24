@@ -25,7 +25,7 @@ public:
   
   // anarch::MemoryMap
   virtual void Set();
-  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr);
+  virtual bool Read(PhysAddr *, Attributes *, size_t *, VirtAddr);
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &);
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &);
   virtual void Unmap(VirtAddr, Size);
@@ -33,7 +33,7 @@ public:
   virtual bool Reserve(VirtAddr &, Size);
   virtual void ReserveAt(VirtAddr, Size);
   virtual void Unreserve(VirtAddr, Size);
-  virtual void Rereserve(VirtAddr, Size, PhysSize);
+  virtual void Rereserve(VirtAddr, Size, size_t);
   
 protected:
   // anarch::Module

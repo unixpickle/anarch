@@ -14,9 +14,9 @@ namespace anarch {
 class EasyMap : public ansa::NoCopy {
 private:
   VirtAddr mapStart;
-  PhysSize pageSize;
-  PhysSize pageAlign;
-  PhysSize pageCount;
+  size_t pageSize;
+  size_t pageAlign;
+  size_t pageCount;
   
   VirtAddr start;
   
@@ -24,7 +24,7 @@ public:
   /**
    * @noncritical
    */
-  EasyMap(PhysAddr start, PhysSize size);
+  EasyMap(PhysAddr start, size_t size);
   
   /**
    * @noncritical

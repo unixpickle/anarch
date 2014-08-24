@@ -12,7 +12,7 @@ namespace x64 {
 class Tlb : public ansa::Module {
 public:
   static void Invlpg(VirtAddr addr); // @critical
-  static void Invlpgs(VirtAddr, PhysSize); // @critical
+  static void Invlpgs(VirtAddr, size_t); // @critical
   
   static void InitGlobal();
   static Tlb & GetGlobal();
@@ -25,12 +25,12 @@ public:
   /**
    * @noncritical
    */
-  virtual void DistributeInvlpg(VirtAddr start, PhysSize size);
+  virtual void DistributeInvlpg(VirtAddr start, size_t size);
   
   /**
    * @noncritical
    */
-  virtual void DistributeUserInvlpg(VirtAddr start, PhysSize size,
+  virtual void DistributeUserInvlpg(VirtAddr start, size_t size,
                                     MemoryMap & map);
   
 protected:
@@ -40,8 +40,8 @@ protected:
 private:
   NoncriticalLock lock;
   static void HandleNotification();
-  void DistributeKernel(VirtAddr, PhysSize); // @critical
-  void DistributeUser(VirtAddr, PhysSize, MemoryMap *); // @critical
+  void DistributeKernel(VirtAddr, size_t); // @critical
+  void DistributeUser(VirtAddr, size_t, MemoryMap *); // @critical
 };
 
 }

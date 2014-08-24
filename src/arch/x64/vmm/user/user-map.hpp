@@ -21,7 +21,7 @@ public:
   
   // anarch::MemoryMap
   virtual void Set();
-  virtual bool Read(PhysAddr *, Attributes *, PhysSize *, VirtAddr);
+  virtual bool Read(PhysAddr *, Attributes *, size_t *, VirtAddr);
   virtual bool Map(VirtAddr &, PhysAddr, Size, const Attributes &);
   virtual void MapAt(VirtAddr, PhysAddr, Size, const Attributes &);
   virtual void Unmap(VirtAddr, Size);
@@ -29,7 +29,7 @@ public:
   virtual bool Reserve(VirtAddr &, Size);
   virtual void ReserveAt(VirtAddr, Size);
   virtual void Unreserve(VirtAddr, Size);
-  virtual void Rereserve(VirtAddr, Size oldSize, PhysSize newPageSize);
+  virtual void Rereserve(VirtAddr, Size oldSize, size_t newPageSize);
   
   // anarch::UserMap
   virtual void Delete();
@@ -37,7 +37,7 @@ public:
   virtual void CopyFromKernel(VirtAddr dest, void * start, size_t size);
   
 protected:
-  void DistInvlpg(VirtAddr start, PhysSize size);
+  void DistInvlpg(VirtAddr start, size_t size);
   
   NoncriticalLock lock;
   

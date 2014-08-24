@@ -20,13 +20,13 @@ int UserMap::GetPageSizeCount() {
   return 2;
 }
 
-PhysSize UserMap::GetPageSize(int idx) {
+size_t UserMap::GetPageSize(int idx) {
   assert(idx >= 0 && idx < 3);
   if (idx == 0) return 0x1000;
   return 0x200000;
 }
 
-PhysSize UserMap::GetPageSizeAlign(int idx) {
+size_t UserMap::GetPageSizeAlign(int idx) {
   return GetPageSize(idx);
 }
 
@@ -77,7 +77,7 @@ void UserMap::Set() {
   __asm__("mov %0, %%cr3" : : "r" (table.GetPml4()));
 }
 
-bool UserMap::Read(PhysAddr * addrOut, Attributes * attr, PhysSize * size,
+bool UserMap::Read(PhysAddr * addrOut, Attributes * attr, size_t * size,
                    VirtAddr addr) {
   AssertNoncritical();
   ScopedLock scope(lock);
@@ -112,7 +112,7 @@ void UserMap::Unmap(VirtAddr addr, Size size) {
   ScopedLock scope(lock);
   
   VirtAddr next = addr;
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!GetPageTable().Unset(next)) {
       Panic("UserMap::Unmap() - Unset() failed");
     }
@@ -128,7 +128,7 @@ void UserMap::UnmapAndReserve(VirtAddr addr, Size size) {
   ScopedLock scope(lock);
   
   VirtAddr next = addr;
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!GetPageTable().Unset(next)) {
       Panic("UserMap::Unmap() - Unset() failed");
     }
@@ -160,7 +160,7 @@ void UserMap::Unreserve(VirtAddr addr, Size size) {
   freeList.Free(addr, size.pageSize, size.pageCount);
 }
 
-void UserMap::Rereserve(VirtAddr addr, Size oldSize, PhysSize newPageSize) {
+void UserMap::Rereserve(VirtAddr addr, Size oldSize, size_t newPageSize) {
   // there isn't really anything to do here, but i'll still do some assertions
   AssertNoncritical();
   assert(oldSize.Bytes() % newPageSize == 0);
@@ -200,7 +200,7 @@ void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
   ansa::Memcpy((void *)dest, start, size);
 }
 
-void UserMap::DistInvlpg(VirtAddr start, PhysSize size) {
+void UserMap::DistInvlpg(VirtAddr start, size_t size) {
   Tlb::GetGlobal().DistributeUserInvlpg(start, size, *this);
 }
 

@@ -7,7 +7,7 @@ namespace anarch {
 
 namespace x64 {
 
-int PageTable::CalcDepth(PhysSize size) {
+int PageTable::CalcDepth(size_t size) {
   switch (size) {
     case 0x1000:
       return 3;
@@ -22,7 +22,7 @@ int PageTable::CalcDepth(PhysSize size) {
   return -1;
 }
 
-uint64_t PageTable::CalcMask(PhysSize pageSize, bool kernel,
+uint64_t PageTable::CalcMask(size_t pageSize, bool kernel,
                              const MemoryMap::Attributes & attributes) {
   return 1 | (pageSize == 0x1000 ? 0 : 0x80) | (kernel ? 0x100 : 0x4)
     | (attributes.executable ? 0 : (uint64_t)1 << 63)
@@ -56,7 +56,7 @@ Scratch & PageTable::GetScratch() {
   return scratch;
 }
 
-int PageTable::Walk(VirtAddr addr, uint64_t & entry, PhysSize * size) {
+int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
   AssertNoncritical();
   int indexes[4] = {
     (int)((addr >> 39) & 0x1ff),
@@ -197,7 +197,7 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
 
-  for (PhysSize i = 0; i < size.pageCount; i++) {
+  for (size_t i = 0; i < size.pageCount; i++) {
     if (!Set(curVirt, curPhys, parentMask, depth)) {
       Panic("PageTable::SetList() - Set() failed");
     }
@@ -207,7 +207,7 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
 }
 
 bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
-                     PhysSize * sizeOut, VirtAddr addr) {
+                     size_t * sizeOut, VirtAddr addr) {
   AssertNoncritical();
   
   uint64_t entry;

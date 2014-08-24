@@ -14,8 +14,8 @@ public:
   
   // all @ambicritical
   static int GetPageSizeCount();
-  static PhysSize GetPageSize(int);
-  static PhysSize GetPageSizeAlign(int);
+  static size_t GetPageSize(int);
+  static size_t GetPageSizeAlign(int);
   static Capabilities GetCapabilities();
   
   /**

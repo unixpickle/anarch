@@ -12,19 +12,19 @@ class FreeFinder : public ansa::NoCopy {
 public:
   FreeFinder(PageTable & pt);
   
-  bool Alloc(VirtAddr &, PhysSize size, PhysSize align);
-  void Free(VirtAddr, PhysSize size);
+  bool Alloc(VirtAddr &, size_t size, size_t align);
+  void Free(VirtAddr, size_t size);
   
-  void Reserve(VirtAddr addr, PhysSize size);
+  void Reserve(VirtAddr addr, size_t size);
   
 protected:
   PageTable & pageTable;
   
   VirtAddr freeStart = 0;
-  PhysSize freeSize = 0;
+  size_t freeSize = 0;
   
   void UpdateFreeRegion();
-  bool CanAllocate(PhysSize size, PhysSize align);
+  bool CanAllocate(size_t size, size_t align);
 };
 
 }

@@ -16,7 +16,7 @@ namespace {
 
 Tlb globalTlb;
 VirtAddr invlAddress;
-PhysSize invlSize;
+size_t invlSize;
 ansa::Atomic<int> ipiCount;
 
 }
@@ -26,7 +26,7 @@ void Tlb::Invlpg(VirtAddr addr) {
   __asm__ __volatile__("invlpg (%0)" : : "r" (addr) : "memory");
 }
 
-void Tlb::Invlpgs(VirtAddr start, PhysSize size) {
+void Tlb::Invlpgs(VirtAddr start, size_t size) {
   AssertCritical();
   if (size > 0x200000L) {
     // at this point, it's more efficient to just clear all the caches
@@ -64,7 +64,7 @@ void Tlb::WillSetAddressSpace(MemoryMap & map) {
   Cpu::GetCurrent().currentMap = &map;
 }
 
-void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
+void Tlb::DistributeInvlpg(VirtAddr start, size_t size) {
   AssertNoncritical();
   assert(start + size < Scratch::StartAddr);
   assert(start < Scratch::StartAddr);
@@ -82,7 +82,7 @@ void Tlb::DistributeInvlpg(VirtAddr start, PhysSize size) {
   DistributeKernel(start, size);
 }
 
-void Tlb::DistributeUserInvlpg(VirtAddr start, PhysSize size,
+void Tlb::DistributeUserInvlpg(VirtAddr start, size_t size,
                                MemoryMap & map) {
   AssertNoncritical();
   assert(start > Scratch::StartAddr);
@@ -109,7 +109,7 @@ void Tlb::HandleNotification() {
   LapicModule::GetGlobal().GetLapic().SendEoi();
 }
 
-void Tlb::DistributeKernel(VirtAddr a, PhysSize b) {
+void Tlb::DistributeKernel(VirtAddr a, size_t b) {
   invlAddress = a;
   invlSize = b;
   ipiCount = 0;
@@ -131,7 +131,7 @@ void Tlb::DistributeKernel(VirtAddr a, PhysSize b) {
   while (ipiCount) {}
 }
 
-void Tlb::DistributeUser(VirtAddr a, PhysSize b, MemoryMap * map) {
+void Tlb::DistributeUser(VirtAddr a, size_t b, MemoryMap * map) {
   Cpu * current = &Cpu::GetCurrent();
   if (current->currentMap == map) {
     Invlpgs(a, b);

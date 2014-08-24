@@ -15,8 +15,8 @@ FreeList::~FreeList() {
   }
 }
 
-bool FreeList::AllocAt(VirtAddr start, PhysSize pageSize,
-                       PhysSize pageCount) {
+bool FreeList::AllocAt(VirtAddr start, size_t pageSize,
+                       size_t pageCount) {
   if (start % pageSize) return false;
   
   Region * reg = first;
@@ -36,12 +36,12 @@ bool FreeList::AllocAt(VirtAddr start, PhysSize pageSize,
   return false;
 }
 
-VirtAddr FreeList::Alloc(PhysSize pageSize, PhysSize pageCount) {
+VirtAddr FreeList::Alloc(size_t pageSize, size_t pageCount) {
   AssertNoncritical();
   Region * last = NULL;
   Region * reg = first;
   
-  PhysSize totalSize = pageSize * pageCount;
+  size_t totalSize = pageSize * pageCount;
   
   while (reg) {
     if (!reg->CanHold(pageSize, pageCount)) {
@@ -50,7 +50,7 @@ VirtAddr FreeList::Alloc(PhysSize pageSize, PhysSize pageCount) {
       continue;
     }
     
-    PhysSize chopSize = 0;
+    size_t chopSize = 0;
     if (reg->start % pageSize) {
       chopSize = pageSize - (reg->start % pageSize);
     }
@@ -62,7 +62,7 @@ VirtAddr FreeList::Alloc(PhysSize pageSize, PhysSize pageCount) {
   return 0;
 }
 
-void FreeList::Free(VirtAddr addr, PhysSize pageSize, PhysSize pageCount) {
+void FreeList::Free(VirtAddr addr, size_t pageSize, size_t pageCount) {
   AssertNoncritical();
   
   Region * reg = first;
@@ -107,7 +107,7 @@ void FreeList::Free(VirtAddr addr, PhysSize pageSize, PhysSize pageCount) {
 
 // FreeList::Region
 
-FreeList::Region::Region(VirtAddr _start, PhysSize _size)
+FreeList::Region::Region(VirtAddr _start, size_t _size)
   : start(_start), size(_size) {
   assert(start + size > start || start + size == 0);
 }
@@ -116,8 +116,8 @@ VirtAddr FreeList::Region::End() {
   return start + size;
 }
 
-bool FreeList::Region::CanHold(PhysSize pageSize, PhysSize pageCount) {
-  PhysSize chopSize = 0;
+bool FreeList::Region::CanHold(size_t pageSize, size_t pageCount) {
+  size_t chopSize = 0;
   if (start % pageSize) {
     chopSize += pageSize - (start % pageSize);
   }
@@ -157,7 +157,7 @@ bool FreeList::Region::IsStartedBy(FreeList::Region & reg) {
 
 // FreeList private
 
-FreeList::Region * FreeList::AllocRegion(VirtAddr start, PhysSize size) {
+FreeList::Region * FreeList::AllocRegion(VirtAddr start, size_t size) {
   AssertNoncritical();
   return Domain::GetCurrent().New<Region>(start, size);
 }
@@ -178,7 +178,7 @@ void FreeList::AllocInRegion(Region * reg, Region * last,
   } else if (reg->IsEndedBy(requested)) {
     reg->size -= requested.size;
   } else {
-    PhysSize suffixSize = reg->End() - requested.End();
+    size_t suffixSize = reg->End() - requested.End();
     Region * suffix = AllocRegion(requested.End(), suffixSize);
     reg->size = requested.start - reg->start;
     suffix->next = reg->next;

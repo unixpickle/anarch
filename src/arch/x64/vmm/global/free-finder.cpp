@@ -8,7 +8,7 @@ namespace x64 {
 FreeFinder::FreeFinder(PageTable & pt) : pageTable(pt) {
 }
 
-bool FreeFinder::Alloc(VirtAddr & addr, PhysSize size, PhysSize align) {
+bool FreeFinder::Alloc(VirtAddr & addr, size_t size, size_t align) {
   if (!CanAllocate(size, align)) {
     UpdateFreeRegion();
     if (!CanAllocate(size, align)) {
@@ -29,7 +29,7 @@ bool FreeFinder::Alloc(VirtAddr & addr, PhysSize size, PhysSize align) {
   return true;
 }
 
-void FreeFinder::Free(VirtAddr addr, PhysSize size) {
+void FreeFinder::Free(VirtAddr addr, size_t size) {
   if (addr == freeStart + freeSize) {
     // the chunk is right after the free region
     freeSize += size;
@@ -40,12 +40,12 @@ void FreeFinder::Free(VirtAddr addr, PhysSize size) {
   }
 }
 
-void FreeFinder::Reserve(VirtAddr addr, PhysSize size) {
+void FreeFinder::Reserve(VirtAddr addr, size_t size) {
   if (addr > freeStart + freeSize || addr + size <= freeStart) {
     return;
   }
-  PhysSize leftSize = 0;
-  PhysSize rightSize = 0;
+  size_t leftSize = 0;
+  size_t rightSize = 0;
   if (addr > freeStart) {
     leftSize = addr - freeStart;
   }
@@ -70,10 +70,10 @@ void FreeFinder::UpdateFreeRegion() {
   VirtAddr addr = 0;
   while (addr < Scratch::StartAddr) {
     VirtAddr nextStart = addr;
-    PhysSize nextSize = 0;
+    size_t nextSize = 0;
   
     while (1) {
-      PhysSize pageSize;
+      size_t pageSize;
       uint64_t entry = 0;
       int result = pageTable.Walk(nextStart + nextSize, entry, &pageSize);
       addr += pageSize;
@@ -92,10 +92,10 @@ void FreeFinder::UpdateFreeRegion() {
   }
 }
 
-bool FreeFinder::CanAllocate(PhysSize size, PhysSize align) {
+bool FreeFinder::CanAllocate(size_t size, size_t align) {
   if (!size) return true;
   
-  PhysSize slice = 0;
+  size_t slice = 0;
   if (freeStart % align) {
     slice = align - (freeStart % align);
   }

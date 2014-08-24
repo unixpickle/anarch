@@ -15,8 +15,8 @@ namespace x64 {
  */
 class PageTable : public ansa::NoCopy {
 public:
-  static int CalcDepth(PhysSize size);
-  static uint64_t CalcMask(PhysSize, bool kernel,
+  static int CalcDepth(size_t size);
+  static uint64_t CalcMask(size_t, bool kernel,
                            const MemoryMap::Attributes &);
   
   PageTable(Allocator &, Scratch &, PhysAddr pml4);
@@ -35,7 +35,7 @@ public:
    * This may return depth 3 with entry=0.
    * @noncritical -> @critical -> @noncritical
    */
-  int Walk(VirtAddr addr, uint64_t & entry, PhysSize * size);
+  int Walk(VirtAddr addr, uint64_t & entry, size_t * size);
   
   /**
    * Set a raw entry in the page table.
@@ -70,7 +70,7 @@ public:
    * Perform a memory map read operation. Panic()s if a Set() fails.
    * @noncritical
    */
-  bool Read(PhysAddr *, MemoryMap::Attributes *, PhysSize *, VirtAddr);
+  bool Read(PhysAddr *, MemoryMap::Attributes *, size_t *, VirtAddr);
   
   /**
    * Free all of the page table structures including the PML4.

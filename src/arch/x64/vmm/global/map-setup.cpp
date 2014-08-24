@@ -9,9 +9,9 @@ namespace anarch {
 namespace x64 {
 
 MapSetup::MapSetup()
-  : kernelEnd(ansa::Align<PhysSize>(GetBootInfo()->GetKernelEnd(), 0x1000)),
+  : kernelEnd(ansa::Align<size_t>(GetBootInfo()->GetKernelEnd(), 0x1000)),
     scratchEnd(kernelEnd + 0x1000 * Scratch::PTCount),
-    reservedEnd(scratchEnd + ansa::Align<PhysSize>(sizeof(Scratch)
+    reservedEnd(scratchEnd + ansa::Align<size_t>(sizeof(Scratch)
       + sizeof(BuddyAllocator) + sizeof(PageTable)
       + sizeof(FreeFinder), 0x1000)),
     stepAllocator(reservedEnd) {
@@ -34,7 +34,7 @@ void MapSetup::GenerateMap() {
   pdtOffset = 0x200;
   pdptOffset = -1;
   
-  PhysSize linearSize = (PhysSize)reservedEnd;
+  size_t linearSize = (size_t)reservedEnd;
   while (linearSize) {
     MapNext(linearSize);
   }
@@ -87,7 +87,7 @@ PhysAddr MapSetup::GetPdpt() {
 
 // PRIVATE //
 
-void MapSetup::MapNext(PhysSize & linearSize) {
+void MapSetup::MapNext(size_t & linearSize) {
   if (pdtOffset == 0x200) {
     pdtOffset = 0;
     if (!stepAllocator.Alloc(currentPDT, 0x1000, 0x1000)) {

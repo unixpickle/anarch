@@ -13,7 +13,7 @@ Malloc::~Malloc() {
   AssertNoncritical();
   while (firstSegment) {
     Segment * next = firstSegment->next;
-    allocator.FreeAndUnmap((PhysAddr)next, (PhysSize)poolSize);
+    allocator.FreeAndUnmap((PhysAddr)next, poolSize);
     firstSegment = next;
   }
 }
@@ -82,7 +82,7 @@ bool Malloc::AllocNoNewSegment(void *& addr, size_t size) {
 
 bool Malloc::CreateSegment() {
   VirtAddr freshMemory;
-  if (!allocator.AllocAndMap(freshMemory, (PhysSize)poolSize, bigPages)) {
+  if (!allocator.AllocAndMap(freshMemory, poolSize, bigPages)) {
     return false;
   }
   

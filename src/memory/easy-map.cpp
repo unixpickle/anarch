@@ -5,7 +5,7 @@
 
 namespace anarch {
 
-EasyMap::EasyMap(PhysAddr _start, PhysSize _size) {
+EasyMap::EasyMap(PhysAddr _start, size_t _size) {
   AssertNoncritical();
   
   // TODO: here, attempt to use larger page sizes and then fall back
@@ -15,8 +15,8 @@ EasyMap::EasyMap(PhysAddr _start, PhysSize _size) {
   
   // this is a jumble of variables that some day will get cleaned up
   PhysAddr aligned = _start;
-  PhysSize endSize = _size;
-  PhysSize alignOffset = 0;
+  size_t endSize = _size;
+  size_t alignOffset = 0;
   if (aligned % pageAlign) {
     alignOffset = aligned % pageAlign;
     aligned -= alignOffset;

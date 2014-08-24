@@ -44,7 +44,7 @@ private:
   PhysAddr currentPDT = 0;
   VirtAddr firstUnmapped = 0;
    
-  void MapNext(PhysSize & linearSize);
+  void MapNext(size_t & linearSize);
 };
 
 }
