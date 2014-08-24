@@ -51,9 +51,13 @@ void TimerModule::Initialize() {
     Domain & domain = domains[i];
     for (int i = 0; i < domain.GetThreadCount(); i++) {
       LapicTimer & timer = domain.GetCpu(i).GetLapicTimer();
+      // we must leave our critical section while we poll because the PIT timer
+      // may require interrupts on the boot CPU.
+      SetCritical(false);
       while (!timer.calibrated) {
         __asm__ __volatile__("pause");
       }
+      SetCritical(true);
     }
   }
   

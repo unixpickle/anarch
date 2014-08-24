@@ -58,11 +58,8 @@ void State::Delete() {
 
 void State::Resume() {
   AssertCritical();
-  if (!iretInfo.ss) {
-    Cpu::GetCurrent().SetAsyncKernelTop((void *)GetStackTop());
-  }
-
   if (iretInfo.cs & 3) {
+    Cpu::GetCurrent().SetAsyncKernelTop((void *)GetStackTop());
     __asm__ __volatile__("swapgs");
   }
 
