@@ -10,6 +10,10 @@
 
 namespace anarch {
 
+SyscallModule & SyscallModule::GetGlobal() {
+  return x64::SyscallModule::GetGlobal();
+}
+
 namespace x64 {
 
 namespace {

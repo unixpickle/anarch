@@ -8,7 +8,7 @@ namespace anarch {
 
 class SyscallModule : public ansa::Module {
 public:
-  typedef void (* SyscallHandler)(uint16_t number, const SyscallArgs & args);
+  typedef void (* SyscallHandler)(uint16_t number, SyscallArgs & args);
   
   static SyscallModule & GetGlobal(); // @ambicritical
   
