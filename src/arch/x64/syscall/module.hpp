@@ -5,9 +5,9 @@
 #include <anarch/stddef>
 #include <ansa/atomic>
 
-void AnarchSyscallMainEntry(uint64_t, uint64_t, uint64_t,
-                            uint64_t, uint64_t, uint64_t)
-                            __asm__("AnarchSyscallMainEntry");
+anarch::SyscallRet AnarchSyscallMainEntry(uint64_t, uint64_t, uint64_t,
+                                          uint64_t, uint64_t, uint64_t)
+                                         __asm__("AnarchSyscallMainEntry");
 
 namespace anarch {
 

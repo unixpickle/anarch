@@ -80,13 +80,12 @@ void SyscallModule::SetCpuRegisters() {
 
 }
 
-void AnarchSyscallMainEntry(uint64_t a, uint64_t b, uint64_t c, uint64_t d,
-                            uint64_t e, uint64_t f) {
+anarch::SyscallRet AnarchSyscallMainEntry(uint64_t a, uint64_t b, uint64_t c,
+                                          uint64_t d, uint64_t e, uint64_t f) {
   AssertCritical();
-  anarch::x64::SyscallModule & module =
-      anarch::x64::SyscallModule::GetGlobal();
-  anarch::x64::SyscallModule::SyscallHandler handler = module.GetHandler();
+  auto & module = anarch::x64::SyscallModule::GetGlobal();
+  auto handler = module.GetHandler();
   assert(handler != NULL);
   anarch::x64::SyscallArgs args(b, c, d, e, f);
-  handler((uint16_t)a, args);
+  return handler((uint16_t)a, args);
 }

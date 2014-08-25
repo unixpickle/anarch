@@ -14,10 +14,6 @@ SyscallArgs::SyscallArgs(uint64_t arg1, uint64_t arg2, uint64_t arg3,
   arguments[4] = arg5;
 }
 
-int SyscallArgs::MaxArgCount() {
-  return 5;
-}
-
 bool SyscallArgs::PopBool() {
   return PopUInt64() != 0;
 }
@@ -28,11 +24,6 @@ int SyscallArgs::PopInt() {
 
 uint32_t SyscallArgs::PopUInt32() {
   return (uint32_t)PopUInt64();
-}
-
-uint64_t SyscallArgs::PopUInt64() {
-  assert(idx < 5);
-  return arguments[idx++];
 }
 
 PhysAddr SyscallArgs::PopPhysAddr() {
@@ -49,6 +40,11 @@ PhysSize SyscallArgs::PopPhysSize() {
 
 size_t SyscallArgs::PopVirtSize() {
   return (size_t)PopUInt64();
+}
+
+uint64_t SyscallArgs::PopUInt64() {
+  assert(idx < 5);
+  return arguments[idx++];
 }
 
 }

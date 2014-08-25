@@ -2,13 +2,14 @@
 #define __ANARCH_API_SYSCALL_MODULE_HPP__
 
 #include "syscall-args.hpp"
+#include "syscall-ret.hpp"
 #include <ansa/module>
 
 namespace anarch {
 
 class SyscallModule : public ansa::Module {
 public:
-  typedef void (* SyscallHandler)(uint16_t number, SyscallArgs & args);
+  typedef SyscallRet (* SyscallHandler)(uint16_t number, SyscallArgs & args);
   
   static SyscallModule & GetGlobal(); // @ambicritical
   
