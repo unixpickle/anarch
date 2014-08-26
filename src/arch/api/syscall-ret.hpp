@@ -14,6 +14,7 @@ union SyscallRet {
   bool boolean;
   int integer;
   uint32_t integer32;
+  uint64_t integer64;
   PhysAddr phys;
   VirtAddr virt;
   PhysSize pSize;
@@ -34,6 +35,12 @@ union SyscallRet {
   static inline SyscallRet Integer32(uint32_t i) {
     SyscallRet r;
     r.integer32 = i;
+    return r;
+  }
+  
+  static inline SyscallRet Integer64(uint64_t i) {
+    SyscallRet r;
+    r.integer64 = i;
     return r;
   }
   

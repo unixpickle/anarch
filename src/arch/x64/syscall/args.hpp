@@ -12,12 +12,11 @@ public:
   virtual bool PopBool();
   virtual int PopInt();
   virtual uint32_t PopUInt32();
+  virtual uint64_t PopUInt64();
   virtual PhysAddr PopPhysAddr();
   virtual VirtAddr PopVirtAddr();
   virtual PhysSize PopPhysSize();
   virtual size_t PopVirtSize();
-  
-  uint64_t PopUInt64();
 
 private:
   uint64_t arguments[5];

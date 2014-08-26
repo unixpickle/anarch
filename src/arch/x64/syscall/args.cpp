@@ -26,6 +26,11 @@ uint32_t SyscallArgs::PopUInt32() {
   return (uint32_t)PopUInt64();
 }
 
+uint64_t SyscallArgs::PopUInt64() {
+  assert(idx < 5);
+  return arguments[idx++];
+}
+
 PhysAddr SyscallArgs::PopPhysAddr() {
   return PopUInt64();
 }
@@ -40,11 +45,6 @@ PhysSize SyscallArgs::PopPhysSize() {
 
 size_t SyscallArgs::PopVirtSize() {
   return (size_t)PopUInt64();
-}
-
-uint64_t SyscallArgs::PopUInt64() {
-  assert(idx < 5);
-  return arguments[idx++];
 }
 
 }
