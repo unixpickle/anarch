@@ -1,5 +1,5 @@
 #include "tlb.hpp"
-#include "scratch.hpp"
+#include "page-table.hpp"
 #include "../smp/cpu.hpp"
 #include "../domains/domain-list.hpp"
 #include "../interrupts/irt.hpp"
@@ -30,7 +30,7 @@ void Tlb::Invlpgs(VirtAddr start, size_t size) {
   AssertCritical();
   if (size > 0x200000L) {
     // at this point, it's more efficient to just clear all the caches
-    if (start + size <= Scratch::StartAddr) {
+    if (start + size < PageTable::KernelEnd) {
       __asm__("mov %%cr4, %%rax\n"
               "xor $0x80, %%rax\n"
               "mov %%rax, %%cr4\n"
@@ -58,16 +58,14 @@ Tlb & Tlb::GetGlobal() {
   return globalTlb;
 }
 
-void Tlb::WillSetAddressSpace(MemoryMap & map) {
+void Tlb::WillSetAddressSpace(MemoryMap * map) {
   AssertCritical();
   if (!IsInitialized()) return;
-  Cpu::GetCurrent().currentMap = &map;
+  Cpu::GetCurrent().currentMap = map;
 }
 
 void Tlb::DistributeInvlpg(VirtAddr start, size_t size) {
   AssertNoncritical();
-  assert(start + size < Scratch::StartAddr);
-  assert(start < Scratch::StartAddr);
   
   if (!IsInitialized()) {
     ScopedCritical crit;
@@ -79,18 +77,11 @@ void Tlb::DistributeInvlpg(VirtAddr start, size_t size) {
   ScopedCritical critical;
   
   Invlpgs(start, size);
-  DistributeKernel(start, size);
-}
-
-void Tlb::DistributeUserInvlpg(VirtAddr start, size_t size,
-                               MemoryMap & map) {
-  AssertNoncritical();
-  assert(start > Scratch::StartAddr);
-  assert(start + size > Scratch::StartAddr);
-  
-  ScopedLock scope(lock);
-  ScopedCritical critical;
-  DistributeUser(start, size, &map);
+  if (start < PageTable::KernelEnd) {
+    DistributeKernel(start, size);
+  } else {
+    DistributeUser(start, size);
+  }
 }
 
 ansa::DepList Tlb::GetDependencies() {
@@ -131,11 +122,9 @@ void Tlb::DistributeKernel(VirtAddr a, size_t b) {
   while (ipiCount) {}
 }
 
-void Tlb::DistributeUser(VirtAddr a, size_t b, MemoryMap * map) {
+void Tlb::DistributeUser(VirtAddr a, size_t b) {
   Cpu * current = &Cpu::GetCurrent();
-  if (current->currentMap == map) {
-    Invlpgs(a, b);
-  }
+  MemoryMap * map = current->currentMap;
   
   invlAddress = a;
   invlSize = b;

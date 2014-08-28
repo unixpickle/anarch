@@ -1,10 +1,10 @@
 #include "user-map.hpp"
 #include "../tlb.hpp"
-#include "../scoped-scratch.hpp"
 #include "../global/global-map.hpp"
 #include <anarch/api/page-delegate>
 #include <anarch/api/domain>
 #include <anarch/api/panic>
+#include <anarch/easy-map>
 #include <anarch/critical>
 #include <anarch/assert>
 #include <ansa/cstring>
@@ -42,25 +42,31 @@ UserMap::Capabilities UserMap::GetCapabilities() {
 
 namespace x64 {
 
-UserMap::UserMap() : table(Domain::GetCurrent().GetAllocator(),
-                           GlobalMap::GetGlobal().GetScratch()) {
+UserMap::UserMap() : table(Domain::GetCurrent().GetAllocator()) {
   // allocate the PML4
   PhysAddr pml4;
   if (!table.GetAllocator().Alloc(pml4, 0x1000, 0x1000)) {
     Panic("UserMap::UserMap() - failed to allocate PML4");
   }
+  
+  // setup the PML4's contents
+  {
+    EasyMap map(pml4, 0x1000);
+    uint64_t * mapData = (uint64_t *)map.GetStart();
+    mapData[0] = GlobalMap::GetGlobal().GetPdpt() | 3;
+    mapData[0x1ff] = pml4 | 3;
+    for (int i = 1; i < 0x1ff; ++i) {
+      mapData[i] = 0;
+    }
+  }
+  
   table.SetPml4(pml4);
   
-  // push both canonical regions to the free list
-  freeList.Free(SpaceStart, 0x1000L, 0x7F8000000L);
-  freeList.Free(0xFFFF800000000000L, 0x1000L, 0x800000000L);
+  // we cannot utilize the first PDPT because it's for the kernel
+  freeList.Free(PageTable::KernelEnd, 0x8000000000UL, 0xff);
   
-  ScopedCritical critical;
-  TypedScratch<uint64_t> tableContent(table.GetScratch(), pml4);
-  tableContent[0] = GlobalMap::GetGlobal().GetPdpt() | 3;
-  for (int i = 1; i < 0x200; ++i) {
-    tableContent[i] = 0;
-  }
+  // we cannot utilize the last PDPT because it's for fractal mapping
+  freeList.Free(0xFFFF800000000000L, 0x800000000UL, 0xff);
 }
 
 UserMap::~UserMap() {
@@ -73,7 +79,7 @@ PageTable & UserMap::GetPageTable() {
 
 void UserMap::Set() {
   AssertCritical();
-  Tlb::GetGlobal().WillSetAddressSpace(*this);
+  Tlb::GetGlobal().WillSetAddressSpace(this);
   __asm__("mov %0, %%cr3" : : "r" (table.GetPml4()));
 }
 
@@ -90,7 +96,7 @@ bool UserMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
   ScopedLock scope(lock);
   addr = freeList.Alloc(size.pageSize, size.pageCount);
   if (!addr) return false;
-  assert(addr >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd);
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
@@ -102,7 +108,8 @@ void UserMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
   AssertNoncritical();
   ScopedLock scope(lock);
   
-  assert(addr >= SpaceStart && addr + size.Bytes() >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd
+         && addr + size.Bytes() >= PageTable::KernelEnd);
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
@@ -148,8 +155,8 @@ bool UserMap::Reserve(VirtAddr & addr, Size size) {
 }
 
 void UserMap::ReserveAt(VirtAddr addr, Size size) {
-  assert(addr >= SpaceStart);
-  assert(addr + size.Bytes() >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd);
+  assert(addr + size.Bytes() >= PageTable::KernelEnd);
   ScopedLock scope(lock);
   if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
     Panic("UserMap::ReserveAt() - failed");
@@ -179,7 +186,7 @@ void UserMap::Delete() {
 }
 
 void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
-  if (start + size < start || start < SpaceStart) {
+  if (start + size < start || start < PageTable::KernelEnd) {
     if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyToKernel() - page fault with no delegate");
     }
@@ -191,7 +198,7 @@ void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
 }
 
 void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
-  if (dest + size < dest || dest < SpaceStart) {
+  if (dest + size < dest || dest < PageTable::KernelEnd) {
     if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyFromKernel() - page fault with no delegate");
     }
@@ -203,7 +210,7 @@ void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
 }
 
 void UserMap::DistInvlpg(VirtAddr start, size_t size) {
-  Tlb::GetGlobal().DistributeUserInvlpg(start, size, *this);
+  Tlb::GetGlobal().DistributeInvlpg(start, size);
 }
 
 }

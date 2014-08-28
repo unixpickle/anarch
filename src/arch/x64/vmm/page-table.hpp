@@ -4,23 +4,26 @@
 #include <anarch/api/memory-map>
 #include <anarch/api/allocator>
 #include <ansa/nocopy>
-#include "scratch.hpp"
 
 namespace anarch {
 
 namespace x64 {
 
 /**
- * This class facilitates page table manipulation.
+ * This class facilitates page table manipulation via fractal mapping. The
+ * underlying memory map must be set while you manipulate the page table.
  */
 class PageTable : public ansa::NoCopy {
 public:
+  static const VirtAddr KernelEnd = 0x8000000000UL;
+  static const VirtAddr UserEnd = 0xFFFFFF8000000000UL;
+  
   static int CalcDepth(size_t size);
   static uint64_t CalcMask(size_t, bool kernel,
                            const MemoryMap::Attributes &);
   
-  PageTable(Allocator &, Scratch &, PhysAddr pml4);
-  PageTable(Allocator &, Scratch &);
+  PageTable(Allocator &, PhysAddr pml4);
+  PageTable(Allocator &);
   
   void SetPml4(PhysAddr);
   PhysAddr GetPml4();
@@ -28,7 +31,11 @@ public:
   void SetAllocator(Allocator &);
   Allocator & GetAllocator();
   
-  Scratch & GetScratch();
+  /**
+   * Returns `true` if the PML4 of this page table is CR3.
+   * @noncritical
+   */
+  bool IsSet();
   
   /**
    * @return The depth of the entry found (0-3 inclusive) or -1 if not mapped.
@@ -67,7 +74,7 @@ public:
                uint64_t parentMask);
   
   /**
-   * Perform a memory map read operation. Panic()s if a Set() fails.
+   * Perform a memory map read operation.
    * @noncritical
    */
   bool Read(PhysAddr *, MemoryMap::Attributes *, size_t *, VirtAddr);
@@ -80,13 +87,27 @@ public:
   
 private:
   Allocator * allocator;
-  Scratch & scratch;
   PhysAddr pml4 = 0;
   
   /**
+   * Perform a fractal-map lookup.
+   * @ambicritical
+   */
+  static uint64_t & GetTableEntry(VirtAddr address, int depth);
+  
+  /**
+   * Perform a fractal-map lookup for the beginning of a given table. This is
+   * useful for zeroing new page tables.
+   * @ambicritical
+   */
+  static uint64_t * GetTableStart(VirtAddr address, int depth);
+  
+  /**
+   * Free the table at a certain [depth] that starts with [addr].
    * @critical
    */
-  void FreeTableRecursive(PhysAddr table, int depth, int start);
+  void FreeTableRecursive(PhysAddr table, int depth, int start = 0,
+                          int end = 0x200);
 };
 
 }

@@ -1,7 +1,6 @@
 #ifndef __ANARCH_X64_GLOBAL_MAP_HPP__
 #define __ANARCH_X64_GLOBAL_MAP_HPP__
 
-#include "../scratch.hpp"
 #include "../page-table.hpp"
 #include "free-finder.hpp"
 #include <anarch/api/global-map>
@@ -17,7 +16,6 @@ public:
   static void InitGlobal();
   static GlobalMap & GetGlobal();
   
-  virtual Scratch & GetScratch();
   virtual PageTable & GetPageTable();
   virtual FreeFinder & GetFreeFinder();
   virtual Allocator & GetPageAllocator();
@@ -41,7 +39,6 @@ protected:
   virtual void Initialize();
   
 private:
-  Scratch * scratch;
   PageTable * pageTable;
   FreeFinder * freeFinder;
   Allocator * pageAllocator;

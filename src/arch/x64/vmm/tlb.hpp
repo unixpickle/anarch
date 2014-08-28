@@ -10,7 +10,7 @@ namespace anarch {
 namespace x64 {
 
 class Tlb : public ansa::Module {
-public:
+public:  
   static void Invlpg(VirtAddr addr); // @critical
   static void Invlpgs(VirtAddr, size_t); // @critical
   
@@ -18,20 +18,18 @@ public:
   static Tlb & GetGlobal();
   
   /**
+   * Call this with `NULL` to indicate the global map.
    * @critical
    */
-  virtual void WillSetAddressSpace(MemoryMap & map);
+  virtual void WillSetAddressSpace(MemoryMap * map);
   
   /**
+   * Distribute a TLB flush for the current map. If the memory is in the
+   * kernel's address space (< 0x8000000000), it will be distributed to every
+   * CPU.
    * @noncritical
    */
   virtual void DistributeInvlpg(VirtAddr start, size_t size);
-  
-  /**
-   * @noncritical
-   */
-  virtual void DistributeUserInvlpg(VirtAddr start, size_t size,
-                                    MemoryMap & map);
   
 protected:
   ansa::DepList GetDependencies();
@@ -41,7 +39,7 @@ private:
   NoncriticalLock lock;
   static void HandleNotification();
   void DistributeKernel(VirtAddr, size_t); // @critical
-  void DistributeUser(VirtAddr, size_t, MemoryMap *); // @critical
+  void DistributeUser(VirtAddr, size_t); // @critical
 };
 
 }
