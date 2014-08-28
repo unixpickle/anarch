@@ -32,6 +32,12 @@ struct SyscallRet {
     return r;
   }
   
+  static inline SyscallRet Empty() {
+    SyscallRet r;
+    r.value.boolean = true;
+    return r;
+  }
+  
   static inline SyscallRet Boolean(bool b) {
     SyscallRet r;
     r.value.boolean = b;
