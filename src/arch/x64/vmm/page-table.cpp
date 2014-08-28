@@ -2,6 +2,7 @@
 #include "tlb.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
+#include <anarch/easy-map>
 #include <ansa/cstring>
 
 namespace anarch {
@@ -44,6 +45,12 @@ PhysAddr PageTable::GetPml4() {
   return pml4;
 }
 
+bool PageTable::IsSet() {
+  PhysAddr cr3;
+  __asm__("mov %%cr3, %0" : "=r" (cr3));
+  return cr3 == GetPml4();
+}
+
 void PageTable::SetAllocator(Allocator & a) {
   allocator = &a;
 }
@@ -54,6 +61,7 @@ Allocator & PageTable::GetAllocator() {
 
 int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
   AssertNoncritical();
+  assert(IsSet());
   
   int depth;
   for (depth = 0; depth < 3; ++depth) {
@@ -75,6 +83,7 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
 bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
                     int theDepth) {
   AssertNoncritical();
+  assert(IsSet());
   assert(theDepth >= 0 && theDepth < 4);
   assert(!(addr % (0x1000L << (27 - 9 * theDepth))));
   
@@ -102,6 +111,7 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
 
 bool PageTable::Unset(VirtAddr addr) {
   AssertNoncritical();
+  assert(IsSet());
   assert(!(addr & 0xfff));
   
   int depth;
@@ -136,6 +146,7 @@ bool PageTable::Unset(VirtAddr addr) {
 void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
                         uint64_t parentMask) {
   AssertNoncritical();
+  assert(IsSet());
   int depth = CalcDepth(size.pageSize);
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
@@ -152,6 +163,7 @@ void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
 bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
                      size_t * sizeOut, VirtAddr addr) {
   AssertNoncritical();
+  assert(IsSet());
   
   uint64_t entry;
   int depth = Walk(addr, entry, sizeOut);
@@ -181,8 +193,8 @@ bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
 
 void PageTable::FreeTable(int start) {
   AssertNoncritical();
-  FreeTableRecursive(0, 0, start, 0x1ff);
-  GetAllocator().Free(pml4);
+  assert(!IsSet());
+  FreeTableRecursive(pml4, 0, start, 0x1ff);
 }
 
 // PRIVATE //
@@ -213,22 +225,23 @@ uint64_t * PageTable::GetTableStart(VirtAddr address, int depth) {
   return (uint64_t *)entryPtr;
 }
 
-void PageTable::FreeTableRecursive(VirtAddr addr, int depth, int start,
+void PageTable::FreeTableRecursive(PhysAddr addr, int depth, int start,
                                    int end) {
   // it doesn't matter if addresses are canonical because our fractal helpers
   // uncanonicalize addresses anyway
   AssertNoncritical();
-  size_t entrySize = 0x1000UL << ((3 - depth) * 9);
-  uint64_t * buffer = GetTableStart(addr, depth);
-  for (int i = start; i < end; ++i) {
-    uint64_t entry = buffer[i];
-    if (!entry || entry & 0x80) continue;
-    if (depth < 2) {
-      FreeTableRecursive(addr + (entrySize * i), depth + 1, 0, 0x200);
+  if (depth != 3) {
+    // free sub-tables
+    EasyMap map(addr, 0x1000);
+    uint64_t * entries = (uint64_t *)map.GetStart();
+    for (int i = start; i < end; ++i) {
+      uint64_t entry = entries[i];
+      if (!entry || entry & 0x80) continue;
+      PhysAddr phys = entry & 0x7FFFFFFFFFFFFFFFUL;
+      FreeTableRecursive(phys, depth + 1);
     }
-    PhysAddr addr = entry & 0x7FFFFFFFFFFFF000UL;
-    GetAllocator().Free(addr);
   }
+  GetAllocator().Free(addr);
 }
 
 }

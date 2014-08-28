@@ -32,6 +32,12 @@ public:
   Allocator & GetAllocator();
   
   /**
+   * Returns `true` if the PML4 of this page table is CR3.
+   * @noncritical
+   */
+  bool IsSet();
+  
+  /**
    * @return The depth of the entry found (0-3 inclusive) or -1 if not mapped.
    * This may return depth 3 with entry=0.
    * @noncritical -> @critical -> @noncritical
@@ -100,7 +106,8 @@ private:
    * Free the table at a certain [depth] that starts with [addr].
    * @critical
    */
-  void FreeTableRecursive(VirtAddr addr, int depth, int start, int end);
+  void FreeTableRecursive(PhysAddr table, int depth, int start = 0,
+                          int end = 0x200);
 };
 
 }
