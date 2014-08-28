@@ -2,69 +2,81 @@
 #define __ANARCH_API_SYSCALL_RET_HPP__
 
 #include <anarch/types>
+#include <anarch/assert>
 #include <anarch/stddef>
 #include <anarch/stdint>
 
 namespace anarch {
 
 /**
- * The return value for a system call.
+ * The return value for a system call. This may be an error value.
  */
-union SyscallRet {
-  bool boolean;
-  int integer;
-  uint32_t integer32;
-  uint64_t integer64;
-  PhysAddr phys;
-  VirtAddr virt;
-  PhysSize pSize;
-  size_t vSize;
+struct SyscallRet {
+  union {
+    bool boolean;
+    int integer;
+    uint32_t integer32;
+    uint64_t integer64;
+    PhysAddr phys;
+    VirtAddr virt;
+    PhysSize pSize;
+    size_t vSize;
+  } value;
+  
+  int errorValue = 0;
+  
+  static inline SyscallRet Error(int code) {
+    assert(code != 0);
+    SyscallRet r;
+    r.errorValue = code;
+    return r;
+  }
   
   static inline SyscallRet Boolean(bool b) {
     SyscallRet r;
-    r.boolean = b;
+    r.value.boolean = b;
     return r;
   }
   
   static inline SyscallRet Integer(int i) {
     SyscallRet r;
-    r.integer = i;
+    r.value.integer = i;
     return r;
   }
   
   static inline SyscallRet Integer32(uint32_t i) {
     SyscallRet r;
-    r.integer32 = i;
+    r.value.integer32 = i;
     return r;
   }
   
   static inline SyscallRet Integer64(uint64_t i) {
     SyscallRet r;
-    r.integer64 = i;
+    r.value.integer64 = i;
     return r;
   }
   
   static inline SyscallRet Phys(PhysAddr p) {
     SyscallRet r;
-    r.phys = p;
+    r.value.phys = p;
     return r;
   }
   
   static inline SyscallRet Virt(VirtAddr v) {
     SyscallRet r;
-    r.virt = v;
+    r.value.virt = v;
     return r;
   }
   
   static inline SyscallRet PhysSize(PhysSize p) {
     SyscallRet r;
-    r.pSize = p;
+    r.value.pSize = p;
     return r;
   }
   
   static inline SyscallRet VirtSize(size_t s) {
     SyscallRet r;
-    r.vSize = s;
+    r.value.vSize = s;
     return r;
   }
 };

@@ -14,7 +14,7 @@ AnarchRawSyscallHandler:
   mov rcx, rbx
   
   ; standard System V ABI function; saves some regs for us
-  call AnarchSyscallMainEntry ; sets RAX to return value
+  call AnarchSyscallMainEntry ; sets RAX and RDX to return value
   
   pop rcx
   pop rsp
