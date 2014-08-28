@@ -237,7 +237,7 @@ void PageTable::FreeTableRecursive(PhysAddr addr, int depth, int start,
     for (int i = start; i < end; ++i) {
       uint64_t entry = entries[i];
       if (!entry || entry & 0x80) continue;
-      PhysAddr phys = entry & 0x7FFFFFFFFFFFFFFFUL;
+      PhysAddr phys = entry & 0x7FFFFFFFFFFFF000UL;
       FreeTableRecursive(phys, depth + 1);
     }
   }
