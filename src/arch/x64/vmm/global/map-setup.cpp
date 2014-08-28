@@ -10,10 +10,8 @@ namespace x64 {
 
 MapSetup::MapSetup()
   : kernelEnd(ansa::Align<size_t>(GetBootInfo()->GetKernelEnd(), 0x1000)),
-    scratchEnd(kernelEnd + 0x1000 * Scratch::PTCount),
-    reservedEnd(scratchEnd + ansa::Align<size_t>(sizeof(Scratch)
-      + sizeof(BuddyAllocator) + sizeof(PageTable)
-      + sizeof(FreeFinder), 0x1000)),
+    reservedEnd(kernelEnd + ansa::Align<size_t>(sizeof(BuddyAllocator)
+      + sizeof(PageTable) + sizeof(FreeFinder), 0x1000)),
     stepAllocator(reservedEnd) {
 }
 
@@ -30,6 +28,7 @@ void MapSetup::GenerateMap() {
   
   uint64_t * pml4Buf = (uint64_t *)pml4;
   pml4Buf[0] = pdpt | 3;
+  pml4Buf[0x1ff] = pml4 | 3; // fractal mapping
   
   pdtOffset = 0x200;
   pdptOffset = -1;
@@ -40,14 +39,8 @@ void MapSetup::GenerateMap() {
   }
 }
 
-void MapSetup::GenerateScratch() {
-  uint64_t * scratchStart = (uint64_t *)kernelEnd;
-  new(GetScratch()) Scratch(scratchStart);
-  GetScratch()->CreateMappings((uint64_t *)pdpt, stepAllocator);
-}
-
 void MapSetup::GeneratePageTable() {
-  new(GetPageTable()) PageTable(stepAllocator, *GetScratch(), pml4);
+  new(GetPageTable()) PageTable(stepAllocator, pml4);
 }
 
 void MapSetup::GenerateFreeFinder() {
@@ -61,23 +54,18 @@ void MapSetup::GenerateBuddyAllocator() {
   GetPageTable()->SetAllocator(*GetBuddyAllocator());
 }
 
-Scratch * MapSetup::GetScratch() {
-  return (Scratch *)scratchEnd;
-}
-
 PageTable * MapSetup::GetPageTable() {
-  static_assert(sizeof(Scratch) % 8 == 0, "bad PageTable alignment");
-  return (PageTable *)(scratchEnd + sizeof(Scratch));
+  return (PageTable *)kernelEnd;
 }
 
 FreeFinder * MapSetup::GetFreeFinder() {
   static_assert(sizeof(PageTable) % 8 == 0, "bad FreeFinder alignment");
-  return (FreeFinder *)(scratchEnd + sizeof(Scratch) + sizeof(PageTable));
+  return (FreeFinder *)(kernelEnd + sizeof(PageTable));
 }
 
 BuddyAllocator * MapSetup::GetBuddyAllocator() {
   static_assert(sizeof(FreeFinder) % 8 == 0, "bad BuddyAllocator alignment");
-  return (BuddyAllocator *)(scratchEnd + sizeof(Scratch) + sizeof(PageTable)
+  return (BuddyAllocator *)(kernelEnd + sizeof(PageTable)
     + sizeof(FreeFinder));
 }
 

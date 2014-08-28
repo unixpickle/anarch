@@ -1,7 +1,8 @@
 #include "page-table.hpp"
-#include "scoped-scratch.hpp"
+#include "tlb.hpp"
 #include <anarch/api/panic>
 #include <anarch/critical>
+#include <ansa/cstring>
 
 namespace anarch {
 
@@ -29,11 +30,10 @@ uint64_t PageTable::CalcMask(size_t pageSize, bool kernel,
     | (attributes.writable ? 2 : 0);
 }
 
-PageTable::PageTable(Allocator & a, Scratch & s, PhysAddr p)
-  : allocator(&a), scratch(s), pml4(p) {
+PageTable::PageTable(Allocator & a, PhysAddr p) : allocator(&a), pml4(p) {
 }
 
-PageTable::PageTable(Allocator & a, Scratch & s) : allocator(&a), scratch(s) {
+PageTable::PageTable(Allocator & a) : allocator(&a) {
 }
 
 void PageTable::SetPml4(PhysAddr _pml4) {
@@ -52,35 +52,23 @@ Allocator & PageTable::GetAllocator() {
   return *allocator;
 }
 
-Scratch & PageTable::GetScratch() {
-  return scratch;
-}
-
 int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
   AssertNoncritical();
-  int indexes[4] = {
-    (int)((addr >> 39) & 0x1ff),
-    (int)((addr >> 30) & 0x1ff),
-    (int)((addr >> 21) & 0x1ff),
-    (int)((addr >> 12) & 0x1ff)
-  };
   
-  ScopedCritical critical;
-  TypedScratch<uint64_t> table(scratch, pml4);
   int depth;
-  for (depth = 0; depth < 3; depth++) {
-    uint64_t nextPage = table[indexes[depth]];
-    if (nextPage & 0x80 || !(nextPage & 1)) {
+  for (depth = 0; depth < 3; ++depth) {
+    entry = GetTableEntry(addr, depth);
+    if (entry & 0x80 || !(entry & 1)) {
       break;
     }
-    table.Reassign(nextPage & 0x7ffffffffffff000);
   }
-  if (depth == 3 || (table[indexes[depth]] & 0x80)) {
-    entry = table[indexes[depth]];
-    if (size) *size = 0x1000L << (27 - 9 * depth);
+  
+  if (depth == 3 || (entry & 0x80)) {
+    if (size) *size = 0x1000UL << (27 - 9 * depth);
     return depth;
   }
-  if (size) *size = 0x1000L << (27 - 9 * depth);
+  
+  if (size) *size = 0x1000UL << (27 - 9 * depth);
   return -1;
 }
 
@@ -89,104 +77,59 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
   AssertNoncritical();
   assert(theDepth >= 0 && theDepth < 4);
   assert(!(addr % (0x1000L << (27 - 9 * theDepth))));
-  int indexes[4] = {
-    (int)((addr >> 39) & 0x1ff),
-    (int)((addr >> 30) & 0x1ff),
-    (int)((addr >> 21) & 0x1ff),
-    (int)((addr >> 12) & 0x1ff)
-  };
-
-  ScopedCritical critical;
-  TypedScratch<uint64_t> table(scratch, pml4);
-  for (int depth = 0; depth < theDepth; depth++) {
-    uint64_t nextPage = table[indexes[depth]];
+  
+  for (int depth = 0; depth < theDepth; ++depth) {
+    uint64_t & nextPage = GetTableEntry(addr, depth);
     if (!(nextPage & 1)) {
-      // we have to temporarily leave the critical section, meaning afterwards
-      // we will have to clear the scratch's CPU cache
-      SetCritical(false);
+      // allocate a new page
       PhysAddr fresh;
       if (!GetAllocator().Alloc(fresh, 0x1000, 0x1000)) {
         Panic("PageTable::Set() - allocation failed");
       }
-      nextPage = (uint64_t)fresh;
-      SetCritical(true);
-      table.InvalidateCache();
-    
-      table[indexes[depth]] = nextPage | parentMask;
-      table.Reassign(nextPage);
-    
-      // zero out the new page
-      for (int i = 0; i < 0x200; i++) {
-        table[i] = 0;
-      }
-    
-      continue;
+      nextPage = (uint64_t)fresh | parentMask;
+      ansa::Bzero((void *)GetTableStart(addr, depth + 1), 0x1000);
     } else if (nextPage & 0x80) {
+      // fail if we hit a huge TLB entry
       return false;
     } else {
-      table[indexes[depth]] |= parentMask;
+      nextPage |= parentMask;
     }
-    table.Reassign(nextPage & 0x7ffffffffffff000);
   }
-
-  table[indexes[theDepth]] = entry;
+  
+  GetTableEntry(addr, theDepth) = entry;
   return true;
 }
 
 bool PageTable::Unset(VirtAddr addr) {
   AssertNoncritical();
   assert(!(addr & 0xfff));
-  int indexes[4] = {
-    (int)((addr >> 39) & 0x1ff),
-    (int)((addr >> 30) & 0x1ff),
-    (int)((addr >> 21) & 0x1ff),
-    (int)((addr >> 12) & 0x1ff)
-  };
-
-  PhysAddr tableAddresses[4] = {pml4, 0, 0, 0};
-
-  ScopedCritical critical;
-  TypedScratch<uint64_t> table(scratch, pml4);
-  int maxDepth = 3;
-  for (int depth = 0; depth < 3; depth++) {
-    uint64_t nextPage = table[indexes[depth]];
-    if (nextPage & 0x80) {
-      maxDepth = depth;
-      break;
-    } else if (!(nextPage & 1)) {
-      Panic("PageTable::Unset() - page not mapped!");
-    }
-    tableAddresses[depth + 1] = nextPage & 0x7ffffffffffff000;
-    table.Reassign(tableAddresses[depth + 1]);
-  }
-
-  if (addr % (0x1000L << (27 - 9 * maxDepth))) {
-    // the address is not properly aligned to the page we found
-    return false;
-  }
-
-  // zero out the page and delete any parent table indexes
-  table[indexes[maxDepth]] = 0;
-
-  for (int i = maxDepth; i > 0; i--) {
-    bool allGone = true;
-    for (int j = 0; j < 0x200; j++) {
-      if (table[j]) {
-        allGone = false;
-        break;
-      }
-    }
-    if (!allGone) break;
   
-    SetCritical(false);
-    GetAllocator().Free(tableAddresses[i]);
-    SetCritical(true);
-    // no need to run table.InvalidateCache() because we are reassigning it
-    
-    table.Reassign(tableAddresses[i - 1]);
-    table[indexes[i - 1]] = 0;
+  int depth;
+  for (depth = 0; depth < 3; ++depth) {
+    uint64_t & entry = GetTableEntry(addr, depth);
+    if (entry & 0x80) break;
+    if (!(entry & 1)) {
+      Panic("PageTable::Unset() - no mapping found");
+    }
   }
-
+  
+  GetTableEntry(addr, depth) = 0;
+  for (; depth > 0; --depth) {
+    // check if the whole table is empty
+    uint64_t * tablePtr = GetTableStart(addr, depth);
+    for (int i = 0; i < 0x200; ++i) {
+      // if there's an entry, just return
+      if (tablePtr[i]) return true;
+    }
+    
+    // unmap this table, invalidate the fractal map, and free it
+    uint64_t & parentEntry = GetTableEntry(addr, depth - 1);
+    PhysAddr memory = parentEntry & 0x7FFFFFFFFFFFF000UL;
+    parentEntry = 0;
+    Tlb::GetGlobal().DistributeInvlpg((VirtAddr)tablePtr, 0x1000);
+    GetAllocator().Free(memory);
+  }
+  
   return true;
 }
 
@@ -238,37 +181,54 @@ bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
 
 void PageTable::FreeTable(int start) {
   AssertNoncritical();
-  ScopedCritical critical;
-  FreeTableRecursive(pml4, 0, start);
+  FreeTableRecursive(0, 0, start, 0x1ff);
+  GetAllocator().Free(pml4);
 }
 
 // PRIVATE //
 
-void PageTable::FreeTableRecursive(PhysAddr tbl, int depth, int start) {
-  AssertCritical();
-
+uint64_t & PageTable::GetTableEntry(VirtAddr address, int depth) {
+  assert(depth >= 0 && depth < 4);
+  // remove canonical bits on address
+  address &= 0xFFFFFFFFFFFFUL;
+  
   if (depth == 3) {
-    SetCritical(false);
-    GetAllocator().Free(tbl);
-    SetCritical(true);
-    return;
+    VirtAddr inner = (address / 0x200) & (~(uint64_t)7);
+    return *(uint64_t *)(0xFFFFFF8000000000UL + inner);
+  } else if (depth == 2) {
+    VirtAddr inner = (address / 0x40000) & (~(uint64_t)7);
+    return *(uint64_t *)(0xFFFFFFFFC0000000 + inner);
+  } else if (depth == 1) {
+    VirtAddr inner = (address / 0x8000000) & (~(uint64_t)7);
+    return *(uint64_t *)(0xFFFFFFFFFFE00000 + inner);
+  } else {
+    VirtAddr inner = (address / 0x1000000000UL) & (~(uint64_t)7);
+    return *(uint64_t *)(0xFFFFFFFFFFFFF000 + inner);
   }
+}
 
-  {
-    TypedScratch<uint64_t> table(scratch, tbl);
-    for (int i = start; i < 0x200; i++) {
-      uint64_t entry = table[i];
-      if ((entry & 1) && !(entry & 0x80)) {
-        PhysAddr addr = entry & 0x7FFFFFFFFFFFF000L;
-        FreeTableRecursive(addr, depth + 1, 0);
-        table.InvalidateCache();
-      }
+uint64_t * PageTable::GetTableStart(VirtAddr address, int depth) {
+  VirtAddr entryPtr = (VirtAddr)&GetTableEntry(address, depth);
+  entryPtr &= ~(VirtAddr)0xfff;
+  return (uint64_t *)entryPtr;
+}
+
+void PageTable::FreeTableRecursive(VirtAddr addr, int depth, int start,
+                                   int end) {
+  // it doesn't matter if addresses are canonical because our fractal helpers
+  // uncanonicalize addresses anyway
+  AssertNoncritical();
+  size_t entrySize = 0x1000UL << ((3 - depth) * 9);
+  uint64_t * buffer = GetTableStart(addr, depth);
+  for (int i = start; i < end; ++i) {
+    uint64_t entry = buffer[i];
+    if (!entry || entry & 0x80) continue;
+    if (depth < 2) {
+      FreeTableRecursive(addr + (entrySize * i), depth + 1, 0, 0x200);
     }
+    PhysAddr addr = entry & 0x7FFFFFFFFFFFF000UL;
+    GetAllocator().Free(addr);
   }
-
-  SetCritical(false);
-  GetAllocator().Free(tbl);
-  SetCritical(true);
 }
 
 }

@@ -1,6 +1,5 @@
 #include "global-map.hpp"
 #include "map-setup.hpp"
-#include "../scoped-scratch.hpp"
 #include "../tlb.hpp"
 #include "../../pmm/step-allocator.hpp"
 #include "../../pmm/buddy-allocator.hpp"
@@ -58,10 +57,6 @@ GlobalMap & GlobalMap::GetGlobal() {
   return gGlobalMap;
 }
 
-Scratch & GlobalMap::GetScratch() {
-  return *scratch;
-}
-
 PageTable & GlobalMap::GetPageTable() {
   return *pageTable;
 }
@@ -80,7 +75,7 @@ PhysAddr GlobalMap::GetPdpt() {
 
 void GlobalMap::Set() {
   AssertCritical();
-  Tlb::GetGlobal().WillSetAddressSpace(*this);
+  Tlb::GetGlobal().WillSetAddressSpace(NULL);
   __asm__("mov %0, %%cr3" : : "r" (GetPageTable().GetPml4()));
 }
 
@@ -219,8 +214,6 @@ void GlobalMap::Initialize() {
   MapSetup setup;
   
   setup.GenerateMap();
-  setup.GenerateScratch();
-  scratch = setup.GetScratch();
   
   cout << " - generating global PageTable" << endl;
   

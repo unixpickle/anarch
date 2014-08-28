@@ -2,7 +2,6 @@
 #define __ANARCH_X64_MAP_SETUP_HPP__
 
 #include "free-finder.hpp"
-#include "../scratch.hpp"
 #include "../page-table.hpp"
 #include "../../pmm/buddy-allocator.hpp"
 #include "../../pmm/step-allocator.hpp"
@@ -20,12 +19,10 @@ public:
   MapSetup();
   
   void GenerateMap();
-  void GenerateScratch();
   void GeneratePageTable();
   void GenerateFreeFinder();
   void GenerateBuddyAllocator();
   
-  Scratch * GetScratch();
   PageTable * GetPageTable();
   FreeFinder * GetFreeFinder();
   BuddyAllocator * GetBuddyAllocator();
@@ -34,7 +31,6 @@ public:
   
 private:
   PhysAddr kernelEnd;
-  PhysAddr scratchEnd;
   PhysAddr reservedEnd;
   StepAllocator stepAllocator;
   

@@ -10,6 +10,8 @@ namespace x64 {
 
 class FreeFinder : public ansa::NoCopy {
 public:
+  static const VirtAddr KernelEnd = 0x8000000000UL;
+  
   FreeFinder(PageTable & pt);
   
   bool Alloc(VirtAddr &, size_t size, size_t align);
