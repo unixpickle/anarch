@@ -67,7 +67,7 @@ void FreeFinder::Reserve(VirtAddr addr, size_t size) {
 
 void FreeFinder::UpdateFreeRegion() {
   VirtAddr addr = 0;
-  while (addr < KernelEnd) {
+  while (addr < PageTable::KernelEnd) {
     VirtAddr nextStart = addr;
     size_t nextSize = 0;
   
@@ -78,8 +78,8 @@ void FreeFinder::UpdateFreeRegion() {
       addr += pageSize;
       if (result >= 0 && entry) break;
       nextSize += pageSize;
-      if (nextStart + nextSize >= KernelEnd) {
-        nextSize = KernelEnd - nextStart;
+      if (nextStart + nextSize >= PageTable::KernelEnd) {
+        nextSize = PageTable::KernelEnd - nextStart;
         break;
       }
     }

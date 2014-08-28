@@ -12,8 +12,6 @@ namespace x64 {
 
 class UserMap : public anarch::UserMap {
 public:
-  static const VirtAddr SpaceStart = 0x8000000000UL;
-  
   UserMap(); // @noncritical
   virtual ~UserMap(); // @noncritical
   

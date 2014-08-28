@@ -1,4 +1,5 @@
 #include "tlb.hpp"
+#include "page-table.hpp"
 #include "../smp/cpu.hpp"
 #include "../domains/domain-list.hpp"
 #include "../interrupts/irt.hpp"
@@ -29,7 +30,7 @@ void Tlb::Invlpgs(VirtAddr start, size_t size) {
   AssertCritical();
   if (size > 0x200000L) {
     // at this point, it's more efficient to just clear all the caches
-    if (start + size < KernelEnd) {
+    if (start + size < PageTable::KernelEnd) {
       __asm__("mov %%cr4, %%rax\n"
               "xor $0x80, %%rax\n"
               "mov %%rax, %%cr4\n"
@@ -76,7 +77,7 @@ void Tlb::DistributeInvlpg(VirtAddr start, size_t size) {
   ScopedCritical critical;
   
   Invlpgs(start, size);
-  if (start < KernelEnd) {
+  if (start < PageTable::KernelEnd) {
     DistributeKernel(start, size);
   } else {
     DistributeUser(start, size);

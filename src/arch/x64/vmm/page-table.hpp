@@ -15,6 +15,9 @@ namespace x64 {
  */
 class PageTable : public ansa::NoCopy {
 public:
+  static const VirtAddr KernelEnd = 0x8000000000UL;
+  static const VirtAddr UserEnd = 0xFFFFFF8000000000UL;
+  
   static int CalcDepth(size_t size);
   static uint64_t CalcMask(size_t, bool kernel,
                            const MemoryMap::Attributes &);

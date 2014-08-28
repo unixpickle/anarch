@@ -63,7 +63,7 @@ UserMap::UserMap() : table(Domain::GetCurrent().GetAllocator()) {
   table.SetPml4(pml4);
   
   // we cannot utilize the first PDPT because it's for the kernel
-  freeList.Free(SpaceStart, 0x8000000000UL, 0xff);
+  freeList.Free(PageTable::KernelEnd, 0x8000000000UL, 0xff);
   
   // we cannot utilize the last PDPT because it's for fractal mapping
   freeList.Free(0xFFFF800000000000L, 0x800000000UL, 0xff);
@@ -96,7 +96,7 @@ bool UserMap::Map(VirtAddr & addr, PhysAddr phys, Size size,
   ScopedLock scope(lock);
   addr = freeList.Alloc(size.pageSize, size.pageCount);
   if (!addr) return false;
-  assert(addr >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd);
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
@@ -108,7 +108,8 @@ void UserMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
   AssertNoncritical();
   ScopedLock scope(lock);
   
-  assert(addr >= SpaceStart && addr + size.Bytes() >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd
+         && addr + size.Bytes() >= PageTable::KernelEnd);
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
   GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
@@ -154,8 +155,8 @@ bool UserMap::Reserve(VirtAddr & addr, Size size) {
 }
 
 void UserMap::ReserveAt(VirtAddr addr, Size size) {
-  assert(addr >= SpaceStart);
-  assert(addr + size.Bytes() >= SpaceStart);
+  assert(addr >= PageTable::KernelEnd);
+  assert(addr + size.Bytes() >= PageTable::KernelEnd);
   ScopedLock scope(lock);
   if (!freeList.AllocAt(addr, size.pageSize, size.pageCount)) {
     Panic("UserMap::ReserveAt() - failed");
@@ -185,7 +186,7 @@ void UserMap::Delete() {
 }
 
 void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
-  if (start + size < start || start < SpaceStart) {
+  if (start + size < start || start < PageTable::KernelEnd) {
     if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyToKernel() - page fault with no delegate");
     }
@@ -197,7 +198,7 @@ void UserMap::CopyToKernel(void * dest, VirtAddr start, size_t size) {
 }
 
 void UserMap::CopyFromKernel(VirtAddr dest, void * start, size_t size) {
-  if (dest + size < dest || dest < SpaceStart) {
+  if (dest + size < dest || dest < PageTable::KernelEnd) {
     if (!GetGlobalPageDelegate()) {
       Panic("UserMap::CopyFromKernel() - page fault with no delegate");
     }

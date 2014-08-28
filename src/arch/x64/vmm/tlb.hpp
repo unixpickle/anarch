@@ -10,9 +10,7 @@ namespace anarch {
 namespace x64 {
 
 class Tlb : public ansa::Module {
-public:
-  static const VirtAddr KernelEnd = 0x8000000000UL;
-  
+public:  
   static void Invlpg(VirtAddr addr); // @critical
   static void Invlpgs(VirtAddr, size_t); // @critical
   
