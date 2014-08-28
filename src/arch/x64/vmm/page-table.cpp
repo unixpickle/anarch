@@ -64,14 +64,15 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
   assert(IsSet());
   
   int depth;
-  for (depth = 0; depth < 3; ++depth) {
+  for (depth = 0; depth < 4; ++depth) {
     entry = GetTableEntry(addr, depth);
     if (entry & 0x80 || !(entry & 1)) {
       break;
     }
   }
   
-  if (depth == 3 || (entry & 0x80)) {
+  if (depth == 4 || (entry & 0x80)) {
+    if (depth == 4) depth = 3;
     if (size) *size = 0x1000UL << (27 - 9 * depth);
     return depth;
   }
@@ -168,8 +169,7 @@ bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
   uint64_t entry;
   int depth = Walk(addr, entry, sizeOut);
   if (depth < 0) return false;
-  if (!entry) return false;
-  
+  assert(entry != 0);  
   assert(depth >= 2);
   
   if (physOut) {
@@ -181,7 +181,7 @@ bool PageTable::Read(PhysAddr * physOut, MemoryMap::Attributes * attrOut,
   }
   
   if (attrOut) {
-    attrOut->executable = (entry & (1UL << 63)) != 0;
+    attrOut->executable = (entry & (1UL << 63)) == 0;
     attrOut->writable = (entry & 2) != 0;
   
     // TODO: set cachable flag properly here
