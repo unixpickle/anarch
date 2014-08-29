@@ -83,7 +83,8 @@ void State::SuspendAndCall(void (* func)()) {
   iretInfo.cs = 8;
   iretInfo.ss = 0;
   __asm__ __volatile__(
-    "movq $_anarch_suspend_and_call_return, (%%rdi)\n" // save RIP
+    "movabsq $_anarch_suspend_and_call_return, %%rax\n"
+    "movq %%rax, (%%rdi)\n" // save RIP
     "pushfq\n" // save RFLAGS
     "pop %%rax\n"
     "mov %%rax, 0x10(%%rdi)\n"
@@ -103,7 +104,8 @@ void State::SuspendAndCall(void (* func)(void *), void * arg) {
   iretInfo.cs = 8;
   iretInfo.ss = 0;
   __asm__ __volatile__(
-    "movq $_anarch_suspend_and_call_return2, (%%rsi)\n" // save RIP
+    "movabsq $_anarch_suspend_and_call_return2, %%rax\n"
+    "movq %%rax, (%%rsi)\n" // save RIP
     "pushfq\n" // save RFLAGS
     "pop %%rax\n"
     "mov %%rax, 0x10(%%rsi)\n"
