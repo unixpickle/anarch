@@ -39,6 +39,15 @@ void Thread::RunSync(void (* func)(void *), void * arg) {
 
 namespace x64 {
 
+namespace {
+
+Lapic & GetLapicCritical() {
+  ScopedCritical critical;
+  return LapicModule::GetGlobal().GetLapic();
+}
+
+}
+
 Cpu & Cpu::GetCurrent() {
   Cpu * ptr;
   __asm__("mov %%gs:(0x0), %0" : "=r" (ptr));
@@ -60,7 +69,7 @@ void Cpu::HandleWakeup() {
   func(arg);
 }
 
-Cpu::Cpu() {
+Cpu::Cpu() : lapic(GetLapicCritical()) {
   localData.thisCpu = this;
   localData.userData = NULL;
   
@@ -81,7 +90,7 @@ Cpu::Cpu() {
   uint16_t seg = Gdt::GetGlobal().PushTssDescriptor(desc);
   __asm__ __volatile__("ltr %%ax" : : "a" (seg));
   
-  apicId = LapicModule::GetGlobal().GetLapic().GetId();
+  apicId = GetLapic().GetId();
 }
 
 Cpu::~Cpu() {
@@ -103,6 +112,10 @@ uint32_t Cpu::GetApicId() {
 
 LapicTimer & Cpu::GetLapicTimer() {
   return lapicTimer;
+}
+
+Lapic & Cpu::GetLapic() {
+  return lapic;
 }
 
 anarch::Domain & Cpu::GetDomain() {
@@ -128,8 +141,7 @@ void Cpu::RunAsync(void (* func)(void *), void * arg) {
   wakeupFunction = func;
   wakeupArg = arg;
   wakeupLock.Release();
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
-  lapic.SendIpi(GetApicId(), IntVectors::Wakeup);
+  GetLapic().SendIpi(GetApicId(), IntVectors::Wakeup);
 }
 
 }

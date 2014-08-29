@@ -10,8 +10,9 @@ namespace x64 {
 
 void LapicTimer::GeneralTimerCallback() {
   AssertCritical();
-  LapicTimer & timer = Cpu::GetCurrent().GetLapicTimer();
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Cpu & thisCpu = Cpu::GetCurrent();
+  LapicTimer & timer = thisCpu.GetLapicTimer();
+  Lapic & lapic = thisCpu.GetLapic();
   if (!timer.isExpecting) {
     lapic.SendEoi();
     return;
@@ -46,7 +47,7 @@ void LapicTimer::SetTimeout(uint64_t ticks, void (* func)()) {
 void LapicTimer::SetTimeout(uint64_t ticks, void (* fn)(void *), void * arg) {
   AssertCritical();
   assert(ticks < 0x100000000); // TODO: support bigger times
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Lapic & lapic = Cpu::GetCurrent().GetLapic();
   lapic.SetTimeout(IntVectors::LapicTimer, (uint32_t)ticks);
   isExpecting = true;
   callbackFunction = fn;
@@ -55,7 +56,7 @@ void LapicTimer::SetTimeout(uint64_t ticks, void (* fn)(void *), void * arg) {
 
 void LapicTimer::ClearTimeout() {
   AssertCritical();
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Lapic & lapic = Cpu::GetCurrent().GetLapic();
   lapic.ClearTimeout();
   isExpecting = false;
 }

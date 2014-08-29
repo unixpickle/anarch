@@ -82,7 +82,7 @@ int PageTable::Walk(VirtAddr addr, uint64_t & entry, size_t * size) {
 }
 
 bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
-                    int theDepth) {
+                    int theDepth, bool * overwrote) {
   AssertNoncritical();
   assert(IsSet());
   assert(theDepth >= 0 && theDepth < 4);
@@ -106,7 +106,9 @@ bool PageTable::Set(VirtAddr addr, uint64_t entry, uint64_t parentMask,
     }
   }
   
-  GetTableEntry(addr, theDepth) = entry;
+  uint64_t & entryRef = GetTableEntry(addr, theDepth);
+  if (overwrote) *overwrote = (entryRef != 0);
+  entryRef = entry;
   return true;
 }
 
@@ -125,6 +127,7 @@ bool PageTable::Unset(VirtAddr addr) {
   }
   
   GetTableEntry(addr, depth) = 0;
+  
   for (; depth > 0; --depth) {
     // check if the whole table is empty
     uint64_t * tablePtr = GetTableStart(addr, depth);
@@ -145,17 +148,24 @@ bool PageTable::Unset(VirtAddr addr) {
 }
 
 void PageTable::SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
-                        uint64_t parentMask) {
+                        uint64_t parentMask, bool * overwrote) {
   AssertNoncritical();
   assert(IsSet());
   int depth = CalcDepth(size.pageSize);
   VirtAddr curVirt = virt;
   PhysAddr curPhys = phys;
-
+  
   for (size_t i = 0; i < size.pageCount; i++) {
-    if (!Set(curVirt, curPhys, parentMask, depth)) {
+    if (!Set(curVirt, curPhys, parentMask, depth, overwrote)) {
       Panic("PageTable::SetList() - Set() failed");
     }
+    
+    // if we overwrote something, set `overwrote` to NULL so that we won't set
+    // it back to false in subsequent iterations of this loop
+    if (overwrote) {
+      if (*overwrote) overwrote = NULL;
+    }
+    
     curPhys += size.pageSize;
     curVirt += size.pageSize;
   }

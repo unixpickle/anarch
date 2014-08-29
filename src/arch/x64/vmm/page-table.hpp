@@ -55,7 +55,8 @@ public:
    * large page at a deeper point.
    * @noncritical -> @critical -> @noncritical
    */
-  bool Set(VirtAddr addr, uint64_t entry, uint64_t parentMask, int depth);
+  bool Set(VirtAddr addr, uint64_t entry, uint64_t parentMask, int depth,
+           bool * overwrote = NULL);
   
   /**
    * Unset the page table entry beginning at `addr`.
@@ -71,7 +72,7 @@ public:
    * @noncritical
    */
   void SetList(VirtAddr virt, uint64_t phys, MemoryMap::Size size,
-               uint64_t parentMask);
+               uint64_t parentMask, bool * overwrote = NULL);
   
   /**
    * Perform a memory map read operation.

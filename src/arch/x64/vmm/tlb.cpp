@@ -15,8 +15,8 @@ namespace x64 {
 namespace {
 
 Tlb globalTlb;
-VirtAddr invlAddress;
-size_t invlSize;
+ansa::Atomic<VirtAddr> invlAddress;
+ansa::Atomic<size_t> invlSize;
 ansa::Atomic<int> ipiCount;
 
 }
@@ -46,7 +46,7 @@ void Tlb::Invlpgs(VirtAddr start, size_t size) {
   
   // invalidate one cache entry at a time
   for (VirtAddr addr = start; addr < start + size; addr += 0x1000) {
-    __asm__("invlpg (%0)" : : "r" (addr) : "memory");
+    __asm__ __volatile__("invlpg (%0)" : : "r" (addr) : "memory");
   }
 }
 
@@ -107,7 +107,7 @@ void Tlb::DistributeKernel(VirtAddr a, size_t b) {
   
   // send the invlpg request to every CPU
   Cpu * current = &Cpu::GetCurrent();
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Lapic & lapic = current->GetLapic();
   
   DomainList & list = DomainList::GetGlobal();
   for (int i = 0; i < list.GetCount(); i++) {
@@ -131,7 +131,7 @@ void Tlb::DistributeUser(VirtAddr a, size_t b) {
   ipiCount = 0;
   
   // send the invlpg request to every CPU with our memory map
-  Lapic & lapic = LapicModule::GetGlobal().GetLapic();
+  Lapic & lapic = current->GetLapic();
   
   DomainList & list = DomainList::GetGlobal();
   for (int i = 0; i < list.GetCount(); i++) {

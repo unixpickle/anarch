@@ -112,8 +112,11 @@ void UserMap::MapAt(VirtAddr addr, PhysAddr phys, Size size,
          && addr + size.Bytes() >= PageTable::KernelEnd);
   
   uint64_t mask = PageTable::CalcMask(size.pageSize, false, attributes);
-  GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7);
-  DistInvlpg(addr, size.Bytes());
+  bool overwrote;
+  GetPageTable().SetList(addr, (uint64_t)phys | mask, size, 7, &overwrote);
+  if (overwrote) {
+    DistInvlpg(addr, size.Bytes());
+  }
 }
 
 void UserMap::Unmap(VirtAddr addr, Size size) {

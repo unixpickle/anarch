@@ -49,6 +49,7 @@ I have implemented the following features for x86-64. This pretty much sums up e
 
 Some basic things I'd like to do before v0.1.0
 
+ * Get rid of calls to LapicModule::.... to get the current lapic after CPU list is initailized
  * Every static `New` function should return a pointer, not a reference
  * Create a `VirtPhysSize` type for sizes that must fit in the physical address space as well as the virtual one.
 

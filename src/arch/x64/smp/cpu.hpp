@@ -3,6 +3,7 @@
 
 #include "../segments/tss.hpp"
 #include "../timer/lapic-timer.hpp"
+#include "../interrupts/apic/lapic.hpp"
 #include <anarch/lock>
 #include <anarch/stddef>
 #include <anarch/api/thread>
@@ -31,6 +32,7 @@ public:
   void * GetStackTop(); // @ambicritical
   uint32_t GetApicId(); // @ambicritical
   LapicTimer & GetLapicTimer(); // @ambicritical
+  Lapic & GetLapic(); // @ambicritical
   
   virtual anarch::Domain & GetDomain(); // @ambicritical
   virtual anarch::Timer & GetTimer(); // @critical
@@ -55,6 +57,7 @@ private:
   void (* wakeupFunction)(void *);
   void * wakeupArg;
   
+  Lapic & lapic;
   LapicTimer lapicTimer;
   LocalData localData;
   Tss taskSegment;
