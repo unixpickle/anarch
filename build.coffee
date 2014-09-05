@@ -5,7 +5,6 @@ includes = [
   'src/stdlib/hpp'
   'include'
   'dependencies/ansa/include'
-  'dependencies/ansa/dependencies/anlock/src'
   'dependencies/analloc2/include'
 ]
 
@@ -14,7 +13,6 @@ sourceDirs = [
   'src/util'
   'src/memory'
   'dependencies/ansa/src'
-  'dependencies/ansa/dependencies/anlock/src'
   'dependencies/analloc2/src'
 ]
 

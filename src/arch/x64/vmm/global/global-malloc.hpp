@@ -1,5 +1,6 @@
 #include <anarch/malloc>
 #include <ansa/module>
+#include <ansa/macros>
 
 namespace anarch {
 
