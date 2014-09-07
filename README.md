@@ -32,6 +32,16 @@ Additionally, it will provide these tools to wrap the APIs above:
 
 Architecture-specific APIs will have to be initialized by the operating system's entry point. This means that you may use a custom bootloader, etc. and still use architecture-specific APIs. However, an architecture may provide helper classes/methods for tasks such as parsing multiboot tables.
 
+# Usage
+
+**anarch** is almost completely stand-alone. However, it does include one header that it does not provide. You may notice this line of code in [src/util/lock.hpp](src/util/lock.hpp).
+
+    #include <anarch/noncritical-lock>
+
+The API consumer is responsible for providing this header file. The header should define a class `anarch::NoncriticalLock` that is a subclass of `ansa::Lock`. This class will be used throughout anarch for locking various internal structures.
+
+Your operating system should provide an implementation of `anarch::NoncriticalLock` that yields to waiting tasks to prevent unnecessary CPU usage.
+
 # TODO
 
 I have implemented the following features for x86-64. This pretty much sums up every API that anarch will provide:

@@ -50,7 +50,7 @@ private:
   struct LocalData {
     Cpu * thisCpu;
     void * syscallStack;
-    void * userData;
+    void * userData = NULL;
   } ANSA_PACKED;
   
   anarch::CriticalLock wakeupLock;

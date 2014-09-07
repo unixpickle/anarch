@@ -16,16 +16,4 @@ void CriticalLock::Release() {
   super::Release();
 }
 
-// NoncriticalLock //
-
-void NoncriticalLock::Seize() {
-  AssertNoncritical();
-  super::Seize();
-}
-
-void NoncriticalLock::Release() {
-  AssertNoncritical();
-  super::Release();
-}
-
 }
