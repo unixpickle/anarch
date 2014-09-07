@@ -23,6 +23,6 @@ module.exports = (finder) ->
   
   for source in sourceDirs
     finder.search __dirname + '/' + source
-  finder.search '#{__dirname}/src/arch/' + arch
+  finder.search "#{__dirname}/src/arch/" + arch
   
   return (__dirname + '/' + x for x in includes)
