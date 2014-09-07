@@ -17,7 +17,6 @@ build/critical: ../dependencies build/ansa ../stdlib-api/build
 build/ansa: ../dependencies build
 	mkdir build/ansa
 	../build-objects $(CXX) $(CPPFLAGS) -I../dependencies/ansa/include -c ../dependencies/ansa/src/*.cpp -o build/ansa
-	../build-objects $(CC) -I../dependencies/ansa/include -c ../dependencies/ansa/dependencies/anlock/src/*.c -o build/ansa
 
 ../stdlib-api/build:
 	$(MAKE) -C ../stdlib-api
