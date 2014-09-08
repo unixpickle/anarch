@@ -3,6 +3,7 @@
 
 #include <ansa/lock>
 #include <anarch/stddef>
+#include <anarch/noncritical-lock>
 
 namespace anarch {
 
@@ -12,16 +13,6 @@ class Thread;
  * A lock only to be used in critical sections.
  */
 class CriticalLock : public ansa::OrderedLock {
-public:
-  typedef ansa::OrderedLock super;
-  virtual void Seize();
-  virtual void Release();
-};
-
-/**
- * A lock only to be used in non-critical sections.
- */
-class NoncriticalLock : public ansa::OrderedLock {
 public:
   typedef ansa::OrderedLock super;
   virtual void Seize();
