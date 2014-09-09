@@ -44,23 +44,15 @@ Your operating system should provide an implementation of `anarch::NoncriticalLo
 
 # TODO
 
-I have implemented the following features for x86-64. This pretty much sums up every API that anarch will provide:
+Although anarch is up and running for x86-64, I would still like to rewrite it before I add more architectures. Here is my current wish-list for the rewrite:
 
- * Physical and virtual memory management
- * The Interrupt Routine Table subsystem
- * ACPI
- * APIC and I/O APIC
- * CPU bootstrap code for SMP initialization
- * A time mechanism with PIT, HPET, and APIC timer support
- * Distributed Panic() and TLB invalidations
- * A `State` implementation for task management
- * User-space memory maps
- * A syscall handler mechanism
-
-Some basic things I'd like to do before v0.1.0
-
- * Get rid of calls to LapicModule::.... to get the current lapic after CPU list is initailized
- * Every static `New` function should return a pointer, not a reference
- * Create a `VirtPhysSize` type for sizes that must fit in the physical address space as well as the virtual one.
-
-I have *not* implemented NUMA. In the future, this will be my next step at improving the x86-64 implementation.
+ * Get rid of singletons and "Modules" -- replace with top-level functions
+ * Remove most of the generic API base-classes; instead, architecture specific code will provide its own includes and classes. This will allow for better optimization.
+ * ASID (address-space identifier) support for modern CPUs
+ * Support non-uniform memory access for the x86-64 platform
+ * Better scalable virtual memory management
+   * Slabs
+   * Per-CPU memory pools
+ * Time stamp counter support for CPUs with invariant TSC
+ * `Print()` and `Debug()` functions instead of `cout`.
+ * Performance monitoring to detect how much work a hyperthread (on x86-64) is performing.
